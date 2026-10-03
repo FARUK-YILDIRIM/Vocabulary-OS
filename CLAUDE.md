@@ -1,248 +1,131 @@
-# Claude Agent Instructions for Vocabulary-OS
+# Project: Vocabulary-OS
 
-This file specifies how AI agents should approach development of Vocabulary-OS.
+Open-source vocabulary app for iPhone, iPad and Mac. Learners capture words in context (text, book
+pages, objects), get the meaning in their native language from on-device or bring-your-own-key AI,
+and reinforce the words with spaced review, quizzes and podcasts. There is no server: data stays in
+the user's private iCloud.
 
-## Core Principles
+Read before working:
+- [`SPEC.md`](SPEC.md): what we build and how success is measured.
+- [`docs/`](docs): ADRs, the decisions and their reasons.
+- [`tasks/plan.md`](tasks/plan.md) and [`tasks/todo.md`](tasks/todo.md): the task list and progress.
 
-1. **Privacy-first:** No user data leaves the device except via CloudKit (to user's iCloud). Never log tokens, credentials, or user content.
-2. **Offline-first:** App must work offline; sync happens automatically when online.
-3. **Zero backend:** No server code. All business logic runs on-device.
-4. **Swift + SwiftUI only:** Single language, single framework. No Objective-C, no storyboards.
-5. **Test everything:** Unit tests for logic, UI tests for flows. Aim for >80% code coverage.
-6. **Build incrementally:** One milestone at a time; each is a shippable feature.
+## Workflow
 
-## Code Style
+This project follows the agent-skills lifecycle (https://skills.addy.ie): spec → plan → build →
+verify → review → ship.
 
-- **Swift 6.2+:** Use latest language features (strict concurrency, Actor, Sendable)
-- **SwiftUI:** Declarative UI, no UIKit wrappers
-- **Naming:** CamelCase for types, camelCase for variables; avoid abbreviations
-- **Comments:** Explain "why", not "what" (code is clear, intent may not be)
-- **Error handling:** Use custom `Error` types, no force unwrapping (`!`)
+For each task:
+1. Take the next unchecked task in `tasks/todo.md` and read its acceptance criteria in
+   `tasks/plan.md`.
+2. Load only the files the task needs.
+3. Write the failing test first, where the behavior is testable.
+4. Implement the minimum that makes it pass, keeping the build green.
+5. Run `scripts/verify.sh`.
+6. Commit with a Conventional Commit message (below) and tick the task in `tasks/todo.md`.
 
-### Example Code Structure
+Rules while working:
+- Stay in scope. If you notice something unrelated, record it under "Noticed, not touched" in the
+  commit body. Do not fix it on the side.
+- If the spec is ambiguous or two sources disagree, stop and write a `CONFUSION:` note with the
+  options instead of guessing.
+- Check every Apple API against the SDK interface or developer.apple.com before using it
+  (source-driven). Never rely on memory for API names or OS versions. Cite sources in ADRs.
 
-```swift
-// ✓ Good
-enum WordCaptureError: Error {
-    case emptyWord
-    case invalidLanguage(String)
-}
+## Tech Stack
 
-// ✗ Bad
-enum Error: Error {
-    case error
-}
-// ✗ Bad: force unwrap
-let word = words.first!
-```
+- Swift 6.2, Swift 6 language mode; Xcode 26.2 or newer; XcodeGen 2.46.
+- iOS / iPadOS / macOS 26 minimum; one multiplatform SwiftUI app target plus a Share extension.
+- SwiftData + CloudKit (private DB), `NSUbiquitousKeyValueStore`, Keychain (iCloud Keychain).
+- FoundationModels (on-device AI); `URLSession` clients for cloud providers (no SDKs).
+- Vision, NaturalLanguage, AVFoundation, UserNotifications.
+- Swift Testing; XCTest only for UI tests. No third-party runtime dependencies.
 
-## Architecture
-
-### Package Structure
-
-```
-Vocabulary-OS/
-├── Vocabulary-OS/          # iOS app target
-├── Vocabulary-macOS/       # macOS app target (shared SwiftUI code)
-├── VocabularyCoreKit/      # Shared frameworks (Swift Package)
-│   ├── VocabularyCoreKit/  # Data models, domain logic
-│   ├── VocabularyAIKit/    # LLM provider abstraction
-│   ├── VocabularyStoreKit/ # SwiftData + CloudKit
-│   └── VocabularyUIKit/    # Shared SwiftUI components
-└── Tests/                  # Unit + UI tests
-```
-
-### Dependency Rules
-
-- **Strict:** No circular dependencies between packages
-- **Presentation layer:** Can import all others; imports SwiftUI
-- **Domain logic:** Cannot import SwiftUI or network frameworks
-- **Data layer:** Cannot import SwiftUI or domain logic
-
-### Forbidden
-
-- `DispatchQueue.main.async` (use `@MainActor` instead)
-- `URLSession` (use only in dedicated adapters with async/await)
-- `.ignore()` error handling (catch and handle, or propagate with meaningful error)
-- `print()` (use a logging framework or debug assertions)
-- Optionals without handling (use `guard let`, `if let`, or `??` with clear intent)
-
-## Testing
-
-### Test Coverage Targets
-
-- **Domain logic:** 100% (SM-2, language detection, AI provider interface)
-- **Data models:** 100% (CRUD, relationships, validation)
-- **SwiftUI views:** 50%+ (snapshot tests, navigation tests)
-- **Integration:** 30%+ (sync, AI providers, file I/O)
-
-### Test File Naming
-
-- Logic test: `[Feature]Tests.swift` (e.g., `SM2AlgorithmTests.swift`)
-- UI test: `[Feature]UITests.swift` (e.g., `CaptureFlowUITests.swift`)
-- Mock test: In same file or `Mocks/[Feature]Mock.swift`
-
-### Example Test
-
-```swift
-import XCTest
-@testable import VocabularyCoreKit
-
-final class WordCaptureTests: XCTestCase {
-    func testCaptureValidWord() async throws {
-        let word = Word(text: "serendipity", context: "A fortunate stroke of serendipity")
-        
-        XCTAssertEqual(word.text, "serendipity")
-        XCTAssertTrue(word.context.contains("serendipity"))
-    }
-}
-```
-
-## Building & Running
-
-### Commands
+## Commands
 
 ```bash
-# Install dependencies
-swift package resolve
-
-# Build
-swift build
-
-# Test
-swift test
-
-# Run iOS app
-xcode-select -p
-open Vocabulary-OS.xcodeproj
-# Then build in Xcode
-
-# Run macOS app
-# Same project, select Vocabulary-macOS scheme
-
-# Type-check
-swift build --build-tests
+xcodegen generate                                   # regenerate VocabularyOS.xcodeproj (never edit it by hand)
+swift test --package-path Packages/VocabularyKit    # package tests on the Mac host
+scripts/verify.sh                                   # full gate: generate + tests + iOS Simulator + macOS builds
+swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-device prompt evaluation
 ```
 
-### Required Environment
+## Code Conventions
 
-- **Swift:** 6.2+
-- **macOS:** 14+
-- **Xcode:** 15+
-- **iOS minimum:** 16 (base), 18.2+ (Foundation Models)
-- **macOS minimum:** 13
+- **Concurrency:** the app target and `VocabularyUI` default to `MainActor` isolation. Other modules
+  are non-isolated and use `Sendable` value types or actors. Use `async`/`await` only, never Dispatch.
+- **State and dependencies:** `@Observable` for UI state; never `ObservableObject`. Inject
+  dependencies through initializers or protocols; no global singletons of our own.
+- **Errors:** typed enums conforming to `LocalizedError`, with user-facing messages. No force
+  unwraps or `try!` outside tests.
+- **Logging:** `Logger(subsystem: "app.vocabularyos", category: "<module>")`. Mark user text
+  `privacy: .private`. Never log API keys, not even partially.
+- **Style:**
+  - Comments explain *why*; give public API a one-line doc comment.
+  - Follow the Swift API Design Guidelines; name each file after its main type.
+- **Localization:** UI strings are `LocalizedStringKey`/`String(localized:)` and live in the String
+  Catalog. Do not concatenate localized fragments.
 
-## Git Workflow
+## Boundaries
 
-### Commits
+- **Always:**
+  - Run `scripts/verify.sh` before committing.
+  - Keep SwiftData models CloudKit-compatible: no `.unique`, every property optional or defaulted,
+    relationships optional with an inverse.
+  - Keep `SPEC.md` and the ADRs current.
+- **Ask first:**
+  - A new dependency.
+  - Schema changes after v1 ships.
+  - A new AI provider, or sending a new kind of data to providers.
+  - Changing the minimum OS.
+  - Signing, entitlements, bundle IDs or CloudKit containers.
+  - Rewriting git history.
+- **Never:**
+  - Add a server, analytics or tracking.
+  - Store API keys outside the Keychain.
+  - Commit secrets, Team IDs or personal data.
+  - Skip or delete failing tests.
+  - Edit the generated `.xcodeproj`.
 
-Every commit message must include:
+## Patterns
 
-```
-[Feature name]: brief description
+- **Module dependencies:** `VocabularyCore` ← `VocabularyAI` / `VocabularyData` /
+  `VocabularyCapture` / `VocabularySpeech` ← `VocabularyUI` ← App and Share extension.
+  - `VocabularyCore` imports only Foundation and NaturalLanguage.
+  - Only `VocabularyUI` and the app import SwiftUI.
+- **SwiftData models** live in `VocabularyData`. Use `var id: UUID = UUID()` for identity and give
+  every stored property a default. Domain logic works on value types from `VocabularyCore`
+  (`CardState`, `WordInsight`, …), not on `@Model` classes.
+- **AI outputs** are `@Generable` structs in `VocabularyAI`:
+  - The on-device client uses guided generation.
+  - Cloud clients send the JSON Schema encoded from `GenerationSchema` and parse replies with
+    `GeneratedContent(json:)`.
+  - Every output passes a validator before it reaches the UI or the store.
+  - On-device prompts stay small: one task per call, about 1–3 short paragraphs, and an explicit
+    `maximumResponseTokens`. Do not use regex guides; they fail on device.
+- **Share extension:** writes JSON drafts to the App Group `Inbox/`, never to the synced store. The
+  app imports them when it becomes active.
+- **Tests:**
+  - Use Swift Testing (`@Test`, `#expect`).
+  - SwiftData tests use `ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)`.
+  - HTTP is stubbed with a `URLProtocol` subclass; tests never touch the network.
 
-- Detailed explanation of what changed
-- Why this change was made
-- Related ADR (if applicable)
+## Definition of Done
 
-Co-Authored-By: Claude [Model] <noreply@anthropic.com>
-```
+A task is done only when all of these hold:
+- Its acceptance criteria are met, and new behavior has tests that failed before the change.
+- `scripts/verify.sh` passes with no new warnings in project code.
+- UI tasks were checked in the iOS Simulator (and on macOS when the task affects it).
+- Docs, the spec and the ADRs reflect any decision that changed.
+- `tasks/todo.md` is ticked.
+- The commit message is in English and follows the convention below.
 
-Example:
+## Git
 
-```
-[M1-DataModels]: add Word and Collection SwiftData models
-
-- Word model stores: text, context, sourceLanguage, image, retention score
-- Collection model stores: words (1:many), language, sharing metadata
-- Added CRUD unit tests (12 tests)
-- Validated CloudKit compatibility
-
-Related: docs/ADR-002-cloudkit-private-data-architecture.md
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-```
-
-### PR Template (when needed)
-
-```
-## Milestone
-M[X]: [Feature name]
-
-## Summary
-[What was built]
-
-## Acceptance Criteria
-- [x] Criterion 1
-- [x] Criterion 2
-- [ ] Criterion 3 (if not met, explain why)
-
-## Testing
-- [X] Unit tests pass
-- [X] UI tests pass
-- [X] Manual testing on iOS simulator
-- [ ] Manual testing on macOS (if applicable)
-
-## Screenshots / Video
-[If UI changes, include screenshot]
-```
-
-## Debugging
-
-### Logging
-
-Use `os.log` (not `print`):
-
-```swift
-import os
-
-private let logger = Logger(subsystem: "com.vocab.core", category: "DataSync")
-
-logger.info("Syncing \(words.count) words to CloudKit")
-logger.error("Sync failed: \(error.localizedDescription)")
-```
-
-### Common Issues
-
-- **CloudKit sync not working:** Check iCloud account login in Simulator settings
-- **SwiftData queries slow:** Profile with Instruments (Core Data tool)
-- **AI provider timeout:** Check network, increase timeout if legitimate latency
-
-## Asking for Help
-
-When stuck, provide:
-1. Error message (full stack trace)
-2. Minimal reproducible example (code snippet)
-3. What you've tried
-4. Which ADR or milestone this relates to
-
-Example:
-
-```
-[M5-Vision] Document scanning fails on device
-
-Error: VNRecognizeTextRequest returned nil when processing JPEG
-
-Tried:
-- Checking image orientation
-- Validating JPEG format
-- Different image sizes
-
-Related: docs/ADR-005-vision-and-object-capture.md
-
-Code:
-let request = VNRecognizeTextRequest()
-let handler = VNImageRequestHandler(cgImage: image)
-try handler.perform([request])
-// request.results is nil
-```
-
-## Resources
-
-- [SwiftUI documentation](https://developer.apple.com/documentation/swiftui)
-- [CloudKit documentation](https://developer.apple.com/documentation/cloudkit)
-- [SwiftData documentation](https://developer.apple.com/documentation/swiftdata)
-- [Vision framework](https://developer.apple.com/documentation/vision)
-- Project ADRs: [`docs/`](docs)
-- Specification: [`SPEC.md`](SPEC.md)
-- Milestones: [`MILESTONES.md`](MILESTONES.md)
+- Format: `<type>(<scope>): <imperative summary>` on one line, a body explaining *why*, and the
+  trailer `Co-Authored-By: <agent> <noreply@anthropic.com>` when an agent wrote the change.
+- **Types:** feat, fix, refactor, test, docs, chore, build, ci.
+- **Scopes:** spec, adr, plan, agents, project, core, ai, data, capture, speech, ui, app, share,
+  review, quiz, podcast, plans, sharing, i18n, release.
+- Make one commit per task. Stage files explicitly (never a blind `git add -A`), then review the
+  staged diff for secrets before committing.
