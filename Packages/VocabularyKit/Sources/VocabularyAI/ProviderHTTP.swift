@@ -71,7 +71,7 @@ enum ProviderHTTP {
         func collect(_ value: Any) {
             switch value {
             case let object as [String: Any]:
-                for key in ["message", "type", "code", "status", "reason", "error"] {
+                for key in ["message", "type", "code", "error_code", "status", "reason", "error", "detail"] {
                     if let string = object[key] as? String { parts.append(string) }
                 }
                 object.values.forEach(collect)

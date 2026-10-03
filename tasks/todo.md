@@ -30,7 +30,7 @@ Done holds and its commit exists.
 ## Phase 3: Bring-your-own-key providers
 - [x] T13 `feat(ai)`: provider catalog and Keychain secret store
 - [x] T14 `feat(ai)`: OpenAI-compatible client
-- [ ] T15 `feat(ai)`: Anthropic Messages client
+- [x] T15 `feat(ai)`: Anthropic Messages client
 - [ ] T16 `feat(settings)`: AI provider settings and cloud insight path
 - [ ] Checkpoint 3: Providers
 
