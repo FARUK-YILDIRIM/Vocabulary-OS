@@ -22,7 +22,7 @@ Done holds and its commit exists.
 - [x] T07 `feat(ai)`: generation client contract and Apple on-device client
 - [x] T08 `feat(ai)`: word insight service with validation
 - [x] T09 `feat(ai)`: vos-eval prompt evaluation
-- [ ] T10 `feat(data)`: SwiftData schema v1 and word repository
+- [x] T10 `feat(data)`: SwiftData schema v1 and word repository
 - [ ] T11 `feat(capture)`: in-app text capture
 - [ ] T12 `feat(library)`: library and word detail
 - [ ] Checkpoint 2: Core slice
