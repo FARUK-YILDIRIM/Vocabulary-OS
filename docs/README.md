@@ -1,34 +1,39 @@
-# Vocabulary-OS Architecture Decision Records
+# Architecture Decision Records
 
-This directory contains the architectural decisions for Vocabulary-OS, documented using the ADR (Architecture Decision Record) format.
+Each ADR records one decision that would be expensive to reverse: its context, the alternatives and
+the consequences. ADRs are never deleted. When a decision changes, a new ADR supersedes the old one,
+and the old one's status says so.
 
-## ADRs
+| ADR | Title | Status |
+| --- | --- | --- |
+| [001](ADR-001-apple-only-platform.md) | Apple-only platform, iOS/iPadOS/macOS 26 minimum | Accepted (revised) |
+| [002](ADR-002-cloudkit-private-data-architecture.md) | Private iCloud data, extension hand-off, and file-based sharing | Accepted (revised) |
+| [003](ADR-003-byok-ai-provider-model.md) | On-device AI by default, bring-your-own-key cloud providers | Accepted (revised) |
+| [004](ADR-004-multilingual-architecture.md) | Multiple learning languages with automatic routing | Accepted (revised) |
+| [005](ADR-005-vision-and-object-capture.md) | Capture from text, book pages and objects | Accepted (revised) |
+| [006](ADR-006-project-structure-and-tooling.md) | Project structure, tooling and build configurations | Proposed |
+| [007](ADR-007-spaced-repetition-sm2.md) | Spaced repetition with SM-2 and four ratings | Proposed |
+| [008](ADR-008-podcast-audio-on-device-tts.md) | Podcasts as AI scripts spoken with on-device voices | Proposed |
 
-| # | Title | Status | Date |
-|---|-------|--------|------|
-| [001](ADR-001-apple-only-platform.md) | Apple-Only Platform | Accepted | 2026-10-03 |
-| [002](ADR-002-cloudkit-private-data-architecture.md) | CloudKit Private Data Architecture | Accepted | 2026-10-03 |
-| [003](ADR-003-byok-ai-provider-model.md) | BYOK (Bring Your Own Key) AI Provider Model | Accepted | 2026-10-03 |
-| [004](ADR-004-multilingual-architecture.md) | Multi-Language Architecture | Accepted | 2026-10-03 |
-| [005](ADR-005-vision-and-object-capture.md) | Vision and Object Capture | Accepted | 2026-10-03 |
+ADR-001 to 005 record decisions the owner made on 2026-10-03. On 2026-10-04 they were revised
+after checking the facts against the iOS/macOS 26.2 SDK and Apple's documentation. The first drafts
+named APIs and OS versions that do not exist. ADR-006 to 008 are implementation decisions awaiting
+the owner's review.
 
-## Reading Guide
+## Template
 
-Start with ADR-001 to understand the platform choice. Each ADR builds on the previous decisions:
+```markdown
+# ADR-NNN: <decision as a short phrase>
 
-- **ADR-001** → Platform scope (Apple-only)
-- **ADR-002** → Data storage (CloudKit private)
-- **ADR-003** → AI integration (BYOK model)
-- **ADR-004** → Multi-language support
-- **ADR-005** → Capture mechanisms (text, objects)
+## Status
+Proposed | Accepted | Superseded by ADR-XXX | Deprecated
 
-## Adding New ADRs
+## Date
+YYYY-MM-DD
 
-When a significant architectural decision arises, create a new ADR:
-
-1. Copy the template format
-2. Use the next available number
-3. Update this README
-4. Link related ADRs
-
-Format: `ADR-NNN-kebab-case-title.md`
+## Context
+## Decision
+## Alternatives Considered
+## Consequences
+## Sources
+```

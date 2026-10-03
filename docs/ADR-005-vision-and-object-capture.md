@@ -1,69 +1,86 @@
-# ADR-005: Vision and Object Capture (Text + Objects)
+# ADR-005: Capture from text, book pages and objects
 
-**Status:** Accepted
+## Status
+Accepted (revised 2026-10-04: APIs verified, technology chosen)
 
-**Date:** 2026-10-03
+## Date
+2026-10-03
 
 ## Context
+The owner asked for three capture sources and left the technology choice to the implementer:
+1. text the learner is reading on a device;
+2. a page of a physical book, photographed;
+3. an object around them, photographed, to learn its name.
 
-Users capture words from three sources:
-1. **Text input:** Manual typing or pasting
-2. **Book pages:** Photograph a physical book page, extract text via OCR, select words
-3. **Objects:** Photograph an object (e.g., a coffee cup, a chair), optionally get AI description/translation
+Capture must work on iPhone, iPad and Mac, offline where possible, without sending images to a
+server by default.
 
-The system must provide seamless camera integration for both document scanning and general object capture.
+The first version of this ADR referenced `VNClassificationRequest`, which does not exist. The
+classifier is `ClassifyImageRequest` (Swift API) / `VNClassifyImageRequest`.
 
 ## Decision
+- **Text:**
+  - In-app paste/typing.
+  - A Share extension for iOS/iPadOS and macOS that accepts plain text.
+  - A macOS Services menu item. The handler receives the selected string and opens quick capture.
+  - Text is tokenized with `NLTokenizer`. The learner taps a word or selects a span. The context is
+    the sentence containing the selection (`NLTokenizer(unit: .sentence)`).
+- **Book page:**
+  - The learner takes a photo (camera on iPhone/iPad) or picks an image (PhotosPicker, Files,
+    drag-and-drop on Mac).
+  - Run Vision **`RecognizeDocumentsRequest`** (iOS/macOS 26). It returns paragraphs whose
+    `transcript` joins wrapped lines, each with `words` (per-word observations and normalized boxes).
+  - The app draws tappable word boxes over the image. A tap extracts the sentence that contains the
+    word from the paragraph transcript.
+  - Recognition uses the learner's languages (`.accurate` level; Turkish is not in `.fast`).
+  - Measured on a generated two-paragraph page: 0.46 s, 25 words per paragraph, and correct sentence
+    extraction across line wraps.
+- **Object:**
+  - Run Vision **`ClassifyImageRequest`** on device and keep labels with confidence ≥ 0.3 (top 5).
+  - The learner picks or corrects a label.
+  - The active AI model returns the object's name in the chosen learning language (with
+    article/gender where relevant), a translation into the native language and an example sentence.
+  - Sending the photo itself to a vision-capable cloud model is **off by default**. It waits on
+    spec open question 3.
+- **Images:**
+  - Only downscaled JPEG thumbnails (long edge ≤ 1024 px, quality 0.7) are stored, as
+    `@Attribute(.externalStorage)`. Originals are not kept.
+  - Images are attached only when the learner keeps "Save photo" on.
+- **Live camera scanning** (`DataScannerViewController`) moves to v1.1. It is iOS/iPadOS only,
+  needs A12 or later, and does not run on macOS or the Simulator. Photo-based capture covers all
+  platforms first.
 
-Use **Vision API + VisionKit** with two capture flows:
-
-### Flow 1: Document Scanning (Books, articles)
-- **VisionKit's `DataScannerViewController`** or **Vision framework's text recognition (`VNRecognizeTextRequest`)**
-- Real-time text detection on camera feed
-- User taps words they want to learn
-- Stores: `(selectedWord, context: fullSentence, sourceLanguage, image: pagePhoto)`
-
-### Flow 2: Object Capture (General photography)
-- User photographs an object (furniture, food, animal, etc.)
-- App shows the photo and asks: "What is this?" (optional)
-- AI describes it in user's native language + target language
-- User can add it as a word list item with the object photo as context
-
-### Technology Choices
-
-- **Text Recognition:** `VNRecognizeTextRequest` (Vision framework, iOS 13+) for offline OCR
-- **Live Text:** Leverage iOS 16+ Live Text for in-app selection (user highlights text)
-- **Camera permissions:** Request photo library + camera access on first use
-- **Object recognition:** `VNClassificationRequest` for basic object identification; AI for detailed descriptions
+## Alternatives Considered
+- **`RecognizeTextRequest` only:**
+  - Returns lines, so sentences that wrap across lines must be stitched by hand.
+  - Rejected: `RecognizeDocumentsRequest` provides paragraphs and words directly.
+- **`VNDocumentCameraViewController`:**
+  - Good page cropping, but iOS/iPadOS/Catalyst only and no word-level selection.
+  - May still be used as the camera UI on iOS later.
+- **Cloud OCR or cloud vision by default:**
+  - Rejected for privacy and offline use.
+- **Live Text interaction (`ImageAnalysisInteraction`):**
+  - Gives selection for free, but not a reliable "tapped word + its sentence" hook on both
+    platforms.
+  - Rejected in favor of our own overlay.
 
 ## Consequences
+- The same capture pipeline runs on iPhone, iPad and Mac, and can be unit-tested on the Mac host
+  with generated images.
+- Recognition quality depends on lighting and focus. The learner can always edit the term and the
+  sentence.
+- Object labels from the on-device classifier are English taxonomy identifiers (e.g. `cup`). The AI
+  model turns them into the learner's languages, so object capture needs AI (on device or cloud).
+- Photos synced through iCloud cost storage. Thumbnails keep this small, and photos are optional.
 
-- **Positive:**
-  - Captures real-world learning context (the book page, the object itself)
-  - No external API calls for OCR (Vision framework is on-device)
-  - Rich learning memory: word + visual context
-  - Accessible: VisionKit is built-in, no third-party dependencies
-
-- **Negative:**
-  - OCR quality depends on lighting, page angle, camera focus
-  - Object recognition is basic without fine-tuning
-  - Image storage increases iCloud sync data
-  - User must manually refine auto-detected text
-
-## Implementation Notes
-
-- **Vision framework:** `VNRecognizeTextRequest` for batch OCR of captured images
-- **Image compression:** Store thumbnails (not full resolution) in CloudKit to minimize sync
-- **OCR fallback:** If recognition fails, show raw image + manual text entry option
-- **Permissions:** Request camera + photo library on first use
-- **Accessibility:** Ensure selected words are readable (text size, contrast)
-
-## Alternative Considered
-
-- **Third-party OCR (Tesseract, Cloud Vision API):** Rejected because it requires sending images to external servers, violates privacy principle
-
-## Future Enhancements
-
-- Real-time handwriting recognition (for handwritten notes)
-- QR code scanning (to link to sources)
-- Barcode scanning (to capture book ISBN)
+## Sources
+- `RecognizeDocumentsRequest` and `DocumentObservation` (paragraphs, words, transcript):
+  `Vision.swiftinterface`, macOS 26.2 SDK; https://developer.apple.com/documentation/vision
+- `RecognizeTextRequest`, `RecognizedText.boundingBox(for:)`:
+  https://developer.apple.com/documentation/vision/recognizetextrequest ,
+  https://developer.apple.com/documentation/vision/recognizedtext/boundingbox(for:)
+- `ClassifyImageRequest`: https://developer.apple.com/documentation/vision/classifyimagerequest
+- `DataScannerViewController` requirements:
+  https://developer.apple.com/documentation/visionkit/datascannerviewcontroller/issupported
+- `VNDocumentCameraViewController`: https://developer.apple.com/documentation/visionkit/vndocumentcameraviewcontroller
+- Measurements: local probe on macOS 26.5.2 (2026-10-04), reproduced by `VocabularyCaptureTests`.
