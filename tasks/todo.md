@@ -11,7 +11,7 @@ Done holds and its commit exists.
 
 ## Phase 1: Foundation
 - [x] T01 `chore(project)`: scaffold Xcode project, VocabularyKit package, verify script
-- [ ] T02 `feat(core)`: language catalog and learner profile
+- [x] T02 `feat(core)`: language catalog and learner profile
 - [ ] T03 `feat(data)`: synced settings store
 - [ ] T04 `feat(app)`: onboarding and language settings
 - [ ] Checkpoint 1: Foundation
