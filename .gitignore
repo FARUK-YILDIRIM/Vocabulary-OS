@@ -1,0 +1,50 @@
+# Xcode
+.DS_Store
+**/*.xcodeproj
+**/*.xcworkspace
+DerivedData/
+Build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+*.xcuserstate
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+*.resolved
+
+# CocoaPods (if used)
+Pods/
+Podfile.lock
+
+# Ruby / Bundler
+.ruby-version
+Gemfile.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# App-specific
+.APIKeys (keep tokens out of repo)
+LocalizedStrings.swift (auto-generated)
