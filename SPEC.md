@@ -357,6 +357,11 @@ Conventions:
   right-sense rate and language adherence. It runs before and after any prompt change, and results
   are recorded under `docs/eval/`. Cloud providers are checked manually with the maintainer's key and
   never in automated tests.
+- **The iOS Simulator has no on-device model assets.** The framework reports the model as available,
+  but generation then fails. So:
+  - UI tests use canned AI answers (`-vos-ai-stub YES`);
+  - the real on-device model is exercised on macOS by `vos-eval` and `scripts/mac-smoke.sh --self-test`,
+    which captures a word inside the running app.
 - **No network in tests:** HTTP is stubbed with a `URLProtocol` subclass.
 - **Bugs:** a failing reproduction test comes before the fix (prove-it pattern).
 - **Coverage goal:** about 90% of lines in VocabularyCore; at least 70% in AI and Data.

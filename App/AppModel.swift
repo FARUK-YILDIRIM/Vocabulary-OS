@@ -1,5 +1,8 @@
 import Foundation
 import Observation
+import os
+import SwiftData
+import VocabularyAI
 import VocabularyCore
 import VocabularyData
 
@@ -7,20 +10,64 @@ import VocabularyData
 @Observable
 final class AppModel {
     let settings: SettingsStore
+    let container: ModelContainer
+    let repository: WordRepository
+    @ObservationIgnored private let options: LaunchOptions
 
-    init(settings: SettingsStore) {
+    init(settings: SettingsStore, container: ModelContainer, options: LaunchOptions = LaunchOptions()) {
         self.settings = settings
+        self.container = container
+        self.repository = WordRepository(container: container)
+        self.options = options
     }
 
     /// Production wiring. UI tests launch with `-ui-testing YES` to start from a clean, in-memory
     /// state, optionally already onboarded with `-vos-preset-profile tr:en,de`.
     static func live(options: LaunchOptions = LaunchOptions()) -> AppModel {
-        guard options.isUITesting else {
-            return AppModel(settings: SettingsStore(backing: Self.makeSettingsBacking()))
+        if options.isUITesting {
+            let settings = SettingsStore(backing: InMemoryKeyValueBacking())
+            settings.profile = options.presetProfile
+            return AppModel(settings: settings, container: makeContainer(inMemory: true), options: options)
         }
+        return AppModel(settings: SettingsStore(backing: makeSettingsBacking()), container: makeContainer(inMemory: false), options: options)
+    }
+
+    /// For SwiftUI previews: in-memory settings and store, optionally already onboarded.
+    static func preview(profile: LearnerProfile? = try? LearnerProfile(native: .turkish, learning: [.english, .german])) -> AppModel {
         let settings = SettingsStore(backing: InMemoryKeyValueBacking())
-        settings.profile = options.presetProfile
-        return AppModel(settings: settings)
+        settings.profile = profile
+        return AppModel(settings: settings, container: makeContainer(inMemory: true))
+    }
+
+    // MARK: AI
+
+    /// The insight service for the learner's current provider. Only the on-device model exists until
+    /// cloud providers arrive (task T16).
+    func makeInsightService() -> InsightService {
+        #if DEBUG
+        if options.usesAIStub {
+            return InsightService(client: StubGenerationClient(), strategy: .stepwise, source: InsightSource(providerID: "stub"))
+        }
+        #endif
+        return InsightService(
+            client: AppleOnDeviceClient(),
+            strategy: .stepwise,
+            source: InsightSource(providerID: AIProviderSelection.onDevice.providerID)
+        )
+    }
+
+    var providerDisplayName: String {
+        String(localized: "Apple on-device model")
+    }
+
+    // MARK: Wiring
+
+    private static var isCloudSyncBuild: Bool {
+        #if VOS_CLOUD_SYNC
+        true
+        #else
+        false
+        #endif
     }
 
     /// Builds with a Team ID get the iCloud key-value store entitlement and the `VOS_CLOUD_SYNC`
@@ -34,11 +81,19 @@ final class AppModel {
         #endif
     }
 
-    /// For SwiftUI previews: in-memory settings, optionally already onboarded.
-    static func preview(profile: LearnerProfile? = try? LearnerProfile(native: .turkish, learning: [.english, .german])) -> AppModel {
-        let settings = SettingsStore(backing: InMemoryKeyValueBacking())
-        settings.profile = profile
-        return AppModel(settings: settings)
+    private static func makeContainer(inMemory: Bool) -> ModelContainer {
+        do {
+            return try VocabularyStore.makeContainer(inMemory: inMemory, cloudSync: isCloudSyncBuild && !inMemory)
+        } catch {
+            // A store that can't open (for example after a failed migration) must not take the app down;
+            // the learner can still capture into memory and the error is logged for diagnosis.
+            Logger(subsystem: VocabularyCore.logSubsystem, category: "app")
+                .fault("Could not open the word store: \(error.localizedDescription, privacy: .public)")
+            guard let fallback = try? VocabularyStore.makeContainer(inMemory: true, cloudSync: false) else {
+                preconditionFailure("Even an in-memory store could not be created")
+            }
+            return fallback
+        }
     }
 }
 
@@ -51,6 +106,8 @@ struct LaunchOptions {
     static let uiTesting = "ui-testing"
     static let presetProfile = "vos-preset-profile"
     static let initialTab = "vos-tab"
+    static let aiStub = "vos-ai-stub"
+    static let selfTest = "vos-self-test"
 
     private let defaults: UserDefaults
 
@@ -59,6 +116,12 @@ struct LaunchOptions {
     }
 
     var isUITesting: Bool { defaults.bool(forKey: Self.uiTesting) }
+
+    /// Replace AI with canned answers so UI tests don't depend on a model (Debug builds only).
+    var usesAIStub: Bool { defaults.bool(forKey: Self.aiStub) }
+
+    /// Debug-only end-to-end check to run at launch, e.g. `capture` (see `SelfTest`).
+    var selfTest: String? { defaults.string(forKey: Self.selfTest) }
 
     /// `native:learning1,learning2`, for example `tr:en,de`.
     var presetProfile: LearnerProfile? {
@@ -70,11 +133,6 @@ struct LaunchOptions {
     }
 
     var initialTab: AppTab? {
-        switch defaults.string(forKey: Self.initialTab) {
-        case "today": .today
-        case "library": .library
-        case "settings": .settings
-        default: nil
-        }
+        defaults.string(forKey: Self.initialTab).flatMap(AppTab.init(rawValue:))
     }
 }

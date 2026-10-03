@@ -25,6 +25,7 @@ let package = Package(
         .target(
             name: "VocabularyUI",
             dependencies: ["VocabularyCore", "VocabularyAI", "VocabularyData", "VocabularyCapture", "VocabularySpeech"],
+            resources: [.process("Resources")],
             swiftSettings: [.defaultIsolation(MainActor.self)]
         ),
         .executableTarget(name: "vos-eval", dependencies: ["VocabularyCore", "VocabularyAI"]),
@@ -33,7 +34,11 @@ let package = Package(
         .testTarget(name: "VocabularyDataTests", dependencies: ["VocabularyData"]),
         .testTarget(name: "VocabularyCaptureTests", dependencies: ["VocabularyCapture"]),
         .testTarget(name: "VocabularySpeechTests", dependencies: ["VocabularySpeech"]),
-        .testTarget(name: "VocabularyUITests", dependencies: ["VocabularyUI"]),
+        .testTarget(
+            name: "VocabularyUITests",
+            dependencies: ["VocabularyUI", "VocabularyAI", "VocabularyData", "VocabularyCore"],
+            swiftSettings: [.defaultIsolation(MainActor.self)]
+        ),
     ],
     swiftLanguageModes: [.v6]
 )

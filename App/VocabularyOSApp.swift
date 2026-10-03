@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 @main
@@ -8,6 +9,10 @@ struct VocabularyOSApp: App {
         WindowGroup {
             RootView()
                 .environment(model)
+                .modelContainer(model.container)
+                #if DEBUG
+                .task { await SelfTest.runIfRequested(app: model) }
+                #endif
         }
     }
 }

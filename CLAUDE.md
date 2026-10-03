@@ -49,6 +49,7 @@ swift test --package-path Packages/VocabularyKit    # package tests on the Mac h
 scripts/verify.sh                                   # full gate: generate + tests + iOS Simulator + macOS builds
 scripts/ui-test.sh [Class/test]                     # XCUITests on iPhone 17 (VOS_UI_TEST_DEVICE for iPad); screenshots in .build/ui-tests
 scripts/mac-smoke.sh [-vos-preset-profile tr:en,de] # macOS Debug build launches, shows a window, logs no errors
+scripts/mac-smoke.sh --self-test                    # macOS app captures a word with the real on-device model
 swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-device prompt evaluation
 ```
 
@@ -112,6 +113,7 @@ swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-dev
   - `-ui-testing YES`: in-memory state.
   - `-vos-preset-profile tr:en,de`: skip onboarding.
   - `-vos-tab settings`: start on that tab.
+  - `-vos-ai-stub YES`: canned AI answers (the Simulator has no on-device model assets).
 
   Never pass a bare flag: AppKit then treats the next value as a file to open.
 - **Tests:**

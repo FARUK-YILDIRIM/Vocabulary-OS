@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # macOS smoke test for the Debug build: the app launches, shows a window, keeps running and logs no
 # errors or faults from our subsystem. Visual review of macOS screens stays a manual checkpoint step.
-# Usage: scripts/mac-smoke.sh [launch arguments...]   (run scripts/verify.sh first)
+#
+# Usage:   scripts/mac-smoke.sh [--self-test] [launch arguments...]   (run scripts/verify.sh first)
 # Example: scripts/mac-smoke.sh -vos-preset-profile tr:en,de -vos-tab settings
+# --self-test captures a word with the real on-device model inside the app (App/Debug/SelfTest.swift),
+# which the iOS Simulator can't do because it has no model assets.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -10,9 +13,34 @@ APP="$ROOT/.build/DerivedData/Build/Products/Debug/VocabularyOS.app"
 [[ -d "$APP" ]] || { echo "error: $APP not found; run scripts/verify.sh first" >&2; exit 1; }
 DISPLAY_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$APP/Contents/Info.plist")"
 BINARY="$APP/Contents/MacOS/VocabularyOS"
-pkill -f "$BINARY" 2>/dev/null || true
 
+self_test=0
+if [[ "${1:-}" == "--self-test" ]]; then
+    self_test=1
+    shift
+fi
+
+pkill -f "$BINARY" 2>/dev/null || true
 start="$(date '+%Y-%m-%d %H:%M:%S')"
+
+if [[ $self_test -eq 1 ]]; then
+    open -n "$APP" --args -ui-testing YES -vos-preset-profile tr:en,de -vos-self-test capture "$@"
+    for _ in $(seq 1 60); do
+        pgrep -f "$BINARY" >/dev/null || break
+        sleep 0.5
+    done
+    pkill -f "$BINARY" 2>/dev/null || true
+    result="$(/usr/bin/log show --start "$start" --style compact \
+        --predicate 'subsystem == "app.vocabularyos" AND category == "selftest"' 2>/dev/null | grep -v '^Timestamp' || true)"
+    echo "$result"
+    if grep -q "Self-test capture passed" <<<"$result"; then
+        echo "macOS self-test passed"
+        exit 0
+    fi
+    echo "error: the self-test did not pass" >&2
+    exit 1
+fi
+
 open -n "$APP" --args -ui-testing YES "$@"
 sleep 4
 

@@ -19,6 +19,15 @@ import VocabularyCore
     }
 }
 
+@Suite struct MissingAssetsTests {
+    @Test func recognizesMissingAssetsInUnderlyingErrors() {
+        let assets = NSError(domain: "com.apple.UnifiedAssetFramework", code: 5000)
+        let wrapped = NSError(domain: "FoundationModels.LanguageModelSession.GenerationError", code: -1, userInfo: [NSMultipleUnderlyingErrorsKey: [assets]])
+        #expect(AppleOnDeviceClient.isMissingModelAssets(wrapped))
+        #expect(!AppleOnDeviceClient.isMissingModelAssets(NSError(domain: "Other", code: 1)))
+    }
+}
+
 @Suite struct GenerationErrorMappingTests {
     private let context = LanguageModelSession.GenerationError.Context(debugDescription: "test")
 

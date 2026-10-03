@@ -1,5 +1,6 @@
 import Foundation
 import FoundationModels
+import os
 import VocabularyCore
 
 /// Whether Apple's on-device model can run here.
@@ -67,8 +68,30 @@ public struct AppleOnDeviceClient: GenerationClient {
         } catch is CancellationError {
             throw .cancelled
         } catch {
-            // Internal framework errors (seen with regex guides) carry no actionable detail.
-            throw .unknown(String(describing: type(of: error)))
+            // Internal framework errors (seen with regex guides) carry no actionable detail for the
+            // learner; log the domain and code (never the prompt) for diagnosis.
+            let nsError = error as NSError
+            Logger(subsystem: VocabularyCore.logSubsystem, category: VocabularyAI.logCategory)
+                .error("On-device generation failed: \(nsError.domain, privacy: .public) \(nsError.code) \(String(describing: type(of: error)), privacy: .public)")
+            throw Self.isMissingModelAssets(nsError) ? .onDeviceUnavailable(.modelNotReady) : .unknown("\(nsError.domain) \(nsError.code)")
         }
+    }
+
+    /// The framework can report the model as available and then fail because its assets are missing,
+    /// for example in the iOS Simulator. The cause only shows in the underlying errors.
+    static func isMissingModelAssets(_ error: NSError) -> Bool {
+        var pending: [NSError] = [error]
+        while let current = pending.popLast() {
+            if current.domain.contains("UnifiedAssetFramework") || current.domain.contains("ModelCatalog") {
+                return true
+            }
+            if let underlying = current.userInfo[NSUnderlyingErrorKey] as? NSError {
+                pending.append(underlying)
+            }
+            if let multiple = current.userInfo[NSMultipleUnderlyingErrorsKey] as? [NSError] {
+                pending.append(contentsOf: multiple)
+            }
+        }
+        return false
     }
 }
