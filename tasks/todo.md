@@ -25,10 +25,10 @@ Done holds and its commit exists.
 - [x] T10 `feat(data)`: SwiftData schema v1 and word repository
 - [x] T11 `feat(capture)`: in-app text capture
 - [x] T12 `feat(library)`: library and word detail
-- [ ] Checkpoint 2: Core slice
+- [ ] Checkpoint 2: Core slice — automated checks passed 2026-10-04 (UI tests with canned AI on iPhone and iPad, real on-device capture in the macOS app, vos-eval 10/10 senses); awaiting owner review
 
 ## Phase 3: Bring-your-own-key providers
-- [ ] T13 `feat(ai)`: provider catalog and Keychain secret store
+- [x] T13 `feat(ai)`: provider catalog and Keychain secret store
 - [ ] T14 `feat(ai)`: OpenAI-compatible client
 - [ ] T15 `feat(ai)`: Anthropic Messages client
 - [ ] T16 `feat(settings)`: AI provider settings and cloud insight path
