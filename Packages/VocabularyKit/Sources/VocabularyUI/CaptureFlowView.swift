@@ -2,15 +2,25 @@ import SwiftUI
 import VocabularyAI
 import VocabularyCore
 
+/// Where the capture flow runs.
+public enum CaptureHost: Sendable {
+    case app
+    /// The Share extension. It can't change settings, and its words reach the library when the app
+    /// next becomes active (ADR-002).
+    case shareExtension
+}
+
 /// The capture flow UI, shared by the app and the Share extension (SPEC C5).
 public struct CaptureFlowView: View {
     @Bindable private var model: CaptureModel
     private let providerName: String
+    private let host: CaptureHost
     @State private var isEditing: Bool
 
-    public init(model: CaptureModel, providerName: String) {
+    public init(model: CaptureModel, providerName: String, host: CaptureHost = .app) {
         self.model = model
         self.providerName = providerName
+        self.host = host
         _isEditing = State(initialValue: model.tokens.tokens.isEmpty)
     }
 
@@ -105,12 +115,20 @@ public struct CaptureFlowView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("This looks like \(newLanguage.localizedName()), which isn't one of your languages.", bundle: .module)
                         .font(.callout)
-                    Button {
-                        model.addToLearningLanguages(newLanguage)
-                    } label: {
-                        Text("Add \(newLanguage.localizedName())", bundle: .module)
+                    switch host {
+                    case .app:
+                        Button {
+                            model.addToLearningLanguages(newLanguage)
+                        } label: {
+                            Text("Add \(newLanguage.localizedName())", bundle: .module)
+                        }
+                        .buttonStyle(.bordered)
+                    case .shareExtension:
+                        // Settings written here would not reach iCloud; languages are added in the app.
+                        Text("You can add it in Vocabulary-OS settings.", bundle: .module)
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.bordered)
                 }
             }
             LanguageChips(choices: model.languageChoices, selection: $model.language)
@@ -184,7 +202,12 @@ public struct CaptureFlowView: View {
                 }
                 if model.phase == .saved {
                     Label {
-                        Text("Saved to your library", bundle: .module)
+                        switch host {
+                        case .app:
+                            Text("Saved to your library", bundle: .module)
+                        case .shareExtension:
+                            Text("Saved. It appears in your library the next time you open Vocabulary-OS.", bundle: .module)
+                        }
                     } icon: {
                         Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
                     }

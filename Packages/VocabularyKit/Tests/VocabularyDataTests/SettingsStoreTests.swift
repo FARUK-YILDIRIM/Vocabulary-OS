@@ -97,6 +97,18 @@ import VocabularyCore
         #expect(backing.data(forKey: "k") == Data("local".utf8))
     }
 
+    @Test func readingCopiesCloudValuesIntoTheMirror() {
+        // The Share extension reads only the mirror, so it must not lag behind iCloud.
+        let cloud = FakeCloudStore()
+        cloud.values["k"] = Data("remote".utf8)
+        let defaults = makeDefaults()
+        defaults.set(Data("stale".utf8), forKey: "vos.k")
+        let backing = UbiquitousKeyValueBacking(cloud: cloud, mirror: defaults)
+
+        #expect(backing.data(forKey: "k") == Data("remote".utf8))
+        #expect(defaults.data(forKey: "vos.k") == Data("remote".utf8))
+    }
+
     @Test func worksWithoutTheCloudStore() {
         let defaults = makeDefaults()
         let backing = UbiquitousKeyValueBacking(cloud: nil, mirror: defaults)
@@ -144,6 +156,13 @@ private final class FakeCloudStore: CloudKeyValueStoring {
         let reopened = SettingsStore(backing: backing)
         #expect(reopened.customProviderBaseURL == "http://localhost:11434/v1")
         #expect(reopened.hasAcknowledgedCloudPrivacy)
+    }
+
+    @Test func parsesTheCustomEndpoint() {
+        let settings = SettingsStore(backing: InMemoryKeyValueBacking())
+        #expect(settings.customProviderURL == nil)
+        settings.customProviderBaseURL = " http://localhost:11434/v1\n"
+        #expect(settings.customProviderURL == URL(string: "http://localhost:11434/v1"))
     }
 
     @Test func neverStoresAnAPIKey() throws {

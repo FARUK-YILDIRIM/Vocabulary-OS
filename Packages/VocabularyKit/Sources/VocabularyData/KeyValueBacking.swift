@@ -43,6 +43,10 @@ extension NSUbiquitousKeyValueStore: CloudKeyValueStoring {}
 /// The mirror keeps settings working where the key-value store does not sync: no iCloud account, or
 /// before the first sync. Builds without the key-value store entitlement pass `cloud: nil` and use
 /// the mirror alone. Reads prefer iCloud, so the latest value from any device wins.
+///
+/// In the app, the mirror lives in the App Group, where the Share extension reads it with
+/// `cloud: nil`. Reads therefore copy iCloud values into the mirror, so the extension never sees
+/// older settings than the app.
 @MainActor
 public final class UbiquitousKeyValueBacking: KeyValueBacking {
     public var onExternalChange: (([String]) -> Void)?
@@ -77,7 +81,12 @@ public final class UbiquitousKeyValueBacking: KeyValueBacking {
     }
 
     public func data(forKey key: String) -> Data? {
-        cloud?.data(forKey: key) ?? mirror.data(forKey: mirrorKey(key))
+        let local = mirror.data(forKey: mirrorKey(key))
+        guard let remote = cloud?.data(forKey: key) else { return local }
+        if remote != local {
+            mirror.set(remote, forKey: mirrorKey(key))
+        }
+        return remote
     }
 
     public func setData(_ data: Data?, forKey key: String) {

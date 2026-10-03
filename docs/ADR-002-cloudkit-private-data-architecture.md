@@ -1,7 +1,8 @@
 # ADR-002: Private iCloud data, extension hand-off, and file-based sharing
 
 ## Status
-Accepted (revised 2026-10-04: storage details and the sharing mechanism were researched and decided)
+Accepted (revised 2026-10-04: storage details and the sharing mechanism were researched and decided;
+how the Share extension reads settings was added with the extension)
 
 ## Date
 2026-10-03
@@ -46,6 +47,11 @@ The first version of this ADR assumed SwiftData supports CloudKit sharing throug
    - Changes from other devices arrive through `didChangeExternallyNotification`.
    - It only syncs in App Store/TestFlight-signed builds, so the `UserDefaults` mirror is what
      contributor builds use.
+   - On iOS the mirror is the App Group's `UserDefaults` suite, so the Share extension can read the
+     profile and the AI selection. Reading a value copies the iCloud value into the mirror, so the
+     mirror is never older than what the app last read.
+   - Only the app writes settings. A value the extension wrote would never reach iCloud and would be
+     overwritten at the app's next launch, so the extension cannot add a learning language.
 3. **Secrets: Keychain generic passwords.**
    - Attributes: `kSecAttrSynchronizable = true` (iCloud Keychain), `kSecAttrAccessibleWhenUnlocked`,
      and `kSecUseDataProtectionKeychain = true` on macOS.
@@ -55,6 +61,11 @@ The first version of this ADR assumed SwiftData supports CloudKit sharing throug
    - The extension never opens the synced store and has no CloudKit entitlement.
    - It writes each saved capture as a small JSON file to `<AppGroup>/Inbox/`. The app imports and
      deletes inbox files whenever it becomes active.
+   - Each capture is its own atomically written file, so a broken write loses only that capture.
+     Unreadable files are deleted and logged. A capture that fails to import stays for the next
+     activation.
+   - The extension reads settings from the mirror (decision 2) and API keys from the App Group
+     keychain access group, so it explains words with the same provider as the app.
    - Apple's guidance: the app should be the only process that syncs. When an app and an extension
      both sync the same store, the result is error 134410.
 5. **Sharing in v1: export/import files.**

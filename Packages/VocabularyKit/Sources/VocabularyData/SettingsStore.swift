@@ -36,6 +36,11 @@ public final class SettingsStore {
         didSet { save(customProviderBaseURL, forKey: Key.customProviderBaseURL) }
     }
 
+    /// `customProviderBaseURL` as a URL, ignoring surrounding whitespace.
+    public var customProviderURL: URL? {
+        customProviderBaseURL.flatMap { URL(string: $0.trimmingCharacters(in: .whitespacesAndNewlines)) }
+    }
+
     /// Whether the learner has seen what is sent to cloud providers (SPEC C2).
     public var hasAcknowledgedCloudPrivacy: Bool {
         didSet { save(hasAcknowledgedCloudPrivacy, forKey: Key.cloudPrivacy) }

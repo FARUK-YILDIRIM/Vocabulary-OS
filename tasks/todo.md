@@ -35,7 +35,7 @@ Done holds and its commit exists.
 - [ ] Checkpoint 3: Providers — automated checks passed 2026-10-04 (stubbed HTTP tests for every provider family, AI settings UI test, on-device self-test on macOS); a live cloud test needs the owner's API key
 
 ## Phase 4: Capture everywhere
-- [ ] T17 `feat(share)`: share extension inbox (iOS)
+- [x] T17 `feat(share)`: share extension inbox (iOS)
 - [ ] T18 `feat(share)`: macOS share extension and Services menu
 - [ ] T19 `feat(capture)`: page text recognition
 - [ ] T20 `feat(capture)`: page capture screen

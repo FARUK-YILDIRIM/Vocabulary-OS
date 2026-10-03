@@ -114,7 +114,7 @@ private final class RecordingDestination: CaptureDestination {
 }
 
 /// Answers the on-device insight steps with canned JSON, chosen by the schema's title.
-private struct CannedClient: GenerationClient {
+struct CannedClient: GenerationClient {
     var failure: AIError?
 
     func generate(_ request: GenerationRequest, schema: GenerationSchema) async throws(AIError) -> GeneratedContent {

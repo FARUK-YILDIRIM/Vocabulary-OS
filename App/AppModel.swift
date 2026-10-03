@@ -14,14 +14,23 @@ final class AppModel {
     let repository: WordRepository
     let secrets: any SecretStore
     let router: ProviderRouter
+    /// Words saved in the Share extension, waiting to be imported; `nil` without an App Group.
+    let inbox: CaptureInbox?
     @ObservationIgnored private let options: LaunchOptions
 
-    init(settings: SettingsStore, container: ModelContainer, secrets: any SecretStore, options: LaunchOptions = LaunchOptions()) {
+    init(
+        settings: SettingsStore,
+        container: ModelContainer,
+        secrets: any SecretStore,
+        inbox: CaptureInbox? = nil,
+        options: LaunchOptions = LaunchOptions()
+    ) {
         self.settings = settings
         self.container = container
         self.repository = WordRepository(container: container)
         self.secrets = secrets
         self.router = ProviderRouter(secrets: secrets)
+        self.inbox = inbox
         self.options = options
     }
 
@@ -30,13 +39,45 @@ final class AppModel {
         Bundle.main.object(forInfoDictionaryKey: "VOSAppGroupIdentifier") as? String
     }
 
+    /// The App Group's defaults, which hold the settings mirror the Share extension reads (ADR-002).
+    /// The app's own defaults where there is no App Group. The Mac has no Share extension yet, and
+    /// unsigned Mac builds have no App Group, so the Mac keeps its own defaults.
+    static var sharedDefaults: UserDefaults {
+        #if os(iOS)
+        if let group = appGroupIdentifier,
+           FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) != nil,
+           let defaults = UserDefaults(suiteName: group) {
+            return defaults
+        }
+        #endif
+        return .standard
+    }
+
+    private static var sharedInbox: CaptureInbox? {
+        #if os(iOS)
+        appGroupIdentifier.flatMap(CaptureInbox.appGroup)
+        #else
+        nil
+        #endif
+    }
+
     /// Production wiring. UI tests launch with `-ui-testing YES` to start from a clean, in-memory
     /// state, optionally already onboarded with `-vos-preset-profile tr:en,de`.
     static func live(options: LaunchOptions = LaunchOptions()) -> AppModel {
+        #if DEBUG
+        ShareExtensionTestHooks(usesAIStub: options.usesAIStub, profile: options.isUITesting ? options.presetProfile : nil)
+            .save(to: sharedDefaults)
+        #endif
         if options.isUITesting {
             let settings = SettingsStore(backing: InMemoryKeyValueBacking())
             settings.profile = options.presetProfile
-            let model = AppModel(settings: settings, container: makeContainer(inMemory: true), secrets: InMemorySecretStore(), options: options)
+            let model = AppModel(
+                settings: settings,
+                container: makeContainer(inMemory: true),
+                secrets: InMemorySecretStore(),
+                inbox: sharedInbox,
+                options: options
+            )
             #if DEBUG
             if options.seedsLibrary {
                 SampleLibrary.seed(into: model.repository)
@@ -48,6 +89,7 @@ final class AppModel {
             settings: SettingsStore(backing: makeSettingsBacking()),
             container: makeContainer(inMemory: false),
             secrets: KeychainSecretStore(accessGroup: appGroupIdentifier),
+            inbox: sharedInbox,
             options: options
         )
     }
@@ -73,7 +115,7 @@ final class AppModel {
     }
 
     var customBaseURL: URL? {
-        settings.customProviderBaseURL.flatMap { URL(string: $0.trimmingCharacters(in: .whitespacesAndNewlines)) }
+        settings.customProviderURL
     }
 
     var providerDisplayName: String {
@@ -84,6 +126,14 @@ final class AppModel {
     func providerName(for providerID: String) -> String {
         if providerID == "stub" { return String(localized: "Test answers") }
         return ProviderCatalog.provider(id: providerID)?.displayName ?? providerID
+    }
+
+    // MARK: Share extension
+
+    /// Moves words saved in the Share extension into the library (ADR-002).
+    func importInbox() {
+        guard let inbox else { return }
+        CaptureInbox.importPending(from: inbox, into: repository)
     }
 
     // MARK: Wiring
@@ -101,9 +151,9 @@ final class AppModel {
     /// fault, so unsigned builds keep settings in UserDefaults only.
     private static func makeSettingsBacking() -> UbiquitousKeyValueBacking {
         #if VOS_CLOUD_SYNC
-        UbiquitousKeyValueBacking(cloud: NSUbiquitousKeyValueStore.default)
+        UbiquitousKeyValueBacking(cloud: NSUbiquitousKeyValueStore.default, mirror: sharedDefaults)
         #else
-        UbiquitousKeyValueBacking(cloud: nil)
+        UbiquitousKeyValueBacking(cloud: nil, mirror: sharedDefaults)
         #endif
     }
 

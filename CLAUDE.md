@@ -106,8 +106,13 @@ swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-dev
   - Every output passes a validator before it reaches the UI or the store.
   - On-device prompts stay small: one task per call, about 1–3 short paragraphs, and an explicit
     `maximumResponseTokens`. Do not use regex guides; they fail on device.
-- **Share extension:** writes JSON drafts to the App Group `Inbox/`, never to the synced store. The
-  app imports them when it becomes active.
+- **Share extension:**
+  - It writes JSON drafts to the App Group `Inbox/`, never to the synced store. The app imports them
+    when it becomes active.
+  - It reads settings from the App Group mirror and never writes them.
+  - It can't receive launch arguments. In Debug builds the app hands it `-vos-ai-stub` and the UI-test
+    profile through `ShareExtensionTestHooks` in the App Group defaults.
+  - The Simulator has no Notes app, so `ShareExtensionUITests` shares text from Reminders.
 - **Launch options:** UI tests pass `-key value` pairs, read through `LaunchOptions` from the
   `UserDefaults` argument domain:
   - `-ui-testing YES`: in-memory state.
