@@ -20,7 +20,7 @@ Done holds and its commit exists.
 - [x] T05 `feat(core)`: term selection and sentence context
 - [x] T06 `feat(core)`: language routing
 - [x] T07 `feat(ai)`: generation client contract and Apple on-device client
-- [ ] T08 `feat(ai)`: word insight service with validation
+- [x] T08 `feat(ai)`: word insight service with validation
 - [ ] T09 `feat(ai)`: vos-eval prompt evaluation
 - [ ] T10 `feat(data)`: SwiftData schema v1 and word repository
 - [ ] T11 `feat(capture)`: in-app text capture
