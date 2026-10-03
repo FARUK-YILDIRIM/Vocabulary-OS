@@ -6,6 +6,28 @@
 	<!-- The App Group the app and the Share extension share (keychain access group, inbox). -->
 	<key>VOSAppGroupIdentifier</key>
 	<string>$(VOS_APP_GROUP)</string>
+	<!-- macOS Services menu: "Capture in Vocabulary-OS" for selected text (SPEC C5). iOS ignores it.
+	     NSRequiredContext must be present, or the service is registered but not shown in the menu. -->
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Capture in Vocabulary-OS</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>captureText</string>
+			<key>NSPortName</key>
+			<string>$(PRODUCT_NAME)</string>
+			<key>NSSendTypes</key>
+			<array>
+				<string>public.utf8-plain-text</string>
+			</array>
+			<key>NSRequiredContext</key>
+			<dict/>
+		</dict>
+	</array>
 	<!-- Plain HTTP only to local-network AI servers such as Ollama or LM Studio (ADR-003). -->
 	<key>NSAppTransportSecurity</key>
 	<dict>

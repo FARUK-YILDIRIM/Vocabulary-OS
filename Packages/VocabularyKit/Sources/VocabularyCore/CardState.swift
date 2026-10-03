@@ -34,7 +34,8 @@ public struct CardState: Codable, Hashable, Sendable {
 
 /// Where a word was captured (SPEC C5, C6).
 public enum CaptureSource: String, Codable, Sendable, CaseIterable {
-    case text, shareSheet, page, object, imported
+    /// `services` is the macOS Services menu.
+    case text, shareSheet, services, page, object, imported
 }
 
 extension String {

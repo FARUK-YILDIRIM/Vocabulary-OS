@@ -34,31 +34,16 @@ final class AppModel {
         self.options = options
     }
 
-    /// The App Group shared with the Share extension, from Info.plist (ADR-002).
-    static var appGroupIdentifier: String? {
-        Bundle.main.object(forInfoDictionaryKey: "VOSAppGroupIdentifier") as? String
+    /// The App Group shared with the Share extension, named in Info.plist (ADR-002). `nil` in builds
+    /// without it, such as unsigned Mac builds.
+    static var appGroup: AppGroup? {
+        (Bundle.main.object(forInfoDictionaryKey: "VOSAppGroupIdentifier") as? String).flatMap(AppGroup.init(identifier:))
     }
 
-    /// The App Group's defaults, which hold the settings mirror the Share extension reads (ADR-002).
-    /// The app's own defaults where there is no App Group. The Mac has no Share extension yet, and
-    /// unsigned Mac builds have no App Group, so the Mac keeps its own defaults.
+    /// The App Group's defaults, which hold the settings mirror the Share extension reads (ADR-002),
+    /// or the app's own defaults when there is no App Group.
     static var sharedDefaults: UserDefaults {
-        #if os(iOS)
-        if let group = appGroupIdentifier,
-           FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: group) != nil,
-           let defaults = UserDefaults(suiteName: group) {
-            return defaults
-        }
-        #endif
-        return .standard
-    }
-
-    private static var sharedInbox: CaptureInbox? {
-        #if os(iOS)
-        appGroupIdentifier.flatMap(CaptureInbox.appGroup)
-        #else
-        nil
-        #endif
+        appGroup?.defaults ?? .standard
     }
 
     /// Production wiring. UI tests launch with `-ui-testing YES` to start from a clean, in-memory
@@ -75,7 +60,7 @@ final class AppModel {
                 settings: settings,
                 container: makeContainer(inMemory: true),
                 secrets: InMemorySecretStore(),
-                inbox: sharedInbox,
+                inbox: appGroup?.inbox,
                 options: options
             )
             #if DEBUG
@@ -88,8 +73,8 @@ final class AppModel {
         return AppModel(
             settings: SettingsStore(backing: makeSettingsBacking()),
             container: makeContainer(inMemory: false),
-            secrets: KeychainSecretStore(accessGroup: appGroupIdentifier),
-            inbox: sharedInbox,
+            secrets: KeychainSecretStore(accessGroup: appGroup?.identifier),
+            inbox: appGroup?.inbox,
             options: options
         )
     }

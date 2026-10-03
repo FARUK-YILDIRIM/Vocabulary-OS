@@ -30,13 +30,6 @@ public struct CaptureInbox: Sendable {
         self.directory = directory
     }
 
-    /// The inbox inside an App Group container, or `nil` when the group isn't available (unsigned builds
-    /// without the App Group entitlement).
-    public static func appGroup(_ identifier: String) -> CaptureInbox? {
-        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
-            .map { CaptureInbox(directory: $0.appending(path: "Inbox", directoryHint: .isDirectory)) }
-    }
-
     public func write(_ draft: CaptureDraft) throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try JSONEncoder().encode(draft).write(to: url(for: draft.id), options: .atomic)

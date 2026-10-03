@@ -2,7 +2,8 @@
 
 ## Status
 Accepted (revised 2026-10-04: storage details and the sharing mechanism were researched and decided;
-how the Share extension reads settings was added with the extension)
+how the Share extension reads settings and how the Mac uses the App Group were added with the
+extensions)
 
 ## Date
 2026-10-03
@@ -47,9 +48,9 @@ The first version of this ADR assumed SwiftData supports CloudKit sharing throug
    - Changes from other devices arrive through `didChangeExternallyNotification`.
    - It only syncs in App Store/TestFlight-signed builds, so the `UserDefaults` mirror is what
      contributor builds use.
-   - On iOS the mirror is the App Group's `UserDefaults` suite, so the Share extension can read the
-     profile and the AI selection. Reading a value copies the iCloud value into the mirror, so the
-     mirror is never older than what the app last read.
+   - When the app has its App Group, the mirror is the group's `UserDefaults` suite, so the Share
+     extension can read the profile and the AI selection. Reading a value copies the iCloud value
+     into the mirror, so the mirror is never older than what the app last read.
    - Only the app writes settings. A value the extension wrote would never reach iCloud and would be
      overwritten at the app's next launch, so the extension cannot add a learning language.
 3. **Secrets: Keychain generic passwords.**
@@ -66,6 +67,11 @@ The first version of this ADR assumed SwiftData supports CloudKit sharing throug
      activation.
    - The extension reads settings from the mirror (decision 2) and API keys from the App Group
      keychain access group, so it explains words with the same provider as the app.
+   - On macOS a process uses the App Group only when its code signature claims it.
+     `containerURL(forSecurityApplicationGroupIdentifier:)` returns a URL there even without the
+     entitlement, and since macOS 15 touching a container the app isn't authorized for makes the
+     system ask the user. Unsigned Mac builds therefore have no App Group: their Share extension says
+     it can't pass words on. The Services menu runs inside the app, so it works in every build.
    - Apple's guidance: the app should be the only process that syncs. When an app and an extension
      both sync the same store, the result is error 134410.
 5. **Sharing in v1: export/import files.**
@@ -130,3 +136,8 @@ The first version of this ADR assumed SwiftData supports CloudKit sharing throug
   https://developer.apple.com/documentation/security/sharing-access-to-keychain-items-among-a-collection-of-apps ,
   https://developer.apple.com/documentation/security/ksecusedataprotectionkeychain ,
   https://developer.apple.com/documentation/technotes/tn3137-on-mac-keychains
+- App Groups on macOS (container URL without entitlement, `group.` and Team ID identifiers, the
+  macOS 15 access prompt):
+  https://developer.apple.com/documentation/foundation/filemanager/containerurl(forsecurityapplicationgroupidentifier:) ,
+  https://developer.apple.com/documentation/xcode/configuring-app-groups ,
+  https://developer.apple.com/forums/thread/721701

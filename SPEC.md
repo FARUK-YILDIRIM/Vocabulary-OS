@@ -353,7 +353,9 @@ Conventions:
 - **Integration:** `scripts/verify.sh` builds the app for the iOS Simulator and for macOS on every
   task. Each vertical slice is also checked in the simulator with screenshots. XCUITests cover
   capture → save → library, and sharing text from Reminders through the Share extension into the
-  library (the Simulator has no Notes app).
+  library (the Simulator has no Notes app). On macOS, `scripts/mac-smoke.sh --services` sends text
+  through the Services menu and expects the capture window. Sharing on the Mac needs a signed build
+  with the App Group, so the maintainer checks it at the checkpoint.
 - **AI quality:** `vos-eval` runs fixed sentences against the on-device model and reports the
   right-sense rate and language adherence. It runs before and after any prompt change, and results
   are recorded under `docs/eval/`. Cloud providers are checked manually with the maintainer's key and

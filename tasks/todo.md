@@ -36,7 +36,7 @@ Done holds and its commit exists.
 
 ## Phase 4: Capture everywhere
 - [x] T17 `feat(share)`: share extension inbox (iOS)
-- [ ] T18 `feat(share)`: macOS share extension and Services menu
+- [x] T18 `feat(share)`: macOS share extension and Services menu — sharing from Safari needs a signed build (owner)
 - [ ] T19 `feat(capture)`: page text recognition
 - [ ] T20 `feat(capture)`: page capture screen
 - [ ] T21 `feat(capture)`: object capture

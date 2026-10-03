@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Signed Mac builds: sandbox, network for AI providers, and the App Group shared with the app
+     (settings mirror, inbox, keychain access group). No iCloud: only the app syncs (ADR-002). -->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>$(VOS_APP_GROUP)</string>
+	</array>
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>

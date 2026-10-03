@@ -25,12 +25,13 @@ final class ShareSession {
     @ObservationIgnored private var usesAIStub = false
 
     init() {
-        let group = Bundle.main.object(forInfoDictionaryKey: "VOSAppGroupIdentifier") as? String
-        let defaults = group.flatMap { UserDefaults(suiteName: $0) } ?? .standard
+        let group = (Bundle.main.object(forInfoDictionaryKey: "VOSAppGroupIdentifier") as? String)
+            .flatMap(AppGroup.init(identifier:))
+        let defaults = group?.defaults ?? .standard
         // The extension only reads settings: values it wrote would never reach iCloud.
         settings = SettingsStore(backing: UbiquitousKeyValueBacking(cloud: nil, mirror: defaults))
-        inbox = group.flatMap(CaptureInbox.appGroup)
-        router = ProviderRouter(secrets: KeychainSecretStore(accessGroup: group))
+        inbox = group?.inbox
+        router = ProviderRouter(secrets: KeychainSecretStore(accessGroup: group?.identifier))
         #if DEBUG
         applyTestHooks(from: defaults)
         #endif
