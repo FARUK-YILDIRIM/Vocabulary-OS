@@ -1,0 +1,17 @@
+// Shared build settings for every configuration (ADR-006).
+//
+// Defaults build an unsigned, local-only app: ad-hoc signing, no iCloud, no App Group on macOS.
+// To build with your own Apple Developer Team, copy Signing.local.xcconfig.example to
+// Signing.local.xcconfig (gitignored) and fill it in.
+
+VOS_BUNDLE_PREFIX = com.example.vocabularyos
+VOS_DEVELOPMENT_TEAM =
+VOS_CODE_SIGN_STYLE = Manual
+VOS_CODE_SIGN_IDENTITY = -
+VOS_ENTITLEMENTS = Local
+
+// Identifiers derived from the bundle prefix; referenced by the entitlement files.
+VOS_APP_GROUP = group.$(VOS_BUNDLE_PREFIX)
+VOS_ICLOUD_CONTAINER = iCloud.$(VOS_BUNDLE_PREFIX)
+
+#include? "Signing.local.xcconfig"

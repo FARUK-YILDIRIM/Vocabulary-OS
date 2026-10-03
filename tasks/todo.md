@@ -10,7 +10,7 @@ Done holds and its commit exists.
 - [x] D4 `docs(plan)`: implementation plan and task list
 
 ## Phase 1: Foundation
-- [ ] T01 `chore(project)`: scaffold Xcode project, VocabularyKit package, verify script
+- [x] T01 `chore(project)`: scaffold Xcode project, VocabularyKit package, verify script
 - [ ] T02 `feat(core)`: language catalog and learner profile
 - [ ] T03 `feat(data)`: synced settings store
 - [ ] T04 `feat(app)`: onboarding and language settings

@@ -1,0 +1,9 @@
+// Copy this file to Config/Signing.local.xcconfig (it is gitignored) to build with your own
+// Apple Developer Team. This switches on iCloud sync, the App Group and keychain sharing (ADR-006).
+// Never commit the copy: it identifies your team.
+
+VOS_DEVELOPMENT_TEAM = ABCDE12345
+VOS_BUNDLE_PREFIX = com.yourname.vocabularyos
+VOS_CODE_SIGN_STYLE = Automatic
+VOS_CODE_SIGN_IDENTITY = Apple Development
+VOS_ENTITLEMENTS = Full
