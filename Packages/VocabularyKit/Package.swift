@@ -20,7 +20,7 @@ let package = Package(
         .target(name: "VocabularyCore", resources: [.process("Resources")]),
         .target(name: "VocabularyAI", dependencies: ["VocabularyCore"], resources: [.process("Resources")]),
         .target(name: "VocabularyData", dependencies: ["VocabularyCore"]),
-        .target(name: "VocabularyCapture", dependencies: ["VocabularyCore"]),
+        .target(name: "VocabularyCapture", dependencies: ["VocabularyCore"], resources: [.process("Resources")]),
         .target(name: "VocabularySpeech", dependencies: ["VocabularyCore"]),
         .target(
             name: "VocabularyUI",

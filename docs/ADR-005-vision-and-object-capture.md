@@ -1,7 +1,8 @@
 # ADR-005: Capture from text, book pages and objects
 
 ## Status
-Accepted (revised 2026-10-04: APIs verified, technology chosen)
+Accepted (revised 2026-10-04: APIs verified, technology chosen; page recognition details corrected
+when it was built)
 
 ## Date
 2026-10-03
@@ -32,9 +33,14 @@ classifier is `ClassifyImageRequest` (Swift API) / `VNClassifyImageRequest`.
     `transcript` joins wrapped lines, each with `words` (per-word observations and normalized boxes).
   - The app draws tappable word boxes over the image. A tap extracts the sentence that contains the
     word from the paragraph transcript.
-  - Recognition uses the learner's languages (`.accurate` level; Turkish is not in `.fast`).
-  - Measured on a generated two-paragraph page: 0.46 s, 25 words per paragraph, and correct sentence
-    extraction across line wraps.
+  - Words come with their punctuation (`Bank,`), which is trimmed. Each word is matched to its place
+    in the transcript in reading order, so a word that appears twice gets the sentence it is in.
+  - Recognition is guided by the learner's languages. The request supports all 19 catalog languages,
+    Turkish included, and has no fast or accurate level.
+  - Given the file's data, Vision applies its orientation metadata, so word boxes match the photo as
+    displayed.
+  - Measured on a generated two-paragraph page: about 0.4–0.5 s, 25 words per paragraph, and correct
+    sentence extraction across line wraps.
 - **Object:**
   - Run Vision **`ClassifyImageRequest`** on device and keep labels with confidence ≥ 0.3 (top 5).
   - The learner picks or corrects a label.
@@ -79,6 +85,13 @@ classifier is `ClassifyImageRequest` (Swift API) / `VNClassifyImageRequest`.
 - `RecognizeTextRequest`, `RecognizedText.boundingBox(for:)`:
   https://developer.apple.com/documentation/vision/recognizetextrequest ,
   https://developer.apple.com/documentation/vision/recognizedtext/boundingbox(for:)
+- `RecognizeDocumentsRequest` and its supported languages:
+  https://developer.apple.com/documentation/vision/recognizedocumentsrequest ,
+  https://developer.apple.com/documentation/vision/recognizedocumentsrequest/supportedrecognitionlanguages
+- Thumbnails with ImageIO:
+  https://developer.apple.com/documentation/imageio/cgimagesourcecreatethumbnailatindex(_:_:_:) ,
+  https://developer.apple.com/documentation/imageio/kcgimagesourcethumbnailmaxpixelsize ,
+  https://developer.apple.com/documentation/imageio/kcgimagesourcecreatethumbnailwithtransform
 - `ClassifyImageRequest`: https://developer.apple.com/documentation/vision/classifyimagerequest
 - `DataScannerViewController` requirements:
   https://developer.apple.com/documentation/visionkit/datascannerviewcontroller/issupported
