@@ -23,6 +23,7 @@ public enum AIError: Error, Hashable, Sendable, LocalizedError {
     case missingAPIKey
     case invalidAPIKey
     case quotaExceeded
+    case modelUnavailable
     case network(String)
     case server(status: Int)
     case cancelled
@@ -56,6 +57,8 @@ public enum AIError: Error, Hashable, Sendable, LocalizedError {
             String(localized: "The provider rejected the API key. Check it in Settings.", bundle: .module)
         case .quotaExceeded:
             String(localized: "Your provider account is out of credit or over its limit.", bundle: .module)
+        case .modelUnavailable:
+            String(localized: "This model isn't available for your key. Choose another model in Settings.", bundle: .module)
         case .network:
             String(localized: "The provider couldn't be reached. Check your connection.", bundle: .module)
         case .server(let status):

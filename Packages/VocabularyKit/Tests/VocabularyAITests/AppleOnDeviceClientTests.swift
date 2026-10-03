@@ -48,7 +48,7 @@ import VocabularyCore
         let errors: [AIError] = [
             .onDeviceUnavailable(.deviceNotEligible), .onDeviceUnavailable(.appleIntelligenceNotEnabled),
             .onDeviceUnavailable(.modelNotReady), .unsupportedLanguage, .contextTooLong, .guardrailViolation,
-            .refusal, .rateLimited, .busy, .invalidOutput("x"), .missingAPIKey, .invalidAPIKey, .quotaExceeded,
+            .refusal, .rateLimited, .busy, .invalidOutput("x"), .missingAPIKey, .invalidAPIKey, .quotaExceeded, .modelUnavailable,
             .network("offline"), .server(status: 503), .cancelled, .unknown("x"),
         ]
         for error in errors {
