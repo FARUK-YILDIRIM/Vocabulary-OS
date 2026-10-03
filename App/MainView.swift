@@ -24,14 +24,7 @@ struct MainView: View {
                 CaptureScreen()
             }
             Tab("Library", systemImage: "books.vertical", value: AppTab.library) {
-                NavigationStack {
-                    ContentUnavailableView(
-                        "No words yet",
-                        systemImage: "books.vertical",
-                        description: Text("Capture a word from a sentence to start your library.")
-                    )
-                    .navigationTitle("Library")
-                }
+                LibraryView()
             }
             Tab("Settings", systemImage: "gearshape", value: AppTab.settings) {
                 SettingsView()

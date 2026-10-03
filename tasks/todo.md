@@ -24,7 +24,7 @@ Done holds and its commit exists.
 - [x] T09 `feat(ai)`: vos-eval prompt evaluation
 - [x] T10 `feat(data)`: SwiftData schema v1 and word repository
 - [x] T11 `feat(capture)`: in-app text capture
-- [ ] T12 `feat(library)`: library and word detail
+- [x] T12 `feat(library)`: library and word detail
 - [ ] Checkpoint 2: Core slice
 
 ## Phase 3: Bring-your-own-key providers

@@ -27,7 +27,13 @@ final class AppModel {
         if options.isUITesting {
             let settings = SettingsStore(backing: InMemoryKeyValueBacking())
             settings.profile = options.presetProfile
-            return AppModel(settings: settings, container: makeContainer(inMemory: true), options: options)
+            let model = AppModel(settings: settings, container: makeContainer(inMemory: true), options: options)
+            #if DEBUG
+            if options.seedsLibrary {
+                SampleLibrary.seed(into: model.repository)
+            }
+            #endif
+            return model
         }
         return AppModel(settings: SettingsStore(backing: makeSettingsBacking()), container: makeContainer(inMemory: false), options: options)
     }
@@ -58,6 +64,15 @@ final class AppModel {
 
     var providerDisplayName: String {
         String(localized: "Apple on-device model")
+    }
+
+    /// The name shown under an insight for the provider that produced it.
+    func providerName(for providerID: String) -> String {
+        switch providerID {
+        case AIProviderSelection.onDevice.providerID: String(localized: "Apple on-device model")
+        case "stub": String(localized: "Test answers")
+        default: providerID
+        }
     }
 
     // MARK: Wiring
@@ -108,6 +123,7 @@ struct LaunchOptions {
     static let initialTab = "vos-tab"
     static let aiStub = "vos-ai-stub"
     static let selfTest = "vos-self-test"
+    static let seedLibrary = "vos-seed-library"
 
     private let defaults: UserDefaults
 
@@ -119,6 +135,9 @@ struct LaunchOptions {
 
     /// Replace AI with canned answers so UI tests don't depend on a model (Debug builds only).
     var usesAIStub: Bool { defaults.bool(forKey: Self.aiStub) }
+
+    /// Fill the in-memory library with sample words (Debug builds only, see `SampleLibrary`).
+    var seedsLibrary: Bool { defaults.bool(forKey: Self.seedLibrary) }
 
     /// Debug-only end-to-end check to run at launch, e.g. `capture` (see `SelfTest`).
     var selfTest: String? { defaults.string(forKey: Self.selfTest) }
