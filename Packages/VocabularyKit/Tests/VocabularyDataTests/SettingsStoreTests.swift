@@ -129,3 +129,33 @@ private final class FakeCloudStore: CloudKeyValueStoring {
     func removeObject(forKey key: String) { values[key] = nil }
     @discardableResult func synchronize() -> Bool { true }
 }
+
+@MainActor
+@Suite struct ProviderSettingsTests {
+    @Test func persistsTheCustomEndpointAndPrivacyAcknowledgement() {
+        let backing = InMemoryKeyValueBacking()
+        let store = SettingsStore(backing: backing)
+        #expect(store.customProviderBaseURL == nil)
+        #expect(!store.hasAcknowledgedCloudPrivacy)
+
+        store.customProviderBaseURL = "http://localhost:11434/v1"
+        store.hasAcknowledgedCloudPrivacy = true
+
+        let reopened = SettingsStore(backing: backing)
+        #expect(reopened.customProviderBaseURL == "http://localhost:11434/v1")
+        #expect(reopened.hasAcknowledgedCloudPrivacy)
+    }
+
+    @Test func neverStoresAnAPIKey() throws {
+        // Whatever the learner does in settings, nothing key-like reaches the unencrypted store.
+        let backing = InMemoryKeyValueBacking()
+        let store = SettingsStore(backing: backing)
+        store.aiSelection = AIProviderSelection(providerID: "openai", modelID: "gpt-6-luna")
+        store.customProviderBaseURL = "http://localhost:1234/v1"
+        for key in [SettingsStore.Key.profile, SettingsStore.Key.aiSelection, SettingsStore.Key.reviewLimits, SettingsStore.Key.customProviderBaseURL] {
+            let text = backing.data(forKey: key).map { String(decoding: $0, as: UTF8.self) } ?? ""
+            #expect(!text.localizedCaseInsensitiveContains("sk-"))
+            #expect(!text.localizedCaseInsensitiveContains("apiKey"))
+        }
+    }
+}

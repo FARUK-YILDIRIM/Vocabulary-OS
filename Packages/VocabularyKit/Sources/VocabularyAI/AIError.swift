@@ -21,6 +21,7 @@ public enum AIError: Error, Hashable, Sendable, LocalizedError {
     case busy
     case invalidOutput(String)
     case missingAPIKey
+    case missingEndpoint
     case invalidAPIKey
     case quotaExceeded
     case modelUnavailable
@@ -53,6 +54,8 @@ public enum AIError: Error, Hashable, Sendable, LocalizedError {
             String(localized: "The model's answer wasn't usable. Try again.", bundle: .module)
         case .missingAPIKey:
             String(localized: "Add an API key for this provider in Settings.", bundle: .module)
+        case .missingEndpoint:
+            String(localized: "Enter your server's address in Settings.", bundle: .module)
         case .invalidAPIKey:
             String(localized: "The provider rejected the API key. Check it in Settings.", bundle: .module)
         case .quotaExceeded:

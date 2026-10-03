@@ -31,8 +31,8 @@ Done holds and its commit exists.
 - [x] T13 `feat(ai)`: provider catalog and Keychain secret store
 - [x] T14 `feat(ai)`: OpenAI-compatible client
 - [x] T15 `feat(ai)`: Anthropic Messages client
-- [ ] T16 `feat(settings)`: AI provider settings and cloud insight path
-- [ ] Checkpoint 3: Providers
+- [x] T16 `feat(settings)`: AI provider settings and cloud insight path
+- [ ] Checkpoint 3: Providers — automated checks passed 2026-10-04 (stubbed HTTP tests for every provider family, AI settings UI test, on-device self-test on macOS); a live cloud test needs the owner's API key
 
 ## Phase 4: Capture everywhere
 - [ ] T17 `feat(share)`: share extension inbox (iOS)

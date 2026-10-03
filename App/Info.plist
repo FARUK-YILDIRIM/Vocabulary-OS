@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Keys Xcode can't generate; merged with the generated Info.plist (GENERATE_INFOPLIST_FILE). -->
+<plist version="1.0">
+<dict>
+	<!-- The App Group the app and the Share extension share (keychain access group, inbox). -->
+	<key>VOSAppGroupIdentifier</key>
+	<string>$(VOS_APP_GROUP)</string>
+	<!-- Plain HTTP only to local-network AI servers such as Ollama or LM Studio (ADR-003). -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

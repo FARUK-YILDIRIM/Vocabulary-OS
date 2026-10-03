@@ -10,6 +10,12 @@ struct SettingsView: View {
                     } label: {
                         Label("Languages", systemImage: "globe")
                     }
+                    NavigationLink {
+                        AISettingsView()
+                    } label: {
+                        Label("AI Provider", systemImage: "sparkles")
+                    }
+                    .accessibilityIdentifier("settings-ai")
                 }
             }
             .formStyle(.grouped)

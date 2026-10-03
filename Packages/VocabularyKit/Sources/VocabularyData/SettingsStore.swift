@@ -15,6 +15,8 @@ public final class SettingsStore {
         public static let profile = "profile.v1"
         public static let aiSelection = "aiSelection.v1"
         public static let reviewLimits = "reviewLimits.v1"
+        public static let customProviderBaseURL = "customProviderBaseURL.v1"
+        public static let cloudPrivacy = "cloudPrivacyAcknowledged.v1"
     }
 
     public var profile: LearnerProfile? {
@@ -29,6 +31,16 @@ public final class SettingsStore {
         didSet { save(reviewLimits, forKey: Key.reviewLimits) }
     }
 
+    /// Address of the learner's own OpenAI-compatible server (Ollama, LM Studio), if any.
+    public var customProviderBaseURL: String? {
+        didSet { save(customProviderBaseURL, forKey: Key.customProviderBaseURL) }
+    }
+
+    /// Whether the learner has seen what is sent to cloud providers (SPEC C2).
+    public var hasAcknowledgedCloudPrivacy: Bool {
+        didSet { save(hasAcknowledgedCloudPrivacy, forKey: Key.cloudPrivacy) }
+    }
+
     /// Onboarding is done once the learner has a native language and at least one learning language.
     public var isOnboarded: Bool { profile?.isReadyToLearn == true }
 
@@ -41,6 +53,8 @@ public final class SettingsStore {
         profile = Self.load(LearnerProfile.self, forKey: Key.profile, from: backing)
         aiSelection = Self.load(AIProviderSelection.self, forKey: Key.aiSelection, from: backing) ?? .onDevice
         reviewLimits = Self.load(ReviewLimits.self, forKey: Key.reviewLimits, from: backing) ?? ReviewLimits()
+        customProviderBaseURL = Self.load(String.self, forKey: Key.customProviderBaseURL, from: backing)
+        hasAcknowledgedCloudPrivacy = Self.load(Bool.self, forKey: Key.cloudPrivacy, from: backing) ?? false
         backing.onExternalChange = { [weak self] keys in
             self?.applyExternalChange(keys)
         }
@@ -58,6 +72,10 @@ public final class SettingsStore {
                 aiSelection = Self.load(AIProviderSelection.self, forKey: key, from: backing) ?? .onDevice
             case Key.reviewLimits:
                 reviewLimits = Self.load(ReviewLimits.self, forKey: key, from: backing) ?? ReviewLimits()
+            case Key.customProviderBaseURL:
+                customProviderBaseURL = Self.load(String.self, forKey: key, from: backing)
+            case Key.cloudPrivacy:
+                hasAcknowledgedCloudPrivacy = Self.load(Bool.self, forKey: key, from: backing) ?? false
             default:
                 continue
             }

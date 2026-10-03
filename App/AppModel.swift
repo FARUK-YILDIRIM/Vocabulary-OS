@@ -12,13 +12,22 @@ final class AppModel {
     let settings: SettingsStore
     let container: ModelContainer
     let repository: WordRepository
+    let secrets: any SecretStore
+    let router: ProviderRouter
     @ObservationIgnored private let options: LaunchOptions
 
-    init(settings: SettingsStore, container: ModelContainer, options: LaunchOptions = LaunchOptions()) {
+    init(settings: SettingsStore, container: ModelContainer, secrets: any SecretStore, options: LaunchOptions = LaunchOptions()) {
         self.settings = settings
         self.container = container
         self.repository = WordRepository(container: container)
+        self.secrets = secrets
+        self.router = ProviderRouter(secrets: secrets)
         self.options = options
+    }
+
+    /// The App Group shared with the Share extension, from Info.plist (ADR-002).
+    static var appGroupIdentifier: String? {
+        Bundle.main.object(forInfoDictionaryKey: "VOSAppGroupIdentifier") as? String
     }
 
     /// Production wiring. UI tests launch with `-ui-testing YES` to start from a clean, in-memory
@@ -27,7 +36,7 @@ final class AppModel {
         if options.isUITesting {
             let settings = SettingsStore(backing: InMemoryKeyValueBacking())
             settings.profile = options.presetProfile
-            let model = AppModel(settings: settings, container: makeContainer(inMemory: true), options: options)
+            let model = AppModel(settings: settings, container: makeContainer(inMemory: true), secrets: InMemorySecretStore(), options: options)
             #if DEBUG
             if options.seedsLibrary {
                 SampleLibrary.seed(into: model.repository)
@@ -35,44 +44,46 @@ final class AppModel {
             #endif
             return model
         }
-        return AppModel(settings: SettingsStore(backing: makeSettingsBacking()), container: makeContainer(inMemory: false), options: options)
+        return AppModel(
+            settings: SettingsStore(backing: makeSettingsBacking()),
+            container: makeContainer(inMemory: false),
+            secrets: KeychainSecretStore(accessGroup: appGroupIdentifier),
+            options: options
+        )
     }
 
     /// For SwiftUI previews: in-memory settings and store, optionally already onboarded.
     static func preview(profile: LearnerProfile? = try? LearnerProfile(native: .turkish, learning: [.english, .german])) -> AppModel {
         let settings = SettingsStore(backing: InMemoryKeyValueBacking())
         settings.profile = profile
-        return AppModel(settings: settings, container: makeContainer(inMemory: true))
+        return AppModel(settings: settings, container: makeContainer(inMemory: true), secrets: InMemorySecretStore())
     }
 
     // MARK: AI
 
-    /// The insight service for the learner's current provider. Only the on-device model exists until
-    /// cloud providers arrive (task T16).
+    /// The insight service for the learner's current provider, built at the moment of use so a newly
+    /// saved key or model takes effect immediately.
     func makeInsightService() -> InsightService {
         #if DEBUG
         if options.usesAIStub {
             return InsightService(client: StubGenerationClient(), strategy: .stepwise, source: InsightSource(providerID: "stub"))
         }
         #endif
-        return InsightService(
-            client: AppleOnDeviceClient(),
-            strategy: .stepwise,
-            source: InsightSource(providerID: AIProviderSelection.onDevice.providerID)
-        )
+        return router.insightService(for: settings.aiSelection, customBaseURL: customBaseURL)
+    }
+
+    var customBaseURL: URL? {
+        settings.customProviderBaseURL.flatMap { URL(string: $0.trimmingCharacters(in: .whitespacesAndNewlines)) }
     }
 
     var providerDisplayName: String {
-        String(localized: "Apple on-device model")
+        router.displayName(for: settings.aiSelection)
     }
 
     /// The name shown under an insight for the provider that produced it.
     func providerName(for providerID: String) -> String {
-        switch providerID {
-        case AIProviderSelection.onDevice.providerID: String(localized: "Apple on-device model")
-        case "stub": String(localized: "Test answers")
-        default: providerID
-        }
+        if providerID == "stub" { return String(localized: "Test answers") }
+        return ProviderCatalog.provider(id: providerID)?.displayName ?? providerID
     }
 
     // MARK: Wiring
