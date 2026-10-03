@@ -97,6 +97,15 @@ import VocabularyCore
         #expect(backing.data(forKey: "k") == Data("local".utf8))
     }
 
+    @Test func worksWithoutTheCloudStore() {
+        let defaults = makeDefaults()
+        let backing = UbiquitousKeyValueBacking(cloud: nil, mirror: defaults)
+        backing.setData(Data("v".utf8), forKey: "k")
+        #expect(backing.data(forKey: "k") == Data("v".utf8))
+        backing.setData(nil, forKey: "k")
+        #expect(backing.data(forKey: "k") == nil)
+    }
+
     @Test func externalChangesRefreshTheMirrorAndNotify() async {
         let cloud = FakeCloudStore()
         let defaults = makeDefaults()

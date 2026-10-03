@@ -1,17 +1,28 @@
 import SwiftUI
 
-/// Temporary root screen until onboarding and the main navigation exist (tasks T04, T11).
+/// Shows onboarding until the learner has chosen their languages, then the main interface.
 struct RootView: View {
+    @Environment(AppModel.self) private var model
+
     var body: some View {
-        ContentUnavailableView(
-            "Vocabulary-OS",
-            systemImage: "text.book.closed",
-            description: Text("Capture words in context. Coming together, one task at a time.")
-        )
-        .frame(minWidth: 320, minHeight: 240)
+        Group {
+            if model.settings.isOnboarded {
+                MainView()
+            } else {
+                OnboardingView()
+            }
+        }
+        .animation(.default, value: model.settings.isOnboarded)
+        #if os(macOS)
+        .frame(minWidth: 640, minHeight: 480)
+        #endif
     }
 }
 
-#Preview {
-    RootView()
+#Preview("Onboarded") {
+    RootView().environment(AppModel.preview())
+}
+
+#Preview("First launch") {
+    RootView().environment(AppModel.preview(profile: nil))
 }

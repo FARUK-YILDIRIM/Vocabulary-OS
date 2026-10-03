@@ -9,6 +9,8 @@ VOS_DEVELOPMENT_TEAM =
 VOS_CODE_SIGN_STYLE = Manual
 VOS_CODE_SIGN_IDENTITY = -
 VOS_ENTITLEMENTS = Local
+// Swift compilation conditions; Full builds add VOS_CLOUD_SYNC to use iCloud key-value storage.
+VOS_SWIFT_CONDITIONS =
 
 // Identifiers derived from the bundle prefix; referenced by the entitlement files.
 VOS_APP_GROUP = group.$(VOS_BUNDLE_PREFIX)

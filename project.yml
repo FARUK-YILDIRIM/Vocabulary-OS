@@ -63,17 +63,40 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         ASSETCATALOG_COMPILER_APPICON_NAME: ""  # the app icon arrives in T32
         SWIFT_VERSION: "6.0"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) $(VOS_SWIFT_CONDITIONS)
         SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
         SWIFT_APPROACHABLE_CONCURRENCY: YES
         SWIFT_EMIT_LOC_STRINGS: YES
         LOCALIZATION_PREFERS_STRING_CATALOGS: YES
         ENABLE_USER_SCRIPT_SANDBOXING: YES
 
+  VocabularyOSUITests:
+    type: bundle.ui-testing
+    supportedDestinations: [iOS]
+    sources:
+      - path: UITests
+    dependencies:
+      - target: VocabularyOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(VOS_BUNDLE_PREFIX).uitests
+        GENERATE_INFOPLIST_FILE: YES
+        DEVELOPMENT_TEAM: $(VOS_DEVELOPMENT_TEAM)
+        CODE_SIGN_STYLE: $(VOS_CODE_SIGN_STYLE)
+        CODE_SIGN_IDENTITY: $(VOS_CODE_SIGN_IDENTITY)
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "6.0"
+
 schemes:
   VocabularyOS:
     build:
       targets:
         VocabularyOS: all
+        VocabularyOSUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - VocabularyOSUITests
     run:
       config: Debug
     archive:

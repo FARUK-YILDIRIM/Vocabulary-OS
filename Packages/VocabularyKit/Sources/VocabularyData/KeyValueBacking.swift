@@ -40,18 +40,18 @@ extension NSUbiquitousKeyValueStore: CloudKeyValueStoring {}
 
 /// iCloud key-value store with a `UserDefaults` mirror (ADR-002).
 ///
-/// The mirror keeps settings working where the key-value store does not sync: unsigned builds, no
-/// iCloud account, or before the first sync. Reads prefer iCloud, so the latest value from any
-/// device wins.
+/// The mirror keeps settings working where the key-value store does not sync: no iCloud account, or
+/// before the first sync. Builds without the key-value store entitlement pass `cloud: nil` and use
+/// the mirror alone. Reads prefer iCloud, so the latest value from any device wins.
 @MainActor
 public final class UbiquitousKeyValueBacking: KeyValueBacking {
     public var onExternalChange: (([String]) -> Void)?
 
-    private let cloud: any CloudKeyValueStoring
+    private let cloud: (any CloudKeyValueStoring)?
     private let mirror: UserDefaults
     private var observer: (any NSObjectProtocol)?
 
-    public init(cloud: any CloudKeyValueStoring = NSUbiquitousKeyValueStore.default, mirror: UserDefaults = .standard) {
+    public init(cloud: (any CloudKeyValueStoring)?, mirror: UserDefaults = .standard) {
         self.cloud = cloud
         self.mirror = mirror
         if let store = cloud as? NSUbiquitousKeyValueStore {
@@ -77,22 +77,22 @@ public final class UbiquitousKeyValueBacking: KeyValueBacking {
     }
 
     public func data(forKey key: String) -> Data? {
-        cloud.data(forKey: key) ?? mirror.data(forKey: mirrorKey(key))
+        cloud?.data(forKey: key) ?? mirror.data(forKey: mirrorKey(key))
     }
 
     public func setData(_ data: Data?, forKey key: String) {
         if let data {
-            cloud.set(data, forKey: key)
+            cloud?.set(data, forKey: key)
             mirror.set(data, forKey: mirrorKey(key))
         } else {
-            cloud.removeObject(forKey: key)
+            cloud?.removeObject(forKey: key)
             mirror.removeObject(forKey: mirrorKey(key))
         }
     }
 
     func handleExternalChange(changedKeys: [String]) {
         for key in changedKeys {
-            mirror.set(cloud.data(forKey: key), forKey: mirrorKey(key))
+            mirror.set(cloud?.data(forKey: key), forKey: mirrorKey(key))
         }
         onExternalChange?(changedKeys)
     }

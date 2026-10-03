@@ -47,6 +47,8 @@ xcodegen generate
 ```bash
 scripts/verify.sh                                  # the gate before every commit
 swift test --package-path Packages/VocabularyKit   # package tests only
+scripts/ui-test.sh                                 # UI tests in the iOS Simulator, with screenshots
+scripts/mac-smoke.sh                               # launch check of the macOS build
 ```
 
 `scripts/verify.sh` regenerates the project, runs the package tests and builds the app for the iOS

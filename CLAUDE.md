@@ -47,6 +47,8 @@ Rules while working:
 xcodegen generate                                   # regenerate VocabularyOS.xcodeproj (never edit it by hand)
 swift test --package-path Packages/VocabularyKit    # package tests on the Mac host
 scripts/verify.sh                                   # full gate: generate + tests + iOS Simulator + macOS builds
+scripts/ui-test.sh [Class/test]                     # XCUITests on iPhone 17 (VOS_UI_TEST_DEVICE for iPad); screenshots in .build/ui-tests
+scripts/mac-smoke.sh [-vos-preset-profile tr:en,de] # macOS Debug build launches, shows a window, logs no errors
 swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-device prompt evaluation
 ```
 
@@ -105,6 +107,13 @@ swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-dev
     `maximumResponseTokens`. Do not use regex guides; they fail on device.
 - **Share extension:** writes JSON drafts to the App Group `Inbox/`, never to the synced store. The
   app imports them when it becomes active.
+- **Launch options:** UI tests pass `-key value` pairs, read through `LaunchOptions` from the
+  `UserDefaults` argument domain:
+  - `-ui-testing YES`: in-memory state.
+  - `-vos-preset-profile tr:en,de`: skip onboarding.
+  - `-vos-tab settings`: start on that tab.
+
+  Never pass a bare flag: AppKit then treats the next value as a file to open.
 - **Tests:**
   - Use Swift Testing (`@Test`, `#expect`).
   - SwiftData tests use `ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)`.
@@ -115,7 +124,9 @@ swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-dev
 A task is done only when all of these hold:
 - Its acceptance criteria are met, and new behavior has tests that failed before the change.
 - `scripts/verify.sh` passes with no new warnings in project code.
-- UI tasks were checked in the iOS Simulator (and on macOS when the task affects it).
+- UI tasks were checked in the iOS Simulator with `scripts/ui-test.sh` on iPhone and iPad, and on
+  macOS with `scripts/mac-smoke.sh`. Screenshots were reviewed. Visual checks of macOS screens happen
+  at checkpoints with the owner.
 - Docs, the spec and the ADRs reflect any decision that changed.
 - `tasks/todo.md` is ticked.
 - The commit message is in English and follows the convention below.

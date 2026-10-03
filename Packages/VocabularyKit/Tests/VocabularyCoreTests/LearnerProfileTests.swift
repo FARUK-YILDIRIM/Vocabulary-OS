@@ -140,3 +140,16 @@ import Testing
         }
     }
 }
+
+@Suite struct NativeLanguageSuggestionTests {
+    @Test(arguments: [
+        ("tr_TR", "tr"), ("de_AT", "de"), ("en_GB", "en"), ("pt_BR", "pt"),
+        ("zh_CN", "zh-Hans"), ("zh_TW", "zh-Hant"), ("zh-Hant_HK", "zh-Hant"),
+        ("nb_NO", "nb"), ("no_NO", "nb"), ("nn_NO", "nb"),
+        ("ar_SA", "en"), ("xx", "en"),
+    ])
+    func suggestsTheDeviceLanguageWhenSupported(locale: String, expected: String) {
+        let suggestion = LanguageCatalog.suggestedNative(for: Locale(identifier: locale))
+        #expect(suggestion.rawValue == expected)
+    }
+}

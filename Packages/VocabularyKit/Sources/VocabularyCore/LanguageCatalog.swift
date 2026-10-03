@@ -1,3 +1,5 @@
+import Foundation
+
 /// The languages the app offers, both as native languages and as learning languages (SPEC C1).
 ///
 /// The list covers every language the on-device model supported on macOS 26.5 (ADR-003). It also
@@ -15,5 +17,23 @@ public enum LanguageCatalog {
 
     public static func contains(_ code: LanguageCode) -> Bool {
         members.contains(code)
+    }
+
+    /// The catalog language matching the device locale, used to preselect the native language during
+    /// onboarding. Falls back to English.
+    public static func suggestedNative(for locale: Locale) -> LanguageCode {
+        let language = locale.language
+        guard let subtag = language.languageCode?.identifier else { return .english }
+        switch subtag {
+        case "zh":
+            // Simplified vs. Traditional depends on the script, which is often implied by the region.
+            let script = language.script ?? Locale.Language(identifier: language.maximalIdentifier).script
+            return script?.identifier == "Hant" ? .chineseTraditional : .chineseSimplified
+        case "no", "nn":
+            return .norwegianBokmal
+        default:
+            guard let code = LanguageCode(rawValue: subtag), contains(code) else { return .english }
+            return code
+        }
     }
 }

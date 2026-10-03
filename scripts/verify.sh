@@ -19,7 +19,7 @@ fail() { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 # Only warnings from our own sources count; SDK and toolchain noise is ignored.
 check_warnings() {
     local log="$1" label="$2" found
-    found="$(grep -E "^($ROOT/)?(App|Extensions|Packages/VocabularyKit/(Sources|Tests))/[^:]+:[0-9]+:[0-9]+: warning:" "$log" | sort -u || true)"
+    found="$(grep -E "^($ROOT/)?(App|Extensions|UITests|Packages/VocabularyKit/(Sources|Tests))/[^:]+:[0-9]+:[0-9]+: warning:" "$log" | sort -u || true)"
     if [[ -n "$found" ]]; then
         printf '%s\n' "$found" >&2
         fail "$label produced warnings in project code"
