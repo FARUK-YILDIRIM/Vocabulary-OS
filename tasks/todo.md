@@ -18,7 +18,7 @@ Done holds and its commit exists.
 
 ## Phase 2: Meaning in context
 - [x] T05 `feat(core)`: term selection and sentence context
-- [ ] T06 `feat(core)`: language routing
+- [x] T06 `feat(core)`: language routing
 - [ ] T07 `feat(ai)`: generation client contract and Apple on-device client
 - [ ] T08 `feat(ai)`: word insight service with validation
 - [ ] T09 `feat(ai)`: vos-eval prompt evaluation
