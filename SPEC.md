@@ -16,10 +16,22 @@ See [`docs/`](docs) for architectural decisions (ADRs).
 - **Document scanning:** Photograph a book page, extract text, select words
 - **Object capture:** Photograph an object, get description/translation
 
+**Capture flow:**
+1. User provides: selected word + full sentence context
+2. App auto-detects source language
+3. **AI understands context:** Sends full sentence to AI (not just the word)
+   - AI determines meaning/translation based on context
+   - AI provides explanation in user's native language
+   - Example: "cookie" → "Small file" (web context) not "dessert" (food context)
+4. User reviews AI's understanding, can edit
+5. Save to collection
+
 **Capture metadata:**
 - Selected word
 - Full sentence context
 - Source language (auto-detected)
+- AI-generated explanation (meaning in context)
+- Suggested translation (in user's native language)
 - Image (optional: page photo or object photo)
 - Timestamp
 - Collection (user can organize)
