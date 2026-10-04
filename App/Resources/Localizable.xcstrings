@@ -2557,6 +2557,16 @@
         }
       }
     },
+    "Vocabulary-OS couldn't open your saved words, so it shows nothing rather than risk losing what you add. Quit the app and open it again. If this keeps happening, restart your device or free up some storage." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS kaydettiğin kelimeleri açamadı; eklediklerini kaybetme riskine girmemek için hiçbir şey göstermiyor. Uygulamadan çıkıp yeniden aç. Bu sürerse cihazını yeniden başlat ya da biraz yer aç."
+          }
+        }
+      }
+    },
     "What did you hear?" : {
       "localizations" : {
         "tr" : {
@@ -2713,6 +2723,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld kelime tekrar ettin."
+          }
+        }
+      }
+    },
+    "Your Library Couldn't Be Opened" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kitaplığın Açılamadı"
           }
         }
       }

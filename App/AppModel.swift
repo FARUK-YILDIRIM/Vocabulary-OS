@@ -24,8 +24,12 @@ final class AppModel {
     /// Speaks words, listening questions and podcasts with on-device voices (ADR-008).
     let speech = SpeechPlayer()
     let secrets: any SecretStore
-    /// Words saved in the Share extension, waiting to be imported; `nil` without an App Group.
+    /// Words saved in the Share extension, waiting to be imported; `nil` without an App Group, or
+    /// when the word store couldn't be opened.
     let inbox: CaptureInbox?
+    /// Why the word store couldn't be opened. The app then shows only this, so nothing is captured
+    /// into a stand-in store that disappears at the next launch (code review).
+    let storeError: String?
     @ObservationIgnored private let options: LaunchOptions
 
     init(
@@ -33,6 +37,7 @@ final class AppModel {
         container: ModelContainer,
         secrets: any SecretStore,
         inbox: CaptureInbox? = nil,
+        storeError: String? = nil,
         options: LaunchOptions = LaunchOptions()
     ) {
         self.settings = settings
@@ -45,7 +50,8 @@ final class AppModel {
         self.plans = PlanRepository(words: repository)
         self.navigation = AppNavigation(tab: options.initialTab ?? .today)
         self.secrets = secrets
-        self.inbox = inbox
+        self.inbox = storeError == nil ? inbox : nil
+        self.storeError = storeError
         self.options = options
     }
 
@@ -68,28 +74,33 @@ final class AppModel {
         ShareExtensionTestHooks(usesAIStub: options.usesAIStub, profile: options.isUITesting ? options.presetProfile : nil)
             .save(to: sharedDefaults)
         #endif
+        #if DEBUG
         if options.isUITesting {
             let settings = SettingsStore(backing: InMemoryKeyValueBacking())
             settings.profile = options.presetProfile
             let model = AppModel(
                 settings: settings,
-                container: makeContainer(inMemory: true),
+                container: makeMemoryContainer(),
                 secrets: InMemorySecretStore(),
-                inbox: appGroup?.inbox,
+                // Drafts left by earlier runs would change what a test sees; only the Share
+                // extension's test asks for them.
+                inbox: options.usesSharedInbox ? appGroup?.inbox : nil,
+                storeError: options.simulatesStoreFailure ? "The UI test asked the store to fail." : nil,
                 options: options
             )
-            #if DEBUG
             if options.seedsLibrary {
                 SampleLibrary.seed(into: model.repository)
             }
-            #endif
             return model
         }
+        #endif
+        let store = openStore()
         return AppModel(
             settings: SettingsStore(backing: makeSettingsBacking()),
-            container: makeContainer(inMemory: false),
+            container: store.container,
             secrets: KeychainSecretStore(accessGroup: appGroup?.identifier),
             inbox: appGroup?.inbox,
+            storeError: store.error,
             options: options
         )
     }
@@ -98,7 +109,7 @@ final class AppModel {
     static func preview(profile: LearnerProfile? = try? LearnerProfile(native: .turkish, learning: [.english, .german])) -> AppModel {
         let settings = SettingsStore(backing: InMemoryKeyValueBacking())
         settings.profile = profile
-        return AppModel(settings: settings, container: makeContainer(inMemory: true), secrets: InMemorySecretStore())
+        return AppModel(settings: settings, container: makeMemoryContainer(), secrets: InMemorySecretStore())
     }
 
     // MARK: AI
@@ -203,7 +214,7 @@ final class AppModel {
 
     /// Moves words saved in the Share extension into the library (ADR-002).
     func importInbox() {
-        guard let inbox else { return }
+        guard let inbox, storeError == nil else { return }
         CaptureInbox.importPending(from: inbox, into: repository)
     }
 
@@ -228,19 +239,24 @@ final class AppModel {
         #endif
     }
 
-    private static func makeContainer(inMemory: Bool) -> ModelContainer {
+    /// The word store on disk. If it can't be opened, an empty store in memory stands in, so the app
+    /// can say what went wrong instead of crashing, and the error comes back with it.
+    private static func openStore() -> (container: ModelContainer, error: String?) {
         do {
-            return try VocabularyStore.makeContainer(inMemory: inMemory, cloudSync: isCloudSyncBuild && !inMemory)
+            return (try VocabularyStore.makeContainer(inMemory: false, cloudSync: isCloudSyncBuild), nil)
         } catch {
-            // A store that can't open (for example after a failed migration) must not take the app down;
-            // the learner can still capture into memory and the error is logged for diagnosis.
             Logger(subsystem: VocabularyCore.logSubsystem, category: "app")
                 .fault("Could not open the word store: \(error.localizedDescription, privacy: .public)")
-            guard let fallback = try? VocabularyStore.makeContainer(inMemory: true, cloudSync: false) else {
-                preconditionFailure("Even an in-memory store could not be created")
-            }
-            return fallback
+            return (makeMemoryContainer(), error.localizedDescription)
         }
+    }
+
+    /// A store in memory, for UI tests, previews and the stand-in above.
+    private static func makeMemoryContainer() -> ModelContainer {
+        guard let container = try? VocabularyStore.makeContainer(inMemory: true, cloudSync: false) else {
+            preconditionFailure("Even an in-memory store could not be created")
+        }
+        return container
     }
 }
 
@@ -262,6 +278,8 @@ struct LaunchOptions {
     static let podcast = "vos-podcast"
     static let remindIn = "vos-remind-in"
     static let importSample = "vos-import-sample"
+    static let sharedInbox = "vos-shared-inbox"
+    static let storeFails = "vos-store-fails"
 
     private let defaults: UserDefaults
 
@@ -300,6 +318,12 @@ struct LaunchOptions {
 
     /// Opens a sample word list file at launch, as if the learner had opened it (Debug builds only).
     var importsSample: Bool { defaults.bool(forKey: Self.importSample) }
+
+    /// UI tests import the Share extension's inbox only when they ask for it (Debug builds only).
+    var usesSharedInbox: Bool { defaults.bool(forKey: Self.sharedInbox) }
+
+    /// Acts as if the word store couldn't be opened (Debug builds only).
+    var simulatesStoreFailure: Bool { defaults.bool(forKey: Self.storeFails) }
 
     /// Debug-only end-to-end check to run at launch, e.g. `capture` (see `SelfTest`).
     var selfTest: String? { defaults.string(forKey: Self.selfTest) }

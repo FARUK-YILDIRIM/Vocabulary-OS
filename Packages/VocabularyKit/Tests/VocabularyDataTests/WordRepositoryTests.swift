@@ -6,7 +6,7 @@ import VocabularyCore
 
 @Suite struct SchemaCloudKitRulesTests {
     @Test func theAppSchemaCanSyncWithCloudKit() {
-        #expect(CloudKitSchemaRules.violations(in: Schema(versionedSchema: SchemaV1.self)) == [])
+        #expect(CloudKitSchemaRules.violations(in: VocabularyStore.schema) == [])
     }
 
     /// Proves the check catches real mistakes, so a passing app schema means something.

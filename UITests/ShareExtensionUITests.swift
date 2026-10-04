@@ -14,7 +14,7 @@ final class ShareExtensionUITests: XCTestCase {
         // Launching the app hands the extension its test hooks: canned AI answers and this profile.
         let app = XCUIApplication()
         app.launchArguments = [
-            "-ui-testing", "YES", "-vos-preset-profile", "tr:en,de", "-vos-ai-stub", "YES",
+            "-ui-testing", "YES", "-vos-preset-profile", "tr:en,de", "-vos-ai-stub", "YES", "-vos-shared-inbox", "YES",
             "-vos-tab", "library", "-AppleLanguages", "(en)", "-AppleLocale", "en_US",
         ]
         app.launch()

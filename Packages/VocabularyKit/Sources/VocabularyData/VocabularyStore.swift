@@ -1,39 +1,43 @@
 import Foundation
 import SwiftData
 
-/// The first schema version.
+/// Creates the app's model container (ADR-002).
 ///
-/// Before the first public release this schema may still change. After the release, model changes
-/// must be additive (the production CloudKit schema can't drop fields) and go into `SchemaV2` with a
-/// migration stage (ADR-002, SPEC Boundaries "ask first").
-public enum SchemaV1: VersionedSchema {
-    public static let versionIdentifier = Schema.Version(1, 0, 0)
+/// There is no versioned schema yet. After the first release, model changes must be additive (the
+/// production CloudKit schema can't drop fields), and SwiftData migrates added properties and models
+/// on its own. If a change ever needs a migration stage, `SchemaV1` comes then, with frozen copies of
+/// the models as they shipped, next to `SchemaV2` (SPEC Boundaries, "ask first"). A versioned schema
+/// that listed these live classes would stop matching the shipped store at the first change.
+public enum VocabularyStore {
     public static var models: [any PersistentModel.Type] {
         [VocabularyEntry.self, WordList.self, ReviewLog.self, QuizRecord.self, PodcastEpisode.self, StudyPlan.self]
     }
-}
 
-public enum VocabularyMigrationPlan: SchemaMigrationPlan {
-    public static var schemas: [any VersionedSchema.Type] { [SchemaV1.self] }
-    public static var stages: [MigrationStage] { [] }
-}
+    public static var schema: Schema { Schema(models) }
 
-/// Creates the app's model container (ADR-002).
-public enum VocabularyStore {
     /// - Parameters:
     ///   - inMemory: For tests and previews.
     ///   - cloudSync: Sync with the iCloud container from the app's entitlements. Builds without the
     ///     entitlement pass `false` and keep data on the device.
     public static func makeContainer(inMemory: Bool = false, cloudSync: Bool) throws -> ModelContainer {
-        let schema = Schema(versionedSchema: SchemaV1.self)
-        let configuration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: inMemory,
-            // The Share extension never opens this store; it hands captures over through the inbox.
-            groupContainer: .none,
-            cloudKitDatabase: cloudSync ? .automatic : .none
+        try makeContainer(
+            ModelConfiguration(
+                schema: schema,
+                isStoredInMemoryOnly: inMemory,
+                // The Share extension never opens this store; it hands captures over through the inbox.
+                groupContainer: .none,
+                cloudKitDatabase: cloudSync ? .automatic : .none
+            )
         )
-        return try ModelContainer(for: schema, migrationPlan: VocabularyMigrationPlan.self, configurations: configuration)
+    }
+
+    /// A store at a given place on disk; for tests that reopen it.
+    static func makeContainer(url: URL, cloudSync: Bool) throws -> ModelContainer {
+        try makeContainer(ModelConfiguration(schema: schema, url: url, cloudKitDatabase: cloudSync ? .automatic : .none))
+    }
+
+    private static func makeContainer(_ configuration: ModelConfiguration) throws -> ModelContainer {
+        try ModelContainer(for: schema, configurations: configuration)
     }
 }
 
