@@ -36,7 +36,7 @@ let package = Package(
         .testTarget(name: "VocabularySpeechTests", dependencies: ["VocabularySpeech"]),
         .testTarget(
             name: "VocabularyUITests",
-            dependencies: ["VocabularyUI", "VocabularyAI", "VocabularyData", "VocabularyCore"],
+            dependencies: ["VocabularyUI", "VocabularyAI", "VocabularyData", "VocabularyCore", "VocabularySpeech"],
             swiftSettings: [.defaultIsolation(MainActor.self)]
         ),
     ],

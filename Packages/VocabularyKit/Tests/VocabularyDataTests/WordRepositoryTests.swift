@@ -63,6 +63,14 @@ import VocabularyCore
         #expect(stored.cardState == CardState())
     }
 
+    @Test func findsAnEntryByID() throws {
+        let entry = try repository.save(insight(), captureSource: .text)
+        #expect(try repository.entry(id: entry.id)?.term == "cookies")
+        try repository.delete(entry)
+        #expect(try repository.entry(id: entry.id) == nil)
+        #expect(try repository.entry(id: UUID()) == nil)
+    }
+
     @Test func findsDuplicatesByLemmaIgnoringCaseAndDiacritics() throws {
         try repository.save(insight(term: "Cookie", lemma: "Cookie"), captureSource: .text)
         #expect(try repository.existingEntry(lemma: "cookie", language: .english) != nil)

@@ -45,7 +45,13 @@ public final class SpeechPlayer {
     public private(set) var state = State.idle
     public private(set) var segments: [SpeechSegment] = []
     /// The segment being spoken, for highlighting a transcript.
-    public private(set) var currentIndex: Int?
+    public private(set) var currentIndex: Int? {
+        didSet {
+            if currentIndex != oldValue { onPositionChange?(currentIndex) }
+        }
+    }
+    /// Called whenever `currentIndex` changes: `nil` once the last segment ends or playback stops.
+    @ObservationIgnored public var onPositionChange: ((Int?) -> Void)?
     /// Applies from the next segment on.
     public var speed = 1.0 {
         didSet {
@@ -173,6 +179,10 @@ public final class SystemSpeechEngine: NSObject, SpeechEngine, AVSpeechSynthesiz
     public func stop() {
         current = nil
         synthesizer.stopSpeaking(at: .immediate)
+        // Skipping stops and speaks again right away; only a stop that nothing follows ends the session.
+        Task { @MainActor [weak self] in
+            self?.endSessionIfQuiet()
+        }
     }
 
     nonisolated public func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
@@ -182,6 +192,15 @@ public final class SystemSpeechEngine: NSObject, SpeechEngine, AVSpeechSynthesiz
             guard let self, self.current == finished else { return }
             self.current = nil
             self.onFinish?()
+            self.endSessionIfQuiet()
         }
+    }
+
+    /// Other apps' audio stays ducked while the session is active, so it ends once nothing is spoken.
+    private func endSessionIfQuiet() {
+        guard current == nil else { return }
+        #if os(iOS)
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        #endif
     }
 }

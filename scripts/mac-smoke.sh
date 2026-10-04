@@ -2,14 +2,19 @@
 # macOS smoke test for the Debug build: the app launches, shows a window, keeps running and logs no
 # errors or faults from our subsystem. Visual review of macOS screens stays a manual checkpoint step.
 #
-# Usage:   scripts/mac-smoke.sh [--self-test [capture|page|object|quiz|speech] | --services] [launch arguments...]
+# Usage:   scripts/mac-smoke.sh [--self-test [capture|page|object|quiz|speech|podcast] | --services | --screenshot FILE]
+#                               [launch arguments...]
 #          (run scripts/verify.sh first)
 # Example: scripts/mac-smoke.sh -vos-preset-profile tr:en,de -vos-tab settings
 # --self-test captures a word with the real on-device model inside the app (App/Debug/SelfTest.swift),
 # which the iOS Simulator can't do because it has no model assets: from a sentence (capture, the
 # default), from a generated book page (page), by naming a photographed cup (object), or by running
-# a quiz over sample words (quiz). `speech` says a German word with the system synthesizer.
+# a quiz over sample words (quiz). `speech` says a German word with the system synthesizer; `podcast`
+# writes a dialogue over sample words and plays its first lines.
 # --services sends text through Services → "Capture in Vocabulary-OS" and expects the capture window.
+# --screenshot FILE also saves the app's window as a PNG for review; the terminal needs the Screen
+# Recording permission. Example: scripts/mac-smoke.sh --screenshot player.png -vos-preset-profile tr:en,de
+#   -vos-seed-library YES -vos-tab practice -vos-podcast newest
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,16 +26,20 @@ BINARY="$APP/Contents/MacOS/VocabularyOS"
 self_test=0
 self_test_mode=capture
 services=0
+screenshot=""
 if [[ "${1:-}" == "--self-test" ]]; then
     self_test=1
     shift
-    if [[ "${1:-}" =~ ^(capture|page|object|quiz|speech)$ ]]; then
+    if [[ "${1:-}" =~ ^(capture|page|object|quiz|speech|podcast)$ ]]; then
         self_test_mode="$1"
         shift
     fi
 elif [[ "${1:-}" == "--services" ]]; then
     services=1
     shift
+elif [[ "${1:-}" == "--screenshot" ]]; then
+    screenshot="${2:?--screenshot needs a file name}"
+    shift 2
 fi
 
 pkill -f "$BINARY" 2>/dev/null || true
@@ -45,7 +54,10 @@ logged_problems() {
 
 if [[ $self_test -eq 1 ]]; then
     open -n "$APP" --args -ui-testing YES -vos-preset-profile tr:en,de -vos-self-test "$self_test_mode" "$@"
-    for _ in $(seq 1 60); do
+    # Half-second ticks: 30 s, or 3 minutes for a podcast, which the model writes in several parts.
+    ticks=60
+    [[ "$self_test_mode" == podcast ]] && ticks=360
+    for _ in $(seq 1 "$ticks"); do
         pgrep -f "$BINARY" >/dev/null || break
         sleep 0.5
     done
@@ -82,6 +94,11 @@ fi
 open -n "$APP" --args -ui-testing YES "$@"
 sleep 4
 
+if [[ -n "$screenshot" ]]; then
+    window="$(swift "$ROOT/scripts/tools/window-id.swift" "$DISPLAY_NAME")" || { echo "error: no window to capture" >&2; exit 1; }
+    screencapture -x -o -l"$window" "$screenshot"
+    echo "screenshot=$screenshot"
+fi
 windows="$(swift "$ROOT/scripts/tools/count-windows.swift" "$DISPLAY_NAME")"
 running=0
 pgrep -f "$BINARY" >/dev/null && running=1

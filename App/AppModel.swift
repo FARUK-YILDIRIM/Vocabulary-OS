@@ -15,6 +15,7 @@ final class AppModel {
     let repository: WordRepository
     let reviews: ReviewRepository
     let quizzes: QuizRepository
+    let podcasts: PodcastRepository
     /// Speaks words, listening questions and podcasts with on-device voices (ADR-008).
     let speech = SpeechPlayer()
     let secrets: any SecretStore
@@ -36,6 +37,7 @@ final class AppModel {
         self.repository = repository
         self.reviews = ReviewRepository(words: repository)
         self.quizzes = QuizRepository(words: repository)
+        self.podcasts = PodcastRepository(words: repository)
         self.secrets = secrets
         self.router = ProviderRouter(secrets: secrets)
         self.inbox = inbox
@@ -181,6 +183,7 @@ struct LaunchOptions {
     static let captureMode = "vos-capture-mode"
     static let samplePage = "vos-sample-page"
     static let sampleObject = "vos-sample-object"
+    static let podcast = "vos-podcast"
 
     private let defaults: UserDefaults
 
@@ -206,6 +209,10 @@ struct LaunchOptions {
 
     /// Load a stand-in photo of a cup into object capture (Debug builds only, see `SampleObject`).
     var usesSampleObject: Bool { defaults.bool(forKey: Self.sampleObject) }
+
+    /// Open Practice → New Podcast (`new`) or the newest episode (`newest`), for screenshots (Debug
+    /// builds only).
+    var podcastScreen: String? { defaults.string(forKey: Self.podcast) }
 
     /// Debug-only end-to-end check to run at launch, e.g. `capture` (see `SelfTest`).
     var selfTest: String? { defaults.string(forKey: Self.selfTest) }

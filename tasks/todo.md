@@ -53,7 +53,7 @@ Done holds and its commit exists.
 - [x] T25 `feat(quiz)`: quiz session and grading — listening questions come with the speech engine (T26)
 - [x] T26 `feat(speech)`: speech engine — also enables listening quiz questions
 - [x] T27 `feat(podcast)`: podcast script generation
-- [ ] T28 `feat(podcast)`: podcast setup and player
+- [x] T28 `feat(podcast)`: podcast setup and player — on-device writing and playback with system voices checked by the macOS self-test
 - [ ] Checkpoint 5: Practice
 
 ## Phase 6: Plans, sharing, polish
@@ -66,5 +66,12 @@ Done holds and its commit exists.
     - in the selectable text, punctuation can wrap to the next line away from its word;
     - under a capture, "Explained by" names the selected provider instead of the insight's source,
       which only differs with canned test answers.
+  - Noticed while building T27 and T28:
+    - on-device "about 2 minutes" episodes run short: 131–222 words in the eval and 122–293 in the
+      macOS self-tests, against a 260-word target, since each drafted part has 2–4 short lines;
+    - an episode's title sometimes comes out in English for another language;
+    - lock-screen controls (Now Playing) for podcasts;
+    - short words over-match as inflected forms in validation and highlighting: "ran" also matches
+      "random" (the prefix rule in `QuizValidator.isForm`).
 - [ ] T33 `docs(release)`: open-source release readiness
 - [ ] Checkpoint 6: Ship

@@ -3,6 +3,7 @@ import Foundation
 import os
 import VocabularyAI
 import VocabularyCore
+import VocabularyData
 import VocabularySpeech
 import VocabularyUI
 #if os(macOS)
@@ -10,11 +11,11 @@ import AppKit
 #endif
 
 /// Debug-only end-to-end checks with the real AI provider and system services (`-vos-self-test
-/// capture`, `page`, `object`, `quiz` or `speech`).
+/// capture`, `page`, `object`, `quiz`, `speech` or `podcast`).
 ///
 /// The iOS Simulator has no on-device model assets, so `scripts/mac-smoke.sh --self-test` runs these
-/// in the macOS build. Each captures a word, explains it, saves it, logs the outcome and quits. UI
-/// tests cover the same flows with canned answers.
+/// in the macOS build. Each runs one flow, logs the outcome and quits. UI tests cover the same flows
+/// with canned answers.
 enum SelfTest {
     private static let logger = Logger(subsystem: VocabularyCore.logSubsystem, category: "selftest")
 
@@ -30,6 +31,8 @@ enum SelfTest {
             await quiz(app: app)
         case "speech":
             await speech(app: app)
+        case "podcast":
+            await podcast(app: app)
         default:
             return
         }
@@ -172,6 +175,48 @@ enum SelfTest {
             logger.notice("Self-test speech passed: “Die Tasse” spoken by \(voice.name, privacy: .public) (\(voice.language, privacy: .public)) in \(elapsed.formatted(.units(allowed: [.seconds], fractionalPart: .show(length: 2))), privacy: .public)")
         } else {
             logger.error("Self-test speech failed: the synthesizer didn't finish within 10 s")
+        }
+    }
+
+    /// Writes a two-minute dialogue over the sample English words, then plays its first lines with
+    /// the system voices (SPEC C9).
+    private static func podcast(app: AppModel) async {
+        SampleLibrary.seed(into: app.repository)
+        let words: [VocabularyEntry]
+        do {
+            words = try app.quizzes.words(language: .english, source: .all, limit: 4)
+        } catch {
+            logger.error("Self-test podcast failed: \(error.localizedDescription, privacy: .public)")
+            return
+        }
+        let creation = PodcastCreationModel(podcasts: app.podcasts) { PodcastService(app.makeInsightService()) }
+        let start = ContinuousClock.now
+        guard let episode = await creation.create(
+            words: words, language: .english, nativeLanguage: .turkish, level: .a2, length: .short, style: .dialogue
+        ) else {
+            let reason = if case .failed(let message) = creation.phase { message } else { "no episode" }
+            logger.error("Self-test podcast failed: \(reason, privacy: .public)")
+            return
+        }
+        let written = ContinuousClock.now - start
+
+        let playback = PodcastPlaybackModel(episode: episode, podcasts: app.podcasts)
+        playback.togglePlayback()
+        let playing = ContinuousClock.now
+        while playback.position < 2, playback.player.state != .idle, ContinuousClock.now - playing < .seconds(30) {
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        let reached = playback.position
+        playback.stop()
+
+        let script = episode.script
+        let voices = [playback.voices.host?.name, playback.voices.guest?.name].compactMap(\.self).joined(separator: " + ")
+        let lines = script.segments.map { "\($0.speaker.rawValue): \($0.text)" }.joined(separator: " / ")
+        let summary = "“\(script.title)” | \(script.segments.count) lines, \(script.wordCount) words | written in \(written.formatted(.units(allowed: [.seconds], fractionalPart: .show(length: 1)))) | voices \(voices) | spoke to line \(reached + 1) | \(lines)"
+        if reached >= 2 {
+            logger.notice("Self-test podcast passed: \(summary, privacy: .public)")
+        } else {
+            logger.error("Self-test podcast failed: playback stopped at line \(reached + 1) | \(summary, privacy: .public)")
         }
     }
 

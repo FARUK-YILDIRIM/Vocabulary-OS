@@ -42,21 +42,10 @@ public enum PodcastValidator {
         guard missing.isEmpty else { throw .missingWords(missing.map(\.term)) }
     }
 
-    /// The words the script doesn't use, in the given order. A word counts as used in any form: as
-    /// written, inflected ("Banken" for "Bank"), or through its dictionary form where NaturalLanguage
-    /// knows the language ("ran" for "run").
+    /// The words the script doesn't use, in the given order, in any form (see `WordOccurrences`).
     public static func missingWords(_ words: [QuizWord], in script: PodcastScript, language: LanguageCode) -> [QuizWord] {
-        let text = script.text
-        let tokens = TokenizedText(text).tokens
-        let lemmas = Self.lemmas(of: text, language: language)
-        return words.filter { word in
-            if word.term.contains(" ") {
-                return text.range(of: word.term, options: [.caseInsensitive, .diacriticInsensitive]) == nil
-            }
-            let forms = Set([word.term.matchingKey, word.lemma.matchingKey])
-            let used = tokens.contains { QuizValidator.isForm($0.text, of: word) } || !forms.isDisjoint(with: lemmas)
-            return !used
-        }
+        let used = Set(WordOccurrences.find(words, in: script.text, language: language).map(\.wordID))
+        return words.filter { !used.contains($0.id) }
     }
 
     /// Whether any sentence appears twice, ignoring case, accents and spacing.
@@ -107,22 +96,5 @@ public enum PodcastValidator {
             return true
         }
         return sentences
-    }
-
-    /// Dictionary forms of the text's words, empty where the language has no lemmatizer.
-    private static func lemmas(of text: String, language: LanguageCode) -> Set<String> {
-        let nlLanguage = NLLanguage(rawValue: language.languageSubtag)
-        guard NLTagger.availableTagSchemes(for: .word, language: nlLanguage).contains(.lemma) else { return [] }
-        let tagger = NLTagger(tagSchemes: [.lemma])
-        tagger.string = text
-        tagger.setLanguage(nlLanguage, range: text.startIndex..<text.endIndex)
-        var lemmas: Set<String> = []
-        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .lemma, options: [.omitPunctuation, .omitWhitespace]) { tag, _ in
-            if let lemma = tag?.rawValue, !lemma.isEmpty {
-                lemmas.insert(lemma.matchingKey)
-            }
-            return true
-        }
-        return lemmas
     }
 }

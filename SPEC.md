@@ -192,7 +192,9 @@ Each capability can be built and tested on its own. Build order goes top to bott
 - The player:
   - speaks the script with on-device voices, using two voices for dialogues;
   - has play/pause, previous/next segment and speed controls;
-  - shows a transcript where the target words are highlighted and open their word detail.
+  - shows a transcript where the target words are highlighted and open their word detail;
+  - continues where I stopped, and keeps playing on iPhone and iPad while the screen is locked.
+- Episodes are listed newest first, and I can delete them.
 - Scripts sync. Audio is spoken on each device and never uploaded (ADR-008).
 - *Accept when:* validation confirms each chosen word (or an inflected form) appears in the script;
   playback works on the iOS simulator and on macOS; a missing voice falls back to the default voice

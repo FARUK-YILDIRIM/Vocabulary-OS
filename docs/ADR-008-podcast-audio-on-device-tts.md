@@ -23,7 +23,8 @@ Measurements and facts:
 ## Decision
 - **Script generation:**
   - The AI produces a structured script: a title and a list of segments, each with a speaker
-    (`host`, `guest` or `narrator`) and text, plus a short glossary of the target words.
+    (`host`, `guest` or `narrator`) and text. The player lists the target words with their saved
+    translations, so the model writes no glossary.
   - It uses the chosen words, level (A1–C2), length and style (dialogue or story).
   - The script is validated: every target word or an inflection appears, segments are not empty,
     and lengths are capped.
@@ -45,16 +46,26 @@ Measurements and facts:
   - Live `AVSpeechSynthesizer` playback, one utterance per segment. A dialogue uses two distinct
     installed voices for the language; when only one voice exists, the second speaker uses a
     different pitch.
-  - Controls: play/pause, previous/next segment, speed (0.8×–1.2×).
-  - The transcript highlights the current segment and the target words.
+  - Controls: play/pause, previous/next segment, speed (0.8×–1.2×). On a Mac, Space plays or pauses
+    and ⌘← / ⌘→ skip.
+  - The transcript highlights the current segment and the target words. The words are found in any
+    form, the same way validation counts them (`WordOccurrences`), and tapping one pauses the episode
+    for the word's detail; it continues when the detail closes.
+  - Leaving the player stops it and remembers the segment (`resumeSegment`, saved as each segment
+    starts). The next visit continues there; an episode played to its end starts over.
+  - On iPhone and iPad an episode keeps playing while the screen is locked (`UIBackgroundModes`
+    `audio`). Lock-screen controls (Now Playing) are not part of v1.
 - **Voices:**
   - Use the best installed quality for the language (premium, then enhanced, then default), then the
     region the language is usually heard in (en-US, pt-BR; zh-TW for Traditional Chinese).
-  - Novelty and personal voices are never used. macOS also ships robotic-sounding voices (Eddy,
-    Flo, Grandma …) at default quality without a gender; regular voices with a gender come first,
-    and a dialogue's second voice is only ever a regular one.
+  - Novelty and personal voices are never used. macOS also ships robotic-sounding voices at default
+    quality: the Eloquence voices (Eddy, Flo, Grandma …), which have no gender, and the old MacinTalk
+    voices (Fred, Ralph …), whose identifiers start with `com.apple.speech.synthesis.voice.`. Regular
+    voices come first, and a dialogue's second voice is only ever a regular one. Measured on this
+    Mac: before MacinTalk voices were recognized, Fred (male) beat Samantha by name for English.
   - If none is installed, the player explains how to download a voice in system settings and falls
-    back to the default voice.
+    back to the default voice. A dialogue with one installed voice also says so: the guest then
+    speaks with the host's voice at a lower pitch.
   - Speech plays in the `.playback` audio session on iPhone and iPad, so a listen button works with
     the ringer off.
   - The same player speaks single words (word detail, listening quiz questions).
@@ -72,8 +83,8 @@ Measurements and facts:
 ## Consequences
 - Podcasts work offline once the script exists, cost nothing to play and never upload audio.
 - Voice quality depends on the voices installed on the device and is lower than cloud TTS.
-- Background playback on iOS needs the audio background mode and an active audio session. This is
-  handled in the podcast task.
+- Background playback on iOS needs the audio background mode and an active audio session: the app
+  declares `audio` in `UIBackgroundModes`, and speech plays in the `.playback` session.
 
 ## Sources
 - `AVSpeechSynthesizer`: https://developer.apple.com/documentation/avfaudio/avspeechsynthesizer

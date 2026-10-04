@@ -499,9 +499,9 @@ because its files are tiny and only work together.
   - An episode list.
   - A player with transcript highlighting, word links and speed control.
 - **Acceptance criteria:**
-  - [ ] An episode generated in the Simulator plays through.
-  - [ ] Tapping a highlighted word opens its detail.
-  - [ ] Works on macOS.
+  - [x] An episode generated in the Simulator plays through.
+  - [x] Tapping a highlighted word opens its detail.
+  - [x] Works on macOS.
 - **Verification:** Simulator and macOS walkthrough.
 - **Dependencies:** T26, T27.
 - **Files:** `App/Practice/PodcastSetupView.swift`, `App/Practice/PodcastPlayerView.swift`,

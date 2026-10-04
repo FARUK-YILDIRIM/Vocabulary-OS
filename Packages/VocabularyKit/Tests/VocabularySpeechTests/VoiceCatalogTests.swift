@@ -46,6 +46,19 @@ import VocabularyCore
         #expect(pair.guest == nil, "The guest gets Anna's voice at a lower pitch instead")
     }
 
+    /// The old MacinTalk voices (Fred, Ralph …) sound robotic too, though Fred has a gender. Measured:
+    /// on a Mac with only default-quality English voices, Fred beat Samantha by name.
+    @Test func prefersModernVoicesOverMacinTalkOnes() throws {
+        let catalog = VoiceCatalog(voices: [
+            voice("com.apple.speech.synthesis.voice.Fred", "en-US", .standard, .male),
+            voice("com.apple.voice.compact.en-US.Samantha", "en-US", .standard, .female),
+            voice("com.apple.voice.super-compact.en-GB.Daniel", "en-GB", .standard, .male),
+        ])
+        #expect(catalog.bestVoice(for: .english)?.id == "com.apple.voice.compact.en-US.Samantha")
+        let pair = try #require(catalog.dialogueVoices(for: .english))
+        #expect(pair.guest?.id == "com.apple.voice.super-compact.en-GB.Daniel", "A dialogue's second voice is never a robotic one")
+    }
+
     @Test func skipsNoveltyAndPersonalVoices() {
         let catalog = VoiceCatalog(voices: [voice("bubbles", "en-US", .premium, special: true), voice("samantha", "en-US")])
         #expect(catalog.bestVoice(for: .english)?.id == "samantha")
@@ -109,6 +122,18 @@ import VocabularyCore
         #expect(engine.spoken.map(\.text) == ["eins", "zwei", "drei", "zwei"])
         #expect(engine.stops == 3)
         #expect(player.currentIndex == 1)
+    }
+
+    @Test func reportsEveryChangeOfPosition() {
+        let player = SpeechPlayer(engine: engine, catalog: catalog)
+        var positions: [Int?] = []
+        player.onPositionChange = { positions.append($0) }
+        player.play(segments(["eins", "zwei", "drei"]))
+        engine.finish()
+        player.next()
+        player.previous()
+        player.stop()
+        #expect(positions == [0, 1, 2, 1, nil])
     }
 
     @Test func pausesResumesAndStops() {

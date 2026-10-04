@@ -24,8 +24,12 @@ public struct VoiceDescriptor: Sendable, Hashable, Identifiable {
     /// Novelty and personal voices, which don't suit lessons.
     public let isSpecial: Bool
 
-    /// A voice with a gender: Apple's regular voices have one, the robotic-sounding extras don't.
-    var isRegular: Bool { gender != .unspecified }
+    /// A natural-sounding voice. Apple's regular voices have a gender; the robotic-sounding Eloquence
+    /// extras (Eddy, Flo, Grandma …) don't. The old MacinTalk voices (Fred, Ralph …) sound robotic too,
+    /// and Fred has a gender, so they are told apart by their identifiers.
+    var isRegular: Bool { gender != .unspecified && !id.hasPrefix(Self.macinTalkPrefix) }
+
+    private static let macinTalkPrefix = "com.apple.speech.synthesis.voice."
 
     public init(id: String, name: String, language: String, quality: Quality, gender: Gender, isSpecial: Bool = false) {
         self.id = id
@@ -74,10 +78,9 @@ public struct VoiceCatalog: Sendable {
         VoiceCatalog(voices: AVSpeechSynthesisVoice.speechVoices().map(VoiceDescriptor.init))
     }
 
-    /// Voices that speak the language, best first: higher quality, then regular voices before ones
-    /// without a gender (the robotic-sounding Eddy, Flo, Grandma … that macOS ships at the same
-    /// quality), then the language's usual region (en-US, pt-BR, zh-TW for Traditional Chinese),
-    /// then by name.
+    /// Voices that speak the language, best first: higher quality, then regular voices before the
+    /// robotic-sounding ones macOS ships at the same quality (Eddy, Flo, Grandma …, Fred, Ralph …),
+    /// then the language's usual region (en-US, pt-BR, zh-TW for Traditional Chinese), then by name.
     public func voices(for language: LanguageCode) -> [VoiceDescriptor] {
         let wanted = Locale.Language(identifier: language.rawValue)
         let usualRegion = Locale.Language(identifier: wanted.maximalIdentifier).region

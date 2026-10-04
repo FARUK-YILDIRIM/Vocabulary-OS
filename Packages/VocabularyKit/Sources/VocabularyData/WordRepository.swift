@@ -45,6 +45,13 @@ public final class WordRepository {
         try context.save()
     }
 
+    /// The saved word with this ID, if it still exists.
+    public func entry(id: UUID) throws -> VocabularyEntry? {
+        var descriptor = FetchDescriptor<VocabularyEntry>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
+    }
+
     /// The saved word with the same dictionary form in the same language, if any.
     public func existingEntry(lemma: String, language: LanguageCode) throws -> VocabularyEntry? {
         let key = lemma.matchingKey

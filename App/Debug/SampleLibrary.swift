@@ -3,7 +3,8 @@ import Foundation
 import VocabularyCore
 import VocabularyData
 
-/// Sample words for UI tests and screenshots (`-vos-seed-library YES`, Debug builds only).
+/// Sample words and a podcast episode for UI tests and screenshots (`-vos-seed-library YES`, Debug
+/// builds only).
 enum SampleLibrary {
     @MainActor
     static func seed(into repository: WordRepository, now: Date = .now) {
@@ -22,12 +23,34 @@ enum SampleLibrary {
             (word("Bank", "Bank", .noun, .german, "Wir saßen auf einer Bank im Park.", "bank", "Parklarda oturmak için yapılmış uzun oturak."), nil, false),
             (word("Schlüssel", "Schlüssel", .noun, .german, "Ich habe meinen Schlüssel im Büro vergessen.", "anahtar", "Kilidi açıp kapamaya yarayan metal araç."), nil, true),
         ]
+        var english: [VocabularyEntry] = []
         for (insight, state, favorite) in words {
             guard let entry = try? repository.save(insight, captureSource: .text) else { continue }
             if let state { entry.cardState = state }
             entry.isFavorite = favorite
+            if insight.language == .english { english.append(entry) }
         }
         try? repository.context.save()
+        seedPodcast(words: english, into: repository, source: source)
+    }
+
+    /// A short English dialogue that uses the sample English words.
+    @MainActor
+    private static func seedPodcast(words: [VocabularyEntry], into repository: WordRepository, source: InsightSource) {
+        let lines: [(PodcastSpeaker, String)] = [
+            (.host, "Welcome back! It's raining cats and dogs outside today."),
+            (.guest, "I know. I ran from the bus stop to the office."),
+            (.host, "Did you bring anything for the meeting?"),
+            (.guest, "Yes, I baked cookies for everyone."),
+            (.host, "Great. I'm a little nervous about my pitch."),
+            (.guest, "Don't worry, your pitch will be fine."),
+            (.host, "Thanks! Let's have a cookie first."),
+        ]
+        let script = PodcastScript(title: "A Rainy Day at the Office", segments: lines.map { PodcastSegment(speaker: $0.0, text: $0.1) })
+        _ = try? PodcastRepository(words: repository).save(
+            script, words: words, language: .english, nativeLanguage: .turkish, level: .a2, style: .dialogue,
+            length: .short, source: source
+        )
     }
 }
 #endif

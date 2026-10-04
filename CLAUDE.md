@@ -49,8 +49,9 @@ swift test --package-path Packages/VocabularyKit    # package tests on the Mac h
 scripts/verify.sh                                   # full gate: generate + tests + iOS Simulator + macOS builds
 scripts/ui-test.sh [Class/test]                     # XCUITests on iPhone 17 (VOS_UI_TEST_DEVICE for iPad); screenshots in .build/ui-tests
 scripts/mac-smoke.sh [-vos-preset-profile tr:en,de] # macOS Debug build launches, shows a window, logs no errors
-scripts/mac-smoke.sh --self-test [capture|page|object|quiz|speech]  # the macOS app with the real model and voices
+scripts/mac-smoke.sh --self-test [capture|page|object|quiz|speech|podcast]  # the macOS app with the real model and voices
 scripts/mac-smoke.sh --services                     # Services → "Capture in Vocabulary-OS" opens the capture window
+scripts/mac-smoke.sh --screenshot out.png [args]    # also saves the window (Screen Recording permission), e.g. -vos-podcast newest
 swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [--verbose]   # live on-device prompt evaluation
 ```
 
@@ -142,8 +143,8 @@ A task is done only when all of these hold:
 - Its acceptance criteria are met, and new behavior has tests that failed before the change.
 - `scripts/verify.sh` passes with no new warnings in project code.
 - UI tasks were checked in the iOS Simulator with `scripts/ui-test.sh` on iPhone and iPad, and on
-  macOS with `scripts/mac-smoke.sh`. Screenshots were reviewed. Visual checks of macOS screens happen
-  at checkpoints with the owner.
+  macOS with `scripts/mac-smoke.sh` (`--screenshot` captures a macOS screen). Screenshots were
+  reviewed. Visual checks of macOS screens also happen at checkpoints with the owner.
 - Docs, the spec and the ADRs reflect any decision that changed.
 - `tasks/todo.md` is ticked.
 - The commit message is in English and follows the convention below.
