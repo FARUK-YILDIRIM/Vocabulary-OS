@@ -1,7 +1,226 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "Add an API key for this provider in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar'dan bu sağlayıcı için bir API anahtarı ekle."
+          }
+        }
+      }
+    },
+    "Apple Intelligence (on device)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Intelligence (cihazda)"
+          }
+        }
+      }
+    },
+    "Custom (OpenAI-compatible)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Özel (OpenAI uyumlu)"
+          }
+        }
+      }
+    },
+    "Enter your server's address in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucunun adresini Ayarlar'dan gir."
+          }
+        }
+      }
+    },
+    "Something went wrong with the AI request." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yapay zekâ isteğinde bir sorun oluştu."
+          }
+        }
+      }
+    },
+    "The key couldn't be stored in the Keychain (error %d)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar, Anahtar Zinciri'ne kaydedilemedi (hata %d)."
+          }
+        }
+      }
+    },
+    "The model declined this text because of its safety rules." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model, güvenlik kuralları nedeniyle bu metni reddetti."
+          }
+        }
+      }
+    },
+    "The model is busy with another request. Try again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model başka bir istekle meşgul. Yeniden dene."
+          }
+        }
+      }
+    },
+    "The model refused to answer this request." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model bu isteği yanıtlamayı reddetti."
+          }
+        }
+      }
+    },
+    "The model's answer wasn't usable. Try again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelin cevabı kullanılamadı. Yeniden dene."
+          }
+        }
+      }
+    },
+    "The on-device model doesn't support this language yet. Connect an AI provider in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz içi model bu dili henüz desteklemiyor. Ayarlar'dan bir yapay zekâ sağlayıcısı bağla."
+          }
+        }
+      }
+    },
+    "The on-device model is still downloading. Try again in a few minutes." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz içi model hâlâ indiriliyor. Birkaç dakika sonra yeniden dene."
+          }
+        }
+      }
+    },
+    "The provider couldn't be reached. Check your connection." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcıya ulaşılamadı. Bağlantını kontrol et."
+          }
+        }
+      }
+    },
+    "The provider had a problem (HTTP %lld). Try again later." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcıda bir sorun oluştu (HTTP %lld). Daha sonra yeniden dene."
+          }
+        }
+      }
+    },
+    "The provider rejected the API key. Check it in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcı API anahtarını reddetti. Ayarlar'dan kontrol et."
+          }
+        }
+      }
+    },
+    "The request was cancelled." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstek iptal edildi."
+          }
+        }
+      }
+    },
+    "The text is too long for the model. Try a shorter selection." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metin model için çok uzun. Daha kısa bir seçim dene."
+          }
+        }
+      }
+    },
+    "This device can't run Apple's on-device model. Connect an AI provider in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu cihaz Apple'ın cihaz içi modelini çalıştıramıyor. Ayarlar'dan bir yapay zekâ sağlayıcısı bağla."
+          }
+        }
+      }
+    },
+    "This model isn't available for your key. Choose another model in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu model anahtarınla kullanılamıyor. Ayarlar'dan başka bir model seç."
+          }
+        }
+      }
+    },
+    "Too many requests right now. Wait a moment and try again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu anda çok fazla istek var. Biraz bekleyip yeniden dene."
+          }
+        }
+      }
+    },
+    "Turn on Apple Intelligence in System Settings to use the on-device model, or connect an AI provider." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cihaz içi modeli kullanmak için Sistem Ayarları'ndan Apple Intelligence'ı aç ya da bir yapay zekâ sağlayıcısı bağla."
+          }
+        }
+      }
+    },
+    "Your provider account is out of credit or over its limit." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcı hesabının kredisi bitti ya da limitini aştı."
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

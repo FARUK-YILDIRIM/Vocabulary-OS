@@ -64,7 +64,7 @@ Done holds and its commit exists.
 ## Phase 6: Plans, sharing, polish
 - [x] T29 `feat(plans)`: study plans and notifications — the reminder scheduler lives in VocabularyData so the package tests cover it
 - [x] T30 `feat(sharing)`: export and import — with the list management deferred from T12
-- [ ] T31 `feat(i18n)`: Turkish localization
+- [x] T31 `feat(i18n)`: Turkish localization — verify.sh now keeps the catalogs in step and requires Turkish
 - [ ] T32 `feat(ui)`: accessibility and polish
   - Noticed while building T20:
     - drag-and-drop photos onto page capture (ADR-005);

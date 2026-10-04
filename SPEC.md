@@ -242,7 +242,9 @@ Each capability can be built and tested on its own. Build order goes top to bott
 - **Accessibility:** Dynamic Type, VoiceOver labels on every control, sufficient contrast, and
   layouts that work on the smallest supported iPhone, in iPad split view and in a resizable Mac
   window.
-- **Localization:** English and Turkish UI at launch, through a String Catalog.
+- **Localization:** English and Turkish UI at launch, through String Catalogs. That includes the
+  Share extension, error messages, reminders, the camera permission text, the word list file type and
+  the Mac's Services menu item. Generated content stays in the languages the learner chose.
 - **Performance:**
   - Library lists stay smooth with 10,000 words (paged fetches).
   - The capture sheet opens in under 300 ms.

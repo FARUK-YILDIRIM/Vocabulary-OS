@@ -1,0 +1,42 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSCameraUsageDescription" : {
+      "comment" : "Why the iOS app asks for the camera; the English text is set in project.yml.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS uses the camera to photograph book pages and objects, so you can capture their words."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS, kitap sayfalarının ve nesnelerin fotoğrafını çekip kelimelerini yakalayabilmen için kamerayı kullanır."
+          }
+        }
+      }
+    },
+    "Vocabulary-OS Word List" : {
+      "comment" : "The .vocabularyos file type's name, from CFBundleTypeName and UTTypeDescription in Info.plist.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS Word List"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS Kelime Listesi"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

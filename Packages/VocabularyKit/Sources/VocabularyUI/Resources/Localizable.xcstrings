@@ -1,7 +1,446 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "Add %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Ekle"
+          }
+        }
+      }
+    },
+    "Already in your library as “%@”." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kitaplığında zaten “%@” olarak var."
+          }
+        }
+      }
+    },
+    "Capture Another Object" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başka Bir Nesne Yakala"
+          }
+        }
+      }
+    },
+    "Capture Another Word" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başka Bir Kelime Yakala"
+          }
+        }
+      }
+    },
+    "Edit Text" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metni Düzenle"
+          }
+        }
+      }
+    },
+    "Examples" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Örnekler"
+          }
+        }
+      }
+    },
+    "Explain" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açıkla"
+          }
+        }
+      }
+    },
+    "Explained by %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açıklayan: %@"
+          }
+        }
+      }
+    },
+    "Explaining…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açıklanıyor…"
+          }
+        }
+      }
+    },
+    "Listen" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dinle"
+          }
+        }
+      }
+    },
+    "Name It" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adını Bul"
+          }
+        }
+      }
+    },
+    "Name it in" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Şu dilde adlandır"
+          }
+        }
+      }
+    },
+    "Naming…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adlandırılıyor…"
+          }
+        }
+      }
+    },
+    "New Photo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Fotoğraf"
+          }
+        }
+      }
+    },
+    "Or type what it is" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya da ne olduğunu yaz"
+          }
+        }
+      }
+    },
+    "Other meanings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diğer anlamlar"
+          }
+        }
+      }
+    },
+    "Paste or type the sentence where you found the word." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimeyi bulduğun cümleyi yapıştır ya da yaz."
+          }
+        }
+      }
+    },
+    "Photo of a page" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir sayfanın fotoğrafı"
+          }
+        }
+      }
+    },
+    "Photo of the object" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nesnenin fotoğrafı"
+          }
+        }
+      }
+    },
+    "Recognizing…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tanınıyor…"
+          }
+        }
+      }
+    },
+    "Save photo with word" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğrafı kelimeyle kaydet"
+          }
+        }
+      }
+    },
+    "Save to Library" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kitaplığa Kaydet"
+          }
+        }
+      }
+    },
+    "Saved to your library" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kitaplığına kaydedildi"
+          }
+        }
+      }
+    },
+    "Saved. It appears in your library the next time you open Vocabulary-OS." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydedildi. Vocabulary-OS'i bir sonraki açışında kitaplığında görünür."
+          }
+        }
+      }
+    },
+    "Select a Word" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir Kelime Seç"
+          }
+        }
+      }
+    },
+    "Show Examples" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Örnekleri Göster"
+          }
+        }
+      }
+    },
+    "Tap a word. Tap a second word to select a phrase." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir kelimeye dokun. Bir ifade seçmek için ikinci bir kelimeye dokun."
+          }
+        }
+      }
+    },
+    "This looks like %@, which isn't one of your languages." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu %@ gibi görünüyor ve öğrendiğin dillerden biri değil."
+          }
+        }
+      }
+    },
+    "Try Again" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden Dene"
+          }
+        }
+      }
+    },
+    "Vocabulary-OS couldn't tell what this is. Type its name below, in any language." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS bunun ne olduğunu anlayamadı. Adını aşağıya, herhangi bir dilde yaz."
+          }
+        }
+      }
+    },
+    "What is it?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu ne?"
+          }
+        }
+      }
+    },
+    "You can add it in Vocabulary-OS settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS ayarlarından ekleyebilirsin."
+          }
+        }
+      }
+    },
+    "adjective" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sıfat"
+          }
+        }
+      }
+    },
+    "adverb" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zarf"
+          }
+        }
+      }
+    },
+    "conjunction" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bağlaç"
+          }
+        }
+      }
+    },
+    "determiner" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "belirleyici"
+          }
+        }
+      }
+    },
+    "interjection" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ünlem"
+          }
+        }
+      }
+    },
+    "noun" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "isim"
+          }
+        }
+      }
+    },
+    "number" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sayı"
+          }
+        }
+      }
+    },
+    "phrase" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ifade"
+          }
+        }
+      }
+    },
+    "preposition" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "edat"
+          }
+        }
+      }
+    },
+    "pronoun" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zamir"
+          }
+        }
+      }
+    },
+    "verb" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fiil"
+          }
+        }
+      }
+    },
+    "word" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kelime"
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

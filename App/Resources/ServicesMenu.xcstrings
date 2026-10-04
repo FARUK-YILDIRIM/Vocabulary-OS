@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Capture in Vocabulary-OS" : {
+      "comment" : "The macOS Services menu item, from NSServices in Info.plist.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capture in Vocabulary-OS"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS ile Yakala"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

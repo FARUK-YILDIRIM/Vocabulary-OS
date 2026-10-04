@@ -3,6 +3,7 @@
 #   1. regenerate the Xcode project from project.yml
 #   2. run the VocabularyKit package tests on the Mac host
 #   3. build the app for the iOS Simulator and for macOS
+#   4. sync the String Catalogs with both builds, and check every string has a Turkish translation
 # Fails on any error, and on any compiler warning that points at project sources.
 set -euo pipefail
 
@@ -54,5 +55,10 @@ build_app() {
 
 build_app iOS-Simulator 'generic/platform=iOS Simulator'
 build_app macOS 'platform=macOS'
+
+step "String catalogs"
+# New strings from both builds go into the catalogs; each needs a Turkish translation.
+scripts/strings.sh sync "$DERIVED_DATA"
+scripts/strings.sh check || fail "translate the strings above (scripts/strings.sh)"
 
 step "All checks passed"

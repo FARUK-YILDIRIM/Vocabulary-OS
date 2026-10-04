@@ -1,7 +1,36 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "%@ is already one of your learning languages." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ zaten öğrendiğin dillerden biri."
+          }
+        }
+      }
+    },
+    "%@ is your native language." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ senin ana dilin."
+          }
+        }
+      }
+    },
+    "%@ isn't supported yet." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ henüz desteklenmiyor."
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

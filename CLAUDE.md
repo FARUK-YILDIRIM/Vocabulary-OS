@@ -52,6 +52,7 @@ scripts/mac-smoke.sh [-vos-preset-profile tr:en,de] # macOS Debug build launches
 scripts/mac-smoke.sh --self-test [capture|page|object|quiz|speech|podcast]  # the macOS app with the real model and voices
 scripts/mac-smoke.sh --services                     # Services → "Capture in Vocabulary-OS" opens the capture window
 scripts/mac-smoke.sh --screenshot out.png [args]    # also saves the window (Screen Recording permission), e.g. -vos-podcast newest
+scripts/strings.sh sync [DERIVED_DATA] | check      # String Catalogs: add the strings a build found; check Turkish
 swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [--verbose]   # live on-device prompt evaluation
 ```
 
@@ -69,7 +70,9 @@ swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [-
   - Comments explain *why*; give public API a one-line doc comment.
   - Follow the Swift API Design Guidelines; name each file after its main type.
 - **Localization:** UI strings are `LocalizedStringKey`/`String(localized:)` and live in the String
-  Catalog. Do not concatenate localized fragments.
+  Catalogs: the app's, the Share extension's, and one per package module, where code passes
+  `bundle: .module`. Every string needs a Turkish translation: `scripts/verify.sh` adds new strings
+  to the catalogs and fails until they are translated. Do not concatenate localized fragments.
 
 ## Boundaries
 
@@ -136,6 +139,9 @@ swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [-
   - HTTP is stubbed with a `URLProtocol` subclass; tests never touch the network.
   - After changing a public enum, an incremental `swift test` can link stale code and compare enum
     values wrongly. Run `swift package clean` before chasing such failures.
+  - After a package's String Catalog changes, an incremental Xcode build can keep the old resource
+    bundle inside the app. Delete the app from `.build/DerivedData/Build/Products` before checking
+    translations in the Simulator.
 
 ## Definition of Done
 

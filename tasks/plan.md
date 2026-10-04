@@ -549,8 +549,8 @@ because its files are tiny and only work together.
 - **Description:** Every UI string is translated in the String Catalog, with pluralization where
   needed.
 - **Acceptance criteria:**
-  - [ ] No untranslated key for `tr`.
-  - [ ] Simulator screenshots in Turkish.
+  - [x] No untranslated key for `tr`.
+  - [x] Simulator screenshots in Turkish.
 - **Verification:** an `xcodebuild` string-catalog build with no missing-translation warnings for
   `tr`.
 - **Dependencies:** T29, T30.

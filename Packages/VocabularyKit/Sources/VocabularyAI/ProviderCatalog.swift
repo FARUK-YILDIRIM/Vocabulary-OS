@@ -81,7 +81,7 @@ public enum ProviderCatalog {
 
     public static let onDevice = ProviderDescriptor(
         id: AIProviderSelection.onDevice.providerID,
-        displayName: "Apple Intelligence (on device)",
+        displayName: String(localized: "Apple Intelligence (on device)", bundle: .module),
         kind: .appleOnDevice,
         baseURL: nil,
         requiresAPIKey: false,
@@ -95,7 +95,7 @@ public enum ProviderCatalog {
 
     public static let custom = ProviderDescriptor(
         id: customID,
-        displayName: "Custom (OpenAI-compatible)",
+        displayName: String(localized: "Custom (OpenAI-compatible)", bundle: .module),
         kind: .openAICompatible,
         baseURL: nil,
         requiresAPIKey: false,

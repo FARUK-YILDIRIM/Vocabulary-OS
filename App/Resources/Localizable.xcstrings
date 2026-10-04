@@ -1,7 +1,2702 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "%@ Words" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Kelimeler"
+          }
+        }
+      }
+    },
+    "%@ at %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ at %2$@"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, saat %2$@"
+          }
+        }
+      }
+    },
+    "%@ will be added to your learning languages." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ öğrendiğin dillere eklenecek."
+          }
+        }
+      }
+    },
+    "%@ writes the script." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senaryoyu %@ yazar."
+          }
+        }
+      }
+    },
+    "%lld due · %lld new" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld due · %2$lld new"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld zamanı gelen · %2$lld yeni"
+          }
+        }
+      }
+    },
+    "%lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld right" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld right"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$lld sorudan %1$lld doğru"
+          }
+        }
+      }
+    },
+    "A narrator tells a short story." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir anlatıcı kısa bir hikâye anlatır."
+          }
+        }
+      }
+    },
+    "A new episode with your words; writing starts when you open the reminder." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimelerinle yeni bir bölüm; hatırlatmayı açınca yazılmaya başlar."
+          }
+        }
+      }
+    },
+    "A plan that is off keeps its settings but sends no reminders." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapalı bir plan ayarlarını korur ama hatırlatma göndermez."
+          }
+        }
+      }
+    },
+    "A quiz on your words; every answer counts as a review." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimelerinle bir test; her cevap bir tekrar sayılır."
+          }
+        }
+      }
+    },
+    "A reminder at the times you choose; tapping it starts the activity." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seçtiğin saatlerde bir hatırlatma; dokununca etkinlik başlar."
+          }
+        }
+      }
+    },
+    "A short dialogue or story that uses your words, read aloud by your device." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimelerini kullanan, cihazının sesli okuduğu kısa bir diyalog ya da hikâye."
+          }
+        }
+      }
+    },
+    "A to Z" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A'dan Z'ye"
+          }
+        }
+      }
+    },
+    "AI Provider" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yapay Zekâ Sağlayıcısı"
+          }
+        }
+      }
+    },
+    "API key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API anahtarı"
+          }
+        }
+      }
+    },
+    "About 2 minutes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yaklaşık 2 dakika"
+          }
+        }
+      }
+    },
+    "About 5 minutes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yaklaşık 5 dakika"
+          }
+        }
+      }
+    },
+    "Activity" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etkinlik"
+          }
+        }
+      }
+    },
+    "Add Language" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dil Ekle"
+          }
+        }
+      }
+    },
+    "Add a language in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar'dan bir dil ekle."
+          }
+        }
+      }
+    },
+    "Add a word from its page: More, then Lists." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir kelimeyi kendi sayfasından ekle: Diğer, sonra Listeler."
+          }
+        }
+      }
+    },
+    "Again" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden"
+          }
+        }
+      }
+    },
+    "All" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tümü"
+          }
+        }
+      }
+    },
+    "All Episodes" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm Bölümler"
+          }
+        }
+      }
+    },
+    "All done for today" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugünlük hepsi tamam"
+          }
+        }
+      }
+    },
+    "Already saved" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaten kayıtlı"
+          }
+        }
+      }
+    },
+    "Apple Intelligence writes the script on this device, which can take a minute." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senaryoyu bu cihazda Apple Intelligence yazar; bu bir dakika kadar sürebilir."
+          }
+        }
+      }
+    },
+    "Available" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanılabilir"
+          }
+        }
+      }
+    },
+    "Before you use %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sağlayıcısını kullanmadan önce"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vazgeç"
+          }
+        }
+      }
+    },
+    "Capture" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakala"
+          }
+        }
+      }
+    },
+    "Capture an Object" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir Nesneyi Yakala"
+          }
+        }
+      }
+    },
+    "Capture from" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaynak"
+          }
+        }
+      }
+    },
+    "Capture from a Page" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sayfadan Yakala"
+          }
+        }
+      }
+    },
+    "Capture in context" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlamında yakala"
+          }
+        }
+      }
+    },
+    "Captured photo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalanan fotoğraf"
+          }
+        }
+      }
+    },
+    "Choose File" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosya Seç"
+          }
+        }
+      }
+    },
+    "Choose Photo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğraf Seç"
+          }
+        }
+      }
+    },
+    "Choose Your Languages First" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önce Dillerini Seç"
+          }
+        }
+      }
+    },
+    "Choose at least one day." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En az bir gün seç."
+          }
+        }
+      }
+    },
+    "Close" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapat"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devam"
+          }
+        }
+      }
+    },
+    "Couldn't Delete the Podcast" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcast Silinemedi"
+          }
+        }
+      }
+    },
+    "Couldn't Open the File" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosya Açılamadı"
+          }
+        }
+      }
+    },
+    "Couldn't Open the Photo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğraf Açılamadı"
+          }
+        }
+      }
+    },
+    "Couldn't Read the Photo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğraf Okunamadı"
+          }
+        }
+      }
+    },
+    "Create" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oluştur"
+          }
+        }
+      }
+    },
+    "Create Podcast" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcast Oluştur"
+          }
+        }
+      }
+    },
+    "Create an API key at %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sitesinde bir API anahtarı oluştur"
+          }
+        }
+      }
+    },
+    "Definition" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tanım"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sil"
+          }
+        }
+      }
+    },
+    "Delete List" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listeyi Sil"
+          }
+        }
+      }
+    },
+    "Delete Plan" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planı Sil"
+          }
+        }
+      }
+    },
+    "Delete this plan?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu plan silinsin mi?"
+          }
+        }
+      }
+    },
+    "Delete “%@”?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” silinsin mi?"
+          }
+        }
+      }
+    },
+    "Dialogue" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diyalog"
+          }
+        }
+      }
+    },
+    "Dictionary form" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sözlük biçimi"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitti"
+          }
+        }
+      }
+    },
+    "Due" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zamanı Gelen"
+          }
+        }
+      }
+    },
+    "Easy" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kolay"
+          }
+        }
+      }
+    },
+    "Edit" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Düzenle"
+          }
+        }
+      }
+    },
+    "Edit Plan" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planı Düzenle"
+          }
+        }
+      }
+    },
+    "Edit Word" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimeyi Düzenle"
+          }
+        }
+      }
+    },
+    "Enter a full address such as http://localhost:11434/v1." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "http://localhost:11434/v1 gibi tam bir adres gir."
+          }
+        }
+      }
+    },
+    "Every day at %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Her gün, saat %@"
+          }
+        }
+      }
+    },
+    "Explain Again" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden Açıkla"
+          }
+        }
+      }
+    },
+    "Explaining again…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden açıklanıyor…"
+          }
+        }
+      }
+    },
+    "Export as CSV" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSV Olarak Dışa Aktar"
+          }
+        }
+      }
+    },
+    "Favorite" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorilere Ekle"
+          }
+        }
+      }
+    },
+    "Favorites" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favoriler"
+          }
+        }
+      }
+    },
+    "Finding words…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimeler bulunuyor…"
+          }
+        }
+      }
+    },
+    "Finish setting up Vocabulary-OS in its main window, then capture the text again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS kurulumunu ana penceresinde bitir, sonra metni yeniden yakala."
+          }
+        }
+      }
+    },
+    "Flashcards for the words due that day." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O gün tekrar zamanı gelen kelimeler için kartlar."
+          }
+        }
+      }
+    },
+    "For example Ollama (port 11434) or LM Studio (port 1234) on your Mac or local network." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Örneğin Mac'indeki ya da yerel ağındaki Ollama (port 11434) veya LM Studio (port 1234)."
+          }
+        }
+      }
+    },
+    "Forgotten %lld times" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forgotten %#@times@"
+          },
+          "substitutions" : {
+            "times" : {
+              "argNum" : 1,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "once"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg times"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kez unutuldu"
+          }
+        }
+      }
+    },
+    "Free and private. Nothing leaves your device. Best for short explanations." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ücretsiz ve gizli. Hiçbir şey cihazından çıkmaz. Kısa açıklamalar için en iyisi."
+          }
+        }
+      }
+    },
+    "From any app, a page of a book, or the things around you." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herhangi bir uygulamadan, bir kitap sayfasından ya da çevrendeki şeylerden."
+          }
+        }
+      }
+    },
+    "Get Started" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başla"
+          }
+        }
+      }
+    },
+    "Good" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İyi"
+          }
+        }
+      }
+    },
+    "Group %@ words to study or share them together." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kelimeleri birlikte çalışmak ya da paylaşmak için gruplandır."
+          }
+        }
+      }
+    },
+    "Guest" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konuk"
+          }
+        }
+      }
+    },
+    "Hard" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zor"
+          }
+        }
+      }
+    },
+    "Host" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu"
+          }
+        }
+      }
+    },
+    "Import" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İçe Aktar"
+          }
+        }
+      }
+    },
+    "Import %@ Words" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Kelimeleri İçe Aktar"
+          }
+        }
+      }
+    },
+    "Import Word List…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelime Listesini İçe Aktar…"
+          }
+        }
+      }
+    },
+    "Import “%@”" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” Listesini İçe Aktar"
+          }
+        }
+      }
+    },
+    "In Use" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanımda"
+          }
+        }
+      }
+    },
+    "In use" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullanımda"
+          }
+        }
+      }
+    },
+    "Its reminders stop on all your devices." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hatırlatmaları tüm cihazlarında durur."
+          }
+        }
+      }
+    },
+    "Its review history is deleted too." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar geçmişi de silinir."
+          }
+        }
+      }
+    },
+    "Its words stay in your library." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimeleri kitaplığında kalır."
+          }
+        }
+      }
+    },
+    "Key saved" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar kayıtlı"
+          }
+        }
+      }
+    },
+    "Language" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dil"
+          }
+        }
+      }
+    },
+    "Languages" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diller"
+          }
+        }
+      }
+    },
+    "Languages you're learning" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğrendiğin diller"
+          }
+        }
+      }
+    },
+    "Learn words where you meet them" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimeleri karşılaştığın yerde öğren"
+          }
+        }
+      }
+    },
+    "Learning" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğrenilen diller"
+          }
+        }
+      }
+    },
+    "Length" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzunluk"
+          }
+        }
+      }
+    },
+    "Level" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seviye"
+          }
+        }
+      }
+    },
+    "Library" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kitaplık"
+          }
+        }
+      }
+    },
+    "Line %lld of %lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Line %1$lld of %2$lld"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satır %1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "Lists" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listeler"
+          }
+        }
+      }
+    },
+    "Lists…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listeler…"
+          }
+        }
+      }
+    },
+    "Load Models from %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modelleri %@ sağlayıcısından yükle"
+          }
+        }
+      }
+    },
+    "Mastered" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğrenilen"
+          }
+        }
+      }
+    },
+    "Meaning" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anlam"
+          }
+        }
+      }
+    },
+    "Meaning in your language" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kendi dilinde anlamı"
+          }
+        }
+      }
+    },
+    "Model" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model"
+          }
+        }
+      }
+    },
+    "More" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diğer"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ad"
+          }
+        }
+      }
+    },
+    "Native language" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana dil"
+          }
+        }
+      }
+    },
+    "New" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni"
+          }
+        }
+      }
+    },
+    "New List" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Liste"
+          }
+        }
+      }
+    },
+    "New List…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Liste…"
+          }
+        }
+      }
+    },
+    "New Photo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Fotoğraf"
+          }
+        }
+      }
+    },
+    "New Plan" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Plan"
+          }
+        }
+      }
+    },
+    "New Podcast" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni Podcast"
+          }
+        }
+      }
+    },
+    "New words" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeni kelimeler"
+          }
+        }
+      }
+    },
+    "Newest First" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önce En Yeni"
+          }
+        }
+      }
+    },
+    "Next" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonraki"
+          }
+        }
+      }
+    },
+    "Next Line" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonraki Satır"
+          }
+        }
+      }
+    },
+    "Next Review" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonraki Tekrar"
+          }
+        }
+      }
+    },
+    "Next review %@ · every %lld days" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next review %1$@ · every %#@days@"
+          },
+          "substitutions" : {
+            "days" : {
+              "argNum" : 2,
+              "formatSpecifier" : "lld",
+              "variations" : {
+                "plural" : {
+                  "one" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "day"
+                    }
+                  },
+                  "other" : {
+                    "stringUnit" : {
+                      "state" : "translated",
+                      "value" : "%arg days"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonraki tekrar %1$@ · %2$lld günde bir"
+          }
+        }
+      }
+    },
+    "No %@ voice is installed, so your device's default voice reads this episode. You can download voices in %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No %1$@ voice is installed, so your device's default voice reads this episode. You can download voices in %2$@."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yüklü bir %1$@ ses yok, bu yüzden bu bölümü cihazının varsayılan sesi okuyor. Sesleri şuradan indirebilirsin: %2$@."
+          }
+        }
+      }
+    },
+    "No Lists" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste Yok"
+          }
+        }
+      }
+    },
+    "No Podcasts" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcast Yok"
+          }
+        }
+      }
+    },
+    "No Text Found" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metin Bulunamadı"
+          }
+        }
+      }
+    },
+    "No Words" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelime Yok"
+          }
+        }
+      }
+    },
+    "No key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar yok"
+          }
+        }
+      }
+    },
+    "No learning languages" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğrenilen dil yok"
+          }
+        }
+      }
+    },
+    "No words match." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eşleşen kelime yok."
+          }
+        }
+      }
+    },
+    "No words yet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz kelime yok"
+          }
+        }
+      }
+    },
+    "Not reviewed yet. It will appear in today's reviews." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz tekrar edilmedi. Bugünkü tekrarlarda görünecek."
+          }
+        }
+      }
+    },
+    "Not set up" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlanmadı"
+          }
+        }
+      }
+    },
+    "Not supported on this device" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu cihazda desteklenmiyor"
+          }
+        }
+      }
+    },
+    "Nothing to review yet" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Henüz tekrar edilecek bir şey yok"
+          }
+        }
+      }
+    },
+    "Notifications are off for Vocabulary-OS, so plans can't remind you." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS için bildirimler kapalı, bu yüzden planlar sana hatırlatamaz."
+          }
+        }
+      }
+    },
+    "OK" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamam"
+          }
+        }
+      }
+    },
+    "Object" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nesne"
+          }
+        }
+      }
+    },
+    "Off" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kapalı"
+          }
+        }
+      }
+    },
+    "Oldest First" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önce En Eski"
+          }
+        }
+      }
+    },
+    "On this device" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu cihazda"
+          }
+        }
+      }
+    },
+    "On-device AI by default, or the AI provider of your choice." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varsayılan olarak cihaz içi yapay zekâ ya da seçtiğin yapay zekâ sağlayıcısı."
+          }
+        }
+      }
+    },
+    "Only one %@ voice is installed, so both hosts share it. Download another in %@ to hear two voices." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Only one %1$@ voice is installed, so both hosts share it. Download another in %2$@ to hear two voices."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yalnızca bir %1$@ ses yüklü, bu yüzden iki sunucu da onu kullanıyor. İki ses duymak için şuradan bir tane daha indir: %2$@."
+          }
+        }
+      }
+    },
+    "Optional API key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İsteğe bağlı API anahtarı"
+          }
+        }
+      }
+    },
+    "Other model ID" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başka bir model kimliği"
+          }
+        }
+      }
+    },
+    "Page" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sayfa"
+          }
+        }
+      }
+    },
+    "Paste your API key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API anahtarını yapıştır"
+          }
+        }
+      }
+    },
+    "Pause" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duraklat"
+          }
+        }
+      }
+    },
+    "Photograph a page of a book or choose a photo. Then tap a word to see what it means in its sentence." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir kitap sayfasının fotoğrafını çek ya da bir fotoğraf seç. Sonra bir kelimeye dokunarak cümlesindeki anlamını gör."
+          }
+        }
+      }
+    },
+    "Photograph something around you or choose a photo, and learn its name in the language you're studying." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çevrendeki bir şeyin fotoğrafını çek ya da bir fotoğraf seç; öğrendiğin dildeki adını öğren."
+          }
+        }
+      }
+    },
+    "Pick one or more. You can add languages later in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir ya da daha fazlasını seç. Daha sonra Ayarlar'dan dil ekleyebilirsin."
+          }
+        }
+      }
+    },
+    "Plans" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planlar"
+          }
+        }
+      }
+    },
+    "Plans can remind you at most %lld times a week. Choose fewer days, or turn another plan off." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planlar sana haftada en fazla %lld kez hatırlatabilir. Daha az gün seç ya da başka bir planı kapat."
+          }
+        }
+      }
+    },
+    "Play" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oynat"
+          }
+        }
+      }
+    },
+    "Play Again" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yeniden Oynat"
+          }
+        }
+      }
+    },
+    "Play from Here" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buradan Oynat"
+          }
+        }
+      }
+    },
+    "Podcast" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcast"
+          }
+        }
+      }
+    },
+    "Podcasts" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcast'ler"
+          }
+        }
+      }
+    },
+    "Podcasts you create appear here." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oluşturduğun podcast'ler burada görünür."
+          }
+        }
+      }
+    },
+    "Practice" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alıştırma"
+          }
+        }
+      }
+    },
+    "Previous Line" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önceki Satır"
+          }
+        }
+      }
+    },
+    "Private by design" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasarımı gereği gizli"
+          }
+        }
+      }
+    },
+    "Questions" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorular"
+          }
+        }
+      }
+    },
+    "Quiz" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test"
+          }
+        }
+      }
+    },
+    "Recent" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son Eklenen"
+          }
+        }
+      }
+    },
+    "Recommended models are cheap and fast. Model names change; loading the list shows what your key can use." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önerilen modeller ucuz ve hızlıdır. Model adları değişebilir; listeyi yüklemek anahtarının neleri kullanabildiğini gösterir."
+          }
+        }
+      }
+    },
+    "Remind Me" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hatırlat"
+          }
+        }
+      }
+    },
+    "Remove" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çıkar"
+          }
+        }
+      }
+    },
+    "Remove Favorite" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Favorilerden Çıkar"
+          }
+        }
+      }
+    },
+    "Remove Key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtarı Kaldır"
+          }
+        }
+      }
+    },
+    "Removing a language hides its words. They come back when you add the language again." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir dili kaldırmak kelimelerini gizler. Dili yeniden eklediğinde geri gelirler."
+          }
+        }
+      }
+    },
+    "Repeat these" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bunları tekrar et"
+          }
+        }
+      }
+    },
+    "Requests go straight from this device to the provider you choose, using your key. Keys stay in your Keychain and sync through iCloud Keychain." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İstekler, anahtarınla doğrudan bu cihazdan seçtiğin sağlayıcıya gider. Anahtarlar Anahtar Zinciri'nde kalır ve iCloud Anahtar Zinciri ile eşzamanlanır."
+          }
+        }
+      }
+    },
+    "Review" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrar"
+          }
+        }
+      }
+    },
+    "Reviews" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekrarlar"
+          }
+        }
+      }
+    },
+    "Right" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doğru"
+          }
+        }
+      }
+    },
+    "Save" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydet"
+          }
+        }
+      }
+    },
+    "Save Address" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresi Kaydet"
+          }
+        }
+      }
+    },
+    "Save Key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtarı Kaydet"
+          }
+        }
+      }
+    },
+    "Save at least %lld %@ words to make a podcast." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Save at least %1$lld %2$@ words to make a podcast."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcast yapmak için en az %1$lld %2$@ kelime kaydet."
+          }
+        }
+      }
+    },
+    "Save at least %lld %@ words to make a quiz: the wrong answers come from your other words." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Save at least %1$lld %2$@ words to make a quiz: the wrong answers come from your other words."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test yapmak için en az %1$lld %2$@ kelime kaydet: yanlış cevaplar diğer kelimelerinden gelir."
+          }
+        }
+      }
+    },
+    "Save photo with words" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğrafı kelimelerle kaydet"
+          }
+        }
+      }
+    },
+    "Saved %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kaydedildi: %@"
+          }
+        }
+      }
+    },
+    "Saved in Keychain" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtar Zinciri'nde kayıtlı"
+          }
+        }
+      }
+    },
+    "Saved words stay as they are. Review history isn't part of a word list, so every new word starts fresh." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kayıtlı kelimeler olduğu gibi kalır. Tekrar geçmişi kelime listesine dahil değildir; her yeni kelime sıfırdan başlar."
+          }
+        }
+      }
+    },
+    "Search languages" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dil ara"
+          }
+        }
+      }
+    },
+    "Search words or translations" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelime ya da çeviri ara"
+          }
+        }
+      }
+    },
+    "See Results" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonuçları Gör"
+          }
+        }
+      }
+    },
+    "Select some text to capture." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakalamak için biraz metin seç."
+          }
+        }
+      }
+    },
+    "Sentence" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cümle"
+          }
+        }
+      }
+    },
+    "Server address" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu adresi"
+          }
+        }
+      }
+    },
+    "Server set" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sunucu ayarlı"
+          }
+        }
+      }
+    },
+    "Session Complete" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oturum Tamamlandı"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar"
+          }
+        }
+      }
+    },
+    "Settings > Accessibility > Spoken Content > Voices" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar > Erişilebilirlik > Seslendirilen İçerik > Sesler"
+          }
+        }
+      }
+    },
+    "Share All %@ Words" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tüm %@ Kelimeleri Paylaş"
+          }
+        }
+      }
+    },
+    "Share List" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listeyi Paylaş"
+          }
+        }
+      }
+    },
+    "Share and Import" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paylaş ve İçe Aktar"
+          }
+        }
+      }
+    },
+    "Show Answer" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cevabı Göster"
+          }
+        }
+      }
+    },
+    "Sort" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sırala"
+          }
+        }
+      }
+    },
+    "Speed" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hız"
+          }
+        }
+      }
+    },
+    "Start Learning" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öğrenmeye Başla"
+          }
+        }
+      }
+    },
+    "Start Quiz" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testi Başlat"
+          }
+        }
+      }
+    },
+    "Story" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hikâye"
+          }
+        }
+      }
+    },
+    "Style" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarz"
+          }
+        }
+      }
+    },
+    "System Settings > Accessibility > Spoken Content" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistem Ayarları > Erişilebilirlik > Seslendirilen İçerik"
+          }
+        }
+      }
+    },
+    "Take Photo" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğraf Çek"
+          }
+        }
+      }
+    },
+    "Tap to make a new episode with your words." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimelerinle yeni bir bölüm yapmak için dokun."
+          }
+        }
+      }
+    },
+    "Tap to review the words due today." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün tekrar zamanı gelen kelimeler için dokun."
+          }
+        }
+      }
+    },
+    "Tap to start: ^[%lld question](inflect: true) on your words." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Başlamak için dokun: kelimelerinden %lld soru."
+          }
+        }
+      }
+    },
+    "Test Connection" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bağlantıyı Sına"
+          }
+        }
+      }
+    },
+    "Test answers" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test yanıtları"
+          }
+        }
+      }
+    },
+    "Text" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Metin"
+          }
+        }
+      }
+    },
+    "The Plan Couldn't Start" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan Başlatılamadı"
+          }
+        }
+      }
+    },
+    "The answer is “%@”." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cevap: “%@”."
+          }
+        }
+      }
+    },
+    "The model is downloading" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model indiriliyor"
+          }
+        }
+      }
+    },
+    "The words go into your list “%@”, which is created if you don't have it." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimeler “%@” listene eklenir; bu liste yoksa oluşturulur."
+          }
+        }
+      }
+    },
+    "Their explanations are in %@." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Açıklama dili: %@."
+          }
+        }
+      }
+    },
+    "These words are in your native language, so they can't be studied here." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu kelimeler ana dilinde, bu yüzden burada çalışılamaz."
+          }
+        }
+      }
+    },
+    "This file isn't a Vocabulary-OS word list." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu dosya bir Vocabulary-OS kelime listesi değil."
+          }
+        }
+      }
+    },
+    "This word list was made by a newer version of Vocabulary-OS. Update the app to open it." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu kelime listesi Vocabulary-OS'in daha yeni bir sürümüyle yapılmış. Açmak için uygulamayı güncelle."
+          }
+        }
+      }
+    },
+    "Time" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saat"
+          }
+        }
+      }
+    },
+    "To explain a word, Vocabulary-OS sends the word, its sentence and your language names to %@ with your API key. Quizzes and podcasts send the words you choose and their meanings. Requests go directly from this device; there is no Vocabulary-OS server." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir kelimeyi açıklamak için Vocabulary-OS kelimeyi, cümlesini ve dillerinin adlarını API anahtarınla %@ sağlayıcısına gönderir. Testler ve podcast'ler seçtiğin kelimeleri ve anlamlarını gönderir. İstekler doğrudan bu cihazdan gider; Vocabulary-OS sunucusu yoktur."
+          }
+        }
+      }
+    },
+    "Today" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bugün"
+          }
+        }
+      }
+    },
+    "Translation" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Çeviri"
+          }
+        }
+      }
+    },
+    "Try a sharper photo, with the page filling the frame." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sayfanın kareyi doldurduğu daha net bir fotoğraf dene."
+          }
+        }
+      }
+    },
+    "Turn On Notifications" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bildirimleri Aç"
+          }
+        }
+      }
+    },
+    "Turn on Apple Intelligence in Settings" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayarlar'dan Apple Intelligence'ı aç"
+          }
+        }
+      }
+    },
+    "Two hosts talk about an everyday topic." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İki sunucu gündelik bir konuyu konuşur."
+          }
+        }
+      }
+    },
+    "Up to %lld new words and %lld reviews a day." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Up to %1$lld new words and %2$lld reviews a day."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Günde en fazla %1$lld yeni kelime ve %2$lld tekrar."
+          }
+        }
+      }
+    },
+    "Use This Provider" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Sağlayıcıyı Kullan"
+          }
+        }
+      }
+    },
+    "What did you hear?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ne duydun?"
+          }
+        }
+      }
+    },
+    "What does it mean?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anlamı ne?"
+          }
+        }
+      }
+    },
+    "When" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaman"
+          }
+        }
+      }
+    },
+    "Which word fills the gap?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boşluğa hangi kelime gelir?"
+          }
+        }
+      }
+    },
+    "Which word is it?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hangi kelime?"
+          }
+        }
+      }
+    },
+    "With your own key" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kendi anahtarınla"
+          }
+        }
+      }
+    },
+    "Word" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelime"
+          }
+        }
+      }
+    },
+    "Words" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimeler"
+          }
+        }
+      }
+    },
+    "Words in This Episode" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu Bölümdeki Kelimeler"
+          }
+        }
+      }
+    },
+    "Words you capture will be scheduled for review here." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakaladığın kelimeler tekrar için burada planlanır."
+          }
+        }
+      }
+    },
+    "Words you save in Capture appear here." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakala'da kaydettiğin kelimeler burada görünür."
+          }
+        }
+      }
+    },
+    "Writing questions…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorular yazılıyor…"
+          }
+        }
+      }
+    },
+    "Writing the script…" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senaryo yazılıyor…"
+          }
+        }
+      }
+    },
+    "You pay the provider directly for what you use. Vocabulary-OS never sees your key or your words." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kullandığın kadarını doğrudan sağlayıcıya ödersin. Vocabulary-OS anahtarını ya da kelimelerini asla görmez."
+          }
+        }
+      }
+    },
+    "You reviewed ^[%lld word](inflect: true)." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kelime tekrar ettin."
+          }
+        }
+      }
+    },
+    "Your native language" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ana dilin"
+          }
+        }
+      }
+    },
+    "Your words stay in your iCloud. No account, no tracking." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimelerin iCloud'unda kalır. Hesap yok, takip yok."
+          }
+        }
+      }
+    },
+    "Zoom In" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yakınlaştır"
+          }
+        }
+      }
+    },
+    "Zoom Out" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uzaklaştır"
+          }
+        }
+      }
+    },
+    "^[%lld day](inflect: true)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld gün"
+          }
+        }
+      }
+    },
+    "^[%lld question](inflect: true) from your words. Every answer counts as a review." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kelimelerinden %lld soru. Her cevap bir tekrar sayılır."
+          }
+        }
+      }
+    },
+    "^[%lld word](inflect: true)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kelime"
+          }
+        }
+      }
+    },
+    "^[%lld word](inflect: true) added." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kelime eklendi."
+          }
+        }
+      }
+    },
+    "^[%lld word](inflect: true) you already had stayed as they were." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaten sahip olduğun %lld kelime olduğu gibi kaldı."
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

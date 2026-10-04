@@ -1,0 +1,86 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Can't Save from Here" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buradan Kaydedilemiyor"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vazgeç"
+          }
+        }
+      }
+    },
+    "Choose Your Languages First" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Önce Dillerini Seç"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitti"
+          }
+        }
+      }
+    },
+    "Open Vocabulary-OS and choose your native and learning languages. Then you can save words from any app." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS'i aç ve ana dilinle öğrendiğin dilleri seç. Sonra her uygulamadan kelime kaydedebilirsin."
+          }
+        }
+      }
+    },
+    "Test answers" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test yanıtları"
+          }
+        }
+      }
+    },
+    "This build of Vocabulary-OS has no App Group, so the Share extension can't pass words to the app." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS'in bu derlemesinde App Group yok, bu yüzden Paylaş uzantısı kelimeleri uygulamaya aktaramıyor."
+          }
+        }
+      }
+    },
+    "Vocabulary-OS" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vocabulary-OS"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
