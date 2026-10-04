@@ -165,8 +165,12 @@ Each capability can be built and tested on its own. Build order goes top to bott
   - reverse (native → term);
   - cloze (a new sentence with a blank);
   - listening (the term is spoken, I pick its meaning).
-- Every generated question is validated: four distinct options, exactly one correct, and the target
-  word present where required. If generation fails, a local generator builds questions from my saved
+- The right answer always comes from my saved word. The AI writes a new sentence for every cloze
+  question. Wrong answers come from my other saved words when there are at least three, because
+  the on-device model's distractors were sometimes synonyms of the answer or in the wrong language
+  (`docs/eval/quiz-on-device.md`); with fewer words the AI writes them too.
+- Every question is validated: four distinct options, exactly one correct, and the target word
+  present where required. If generation fails, a local generator builds questions from my saved
   data.
 - Each answer is recorded as a review: correct → Good, wrong → Again. The summary shows what to
   repeat.
@@ -357,8 +361,9 @@ Conventions:
   library (the Simulator has no Notes app). On macOS, `scripts/mac-smoke.sh --services` sends text
   through the Services menu and expects the capture window. Sharing on the Mac needs a signed build
   with the App Group, so the maintainer checks it at the checkpoint.
-- **AI quality:** `vos-eval` runs fixed sentences against the on-device model and reports the
-  right-sense rate and language adherence. It runs before and after any prompt change, and results
+- **AI quality:** `vos-eval insight` runs fixed sentences against the on-device model and reports the
+  right-sense rate and language adherence; `vos-eval quiz` checks that on-device quiz questions are
+  valid and how fast the first one is ready. It runs before and after any prompt change, and results
   are recorded under `docs/eval/`. Cloud providers are checked manually with the maintainer's key and
   never in automated tests.
 - **The iOS Simulator has no on-device model assets.** The framework reports the model as available,

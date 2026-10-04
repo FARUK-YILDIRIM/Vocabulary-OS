@@ -2,15 +2,15 @@ import Foundation
 import VocabularyAI
 import VocabularyCore
 
-/// Evaluates prompts against Apple's on-device model on this Mac (ADR-003, task T09).
+/// Evaluates prompts against Apple's on-device model on this Mac (ADR-003, tasks T09 and T24).
 ///
-///     swift run --package-path Packages/VocabularyKit vos-eval insight [--report <file.md>]
+///     swift run --package-path Packages/VocabularyKit vos-eval insight|quiz [--report <file.md>]
 @main
 struct VosEval {
     static func main() async {
         let arguments = Array(CommandLine.arguments.dropFirst())
-        guard arguments.first == "insight" else {
-            print("usage: vos-eval insight [--report <file.md>]")
+        guard let command = arguments.first, ["insight", "quiz"].contains(command) else {
+            print("usage: vos-eval insight|quiz [--report <file.md>]")
             exit(64)
         }
         let client = AppleOnDeviceClient()
@@ -18,19 +18,32 @@ struct VosEval {
             print("The on-device model is not available here: \(client.availability)")
             exit(1)
         }
-        let report = await InsightEvaluation(client: client).run()
-        print(report.summary)
+        let (summary, markdown, meetsTargets): (String, String, Bool)
+        if command == "insight" {
+            let report = await InsightEvaluation(client: client).run()
+            (summary, markdown, meetsTargets) = (report.summary, report.markdown, report.meetsTargets)
+        } else {
+            // As in the app: distractors from the learner's other words, the model for cloze sentences.
+            let library = QuizEvaluation.plan.map(\.word)
+            let withLibrary = await QuizEvaluation(client: client, library: library).run()
+            // Diagnostic only: the model writes every distractor, as for a learner with very few words.
+            let modelOnly = await QuizEvaluation(client: client, library: []).run()
+            summary = withLibrary.summary + "\n\nModel-written distractors (no library):\n" + modelOnly.summary
+            markdown = withLibrary.markdown + "\n## Model-written distractors (diagnostic)\n\n" + modelOnly.table
+            meetsTargets = withLibrary.meetsTargets
+        }
+        print(summary)
         if let index = arguments.firstIndex(of: "--report"), arguments.indices.contains(index + 1) {
             let url = URL(fileURLWithPath: arguments[index + 1])
             do {
-                try report.markdown.write(to: url, atomically: true, encoding: .utf8)
+                try markdown.write(to: url, atomically: true, encoding: .utf8)
                 print("Report written to \(url.path)")
             } catch {
                 print("Could not write the report: \(error.localizedDescription)")
                 exit(1)
             }
         }
-        exit(report.meetsTargets ? 0 : 2)
+        exit(meetsTargets ? 0 : 2)
     }
 }
 

@@ -51,7 +51,7 @@ scripts/ui-test.sh [Class/test]                     # XCUITests on iPhone 17 (VO
 scripts/mac-smoke.sh [-vos-preset-profile tr:en,de] # macOS Debug build launches, shows a window, logs no errors
 scripts/mac-smoke.sh --self-test [capture|page|object]  # macOS app captures a word with the real on-device model
 scripts/mac-smoke.sh --services                     # Services → "Capture in Vocabulary-OS" opens the capture window
-swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-device prompt evaluation
+swift run --package-path Packages/VocabularyKit vos-eval insight|quiz   # live on-device prompt evaluation
 ```
 
 ## Code Conventions
