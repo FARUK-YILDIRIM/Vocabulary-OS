@@ -1,5 +1,6 @@
 import Foundation
 import FoundationModels
+import Synchronization
 import Testing
 import VocabularyAI
 import VocabularyCore
@@ -99,6 +100,34 @@ import VocabularyData
         #expect(model.phase == .idle)
     }
 
+    /// Picking another language while the first explanation is on its way must neither show nor
+    /// save the word in the first language (success criterion 3).
+    @Test func choosingAnotherLanguageWhileExplainingDropsTheFirstExplanation() async {
+        let client = GatedClient()
+        let model = CaptureModel(text: "Hand", settings: settings, destination: destination) {
+            InsightService(client: client, strategy: .stepwise, source: InsightSource(providerID: "test"))
+        }
+        #expect(model.term == "Hand")
+        model.language = .english
+        model.explain()
+        #expect(model.phase == .explaining)
+
+        model.language = .german
+        #expect(model.phase == .ready, "the learner can explain it again at once")
+        #expect(model.canExplain)
+        client.open()
+        await model.waitForExplanation()
+        try? await Task.sleep(for: .milliseconds(50))
+        #expect(model.insight == nil, "the English explanation never shows")
+        #expect(model.phase == .ready)
+
+        model.explain()
+        await model.waitForExplanation()
+        #expect(model.insight?.language == .german)
+        model.save()
+        #expect(destination.saved.map(\.insight.language) == [.german])
+    }
+
     @Test func warnsWhenTheWordIsAlreadySaved() async {
         destination.existing = ["cookie": "çerez"]
         let model = model("This website uses cookies for tracking.")
@@ -119,6 +148,31 @@ private final class RecordingDestination: CaptureDestination {
 
     func save(_ insight: WordInsight, captureSource: CaptureSource) throws {
         saved.append((insight, captureSource))
+    }
+}
+
+/// Holds every answer until the test opens it, like a slow model.
+final class GatedClient: GenerationClient {
+    private let state = Mutex<(isOpen: Bool, waiting: [CheckedContinuation<Void, Never>])>((false, []))
+
+    func open() {
+        let waiting = state.withLock { state in
+            state.isOpen = true
+            defer { state.waiting = [] }
+            return state.waiting
+        }
+        waiting.forEach { $0.resume() }
+    }
+
+    func generate(_ request: GenerationRequest, schema: GenerationSchema) async throws(AIError) -> GeneratedContent {
+        await withCheckedContinuation { continuation in
+            let isOpen = state.withLock { state in
+                if !state.isOpen { state.waiting.append(continuation) }
+                return state.isOpen
+            }
+            if isOpen { continuation.resume() }
+        }
+        return try await CannedClient().generate(request, schema: schema)
     }
 }
 

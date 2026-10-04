@@ -165,6 +165,8 @@ public final class CaptureModel {
     }
 
     private func finish(with insight: WordInsight) {
+        // An explanation for a language the learner has since moved away from never shows.
+        guard insight.language == language else { return }
         self.insight = insight
         duplicateTranslation = destination.savedTranslation(lemma: insight.lemma, language: insight.language)
         phase = .explained
@@ -205,11 +207,11 @@ public final class CaptureModel {
         select(tokens.tokens.count == 1 ? 0...0 : nil)
     }
 
+    /// Another language makes the explanation, or the one on its way, wrong for this word.
     private func languageChanged() {
+        explainTask?.cancel()
         insight = nil
         duplicateTranslation = nil
-        if phase != .explaining {
-            phase = language == nil ? .idle : .ready
-        }
+        phase = language == nil ? .idle : .ready
     }
 }

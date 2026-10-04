@@ -57,10 +57,15 @@ public struct TokenizedText: Sendable {
         return Self.collapsingWhitespace(String(text[range]))
     }
 
+    /// The longest context sent with a word. Text without sentence punctuation can be a whole page,
+    /// which would go to the AI with every request.
+    public static let maximumSentenceLength = 400
+
     /// The sentence that contains the selection, used as the context for AI insight.
     ///
     /// A single line break counts as a space, because recognized and pasted text often wraps
-    /// mid-sentence; a blank line ends the paragraph and therefore the sentence.
+    /// mid-sentence; a blank line ends the paragraph and therefore the sentence. A longer sentence
+    /// than `maximumSentenceLength` is cut down to the whole words around the selection.
     public func sentence(containing selection: ClosedRange<Int>) -> String? {
         guard tokens.indices.contains(selection.lowerBound), tokens.indices.contains(selection.upperBound) else {
             return nil
@@ -80,7 +85,38 @@ public struct TokenizedText: Sendable {
             return true
         }
         guard let match else { return nil }
-        return Self.collapsingWhitespace(String(flattened[match]))
+        let sentence = Self.collapsingWhitespace(String(flattened[match]))
+        guard sentence.count > Self.maximumSentenceLength else { return sentence }
+        return window(around: selection, within: match, of: flattened)
+    }
+
+    /// The words around the selection, within the sentence, that fit `maximumSentenceLength`.
+    private func window(around selection: ClosedRange<Int>, within sentence: Range<String.Index>, of flattened: String) -> String {
+        // Token ranges index `text`; `flattened` has the same UTF-16 offsets.
+        func offset(_ index: String.Index) -> Int { index.utf16Offset(in: text) }
+        let bounds = sentence.lowerBound.utf16Offset(in: flattened)..<sentence.upperBound.utf16Offset(in: flattened)
+        func isInSentence(_ token: Int) -> Bool {
+            bounds.contains(offset(tokens[token].range.lowerBound)) && offset(tokens[token].range.upperBound) <= bounds.upperBound
+        }
+        func length(_ first: Int, _ last: Int) -> Int {
+            offset(tokens[last].range.upperBound) - offset(tokens[first].range.lowerBound)
+        }
+        var first = selection.lowerBound, last = selection.upperBound
+        var grew = true
+        while grew {
+            grew = false
+            if first > 0, isInSentence(first - 1), length(first - 1, last) <= Self.maximumSentenceLength {
+                first -= 1
+                grew = true
+            }
+            if last + 1 < tokens.count, isInSentence(last + 1), length(first, last + 1) <= Self.maximumSentenceLength {
+                last += 1
+                grew = true
+            }
+        }
+        let start = String.Index(utf16Offset: offset(tokens[first].range.lowerBound), in: flattened)
+        let end = String.Index(utf16Offset: offset(tokens[last].range.upperBound), in: flattened)
+        return Self.collapsingWhitespace(String(flattened[start..<end]))
     }
 
     /// Replaces each line break that is not part of a blank line with a space. Every replacement

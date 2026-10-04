@@ -70,6 +70,21 @@ import Testing
         #expect(text.sentence(containing: ran...ran) == "He ran the family company for ten years.")
     }
 
+    /// Text without sentence punctuation can be a whole page; only the words around the selection
+    /// go to the AI with every request (security review).
+    @Test func aVeryLongSentenceIsCutDownToTheWordsAroundTheSelection() throws {
+        let words = (1...600).map { "word\($0)" }
+        let text = TokenizedText(words.joined(separator: " "))
+        let index = try #require(text.tokens.firstIndex { $0.text == "word300" })
+
+        let sentence = try #require(text.sentence(containing: index...index))
+        #expect(sentence.count <= TokenizedText.maximumSentenceLength)
+        #expect(sentence.count > TokenizedText.maximumSentenceLength - 12, "as many words as fit")
+        #expect(sentence.contains("word299 word300 word301"))
+        #expect(!sentence.hasPrefix(" ") && !sentence.hasSuffix(" "))
+        #expect(sentence.split(separator: " ").allSatisfy { $0.hasPrefix("word") }, "only whole words")
+    }
+
     @Test func keepsParagraphBreaksAsSentenceBoundaries() throws {
         let text = TokenizedText("A short heading\n\nThe old man ran the company.")
         let ran = try #require(text.tokens.firstIndex { $0.text == "ran" })
