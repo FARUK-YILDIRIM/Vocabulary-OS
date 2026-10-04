@@ -122,6 +122,19 @@ import VocabularyCore
         #expect(throws: WordListDocument.ReadError.notAWordList) { try WordListDocument.read(Data("not json".utf8)) }
     }
 
+    /// A file is checked for its size before it is read, so a huge one can't freeze the app.
+    @Test func refusesAFileTooLargeToOpenBeforeReadingIt() throws {
+        let url = FileManager.default.temporaryDirectory.appending(path: "list-\(UUID().uuidString).vocabularyos")
+        defer { try? FileManager.default.removeItem(at: url) }
+        let data = try library.document(for: try makeTravelList()).data()
+        try data.write(to: url)
+
+        #expect(try WordListDocument.read(contentsOf: url).words.count == 2)
+        #expect(throws: WordListDocument.ReadError.tooLarge) {
+            try WordListDocument.read(contentsOf: url, maximumSize: data.count - 1)
+        }
+    }
+
     @Test func writesCSVForSpreadsheets() throws {
         let document = library.document(for: try makeTravelList())
         let csv = CSVExporter.csv(for: document.words)
@@ -133,5 +146,20 @@ import VocabularyCore
         #expect(lines.contains { $0.contains("\"Anlam, \"\"tırnaklı\"\".\"") })
         #expect(CSVExporter.field("one\ntwo") == "\"one\ntwo\"")
         #expect(CSVExporter.field("plain") == "plain")
+    }
+
+    /// Words can come from shared lists and web pages; a spreadsheet must show them, not run them.
+    @Test(arguments: [
+        ("=HYPERLINK(\"https://example.com\",\"Audio\")", "\"'=HYPERLINK(\"\"https://example.com\"\",\"\"Audio\"\")\""),
+        ("+1 to remember", "'+1 to remember"),
+        ("-ish", "'-ish"),
+        ("@SUM(A1)", "'@SUM(A1)"),
+        ("\tTab", "'\tTab"),
+        ("\rReturn", "\"'\rReturn\""),
+        ("＝HYPERLINK()", "'＝HYPERLINK()"),
+        ("e-mail", "e-mail"),
+    ])
+    func keepsSpreadsheetsFromRunningFormulas(_ value: String, _ expected: String) {
+        #expect(CSVExporter.field(value) == expected)
     }
 }

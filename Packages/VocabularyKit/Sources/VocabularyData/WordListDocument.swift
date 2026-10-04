@@ -68,6 +68,19 @@ public struct WordListDocument: Codable, Hashable, Sendable {
         case notAWordList
         /// Written by a newer version of the app.
         case newerVersion
+        /// Larger than any word list the app writes.
+        case tooLarge
+    }
+
+    /// The largest file the app opens; 10,000 words take about 5 MB.
+    public static let maximumFileSize = 10_000_000
+
+    /// Reads a word list file. Its size is checked first, so a huge file can't freeze the app
+    /// (security review).
+    public static func read(contentsOf url: URL, maximumSize: Int = maximumFileSize) throws -> WordListDocument {
+        let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+        guard size <= maximumSize else { throw ReadError.tooLarge }
+        return try read(Data(contentsOf: url))
     }
 
     public init(name: String?, language: LanguageCode, words: [Word], exportedAt: Date = .now) {
@@ -152,8 +165,18 @@ extension WordRepository {
 
     /// Adds the file's words the library doesn't have; saved words stay as they are. A named list is
     /// created, or reused when the language already has one with that name, and gets all its words.
+    /// Everything is saved at once at the end, so a failed import leaves nothing behind.
     @discardableResult
     public func importWords(from document: WordListDocument) throws -> WordListImport {
+        do {
+            return try addWords(from: document)
+        } catch {
+            context.rollback()
+            throw error
+        }
+    }
+
+    private func addWords(from document: WordListDocument) throws -> WordListImport {
         let target = try document.name.map { try list(named: $0, language: document.language) }
         var result = WordListImport(newWords: 0, existingWords: 0)
         var handled: Set<PersistentIdentifier> = []
@@ -164,7 +187,8 @@ extension WordRepository {
                 if handled.contains(existing.persistentModelID) { continue }
                 result.existingWords += 1
             } else {
-                entry = try save(word.insight, captureSource: .imported)
+                entry = VocabularyEntry(insight: word.insight, captureSource: .imported)
+                context.insert(entry)
                 result.newWords += 1
             }
             handled.insert(entry.persistentModelID)
@@ -207,9 +231,13 @@ public enum CSVExporter {
         return rows.map { $0.map(field).joined(separator: ",") + "\r\n" }.joined()
     }
 
-    /// The value quoted when it has a comma, quote or line break; quotes inside are doubled.
+    /// The value quoted when it has a comma, quote or line break; quotes inside are doubled. A value
+    /// a spreadsheet would run as a formula starts with an apostrophe, which it shows as text: words
+    /// come from shared lists and web pages too (OWASP, CSV injection).
     public static func field(_ value: String) -> String {
-        guard value.contains(where: { $0 == "," || $0 == "\"" || $0.isNewline }) else { return value }
-        return "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+        let formulaStarts: Set<Character> = ["=", "+", "-", "@", "\t", "\r", "＝", "＋", "－", "＠"]
+        let text = value.first.map(formulaStarts.contains) == true ? "'" + value : value
+        guard text.contains(where: { $0 == "," || $0 == "\"" || $0.isNewline }) else { return text }
+        return "\"" + text.replacingOccurrences(of: "\"", with: "\"\"") + "\""
     }
 }

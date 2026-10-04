@@ -2431,6 +2431,16 @@
         }
       }
     },
+    "This word list is too large to open." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bu kelime listesi açılamayacak kadar büyük."
+          }
+        }
+      }
+    },
     "This word list was made by a newer version of Vocabulary-OS. Update the app to open it." : {
       "localizations" : {
         "tr" : {

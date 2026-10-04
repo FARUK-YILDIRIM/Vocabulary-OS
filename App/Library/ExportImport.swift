@@ -77,18 +77,14 @@ extension AppModel {
             removeInboxCopy(of: url)
         }
         do {
-            let data = try Data(contentsOf: url)
-            let document: WordListDocument
-            do throws(WordListDocument.ReadError) {
-                document = try WordListDocument.read(data)
-            } catch .newerVersion {
-                navigation.importError = String(localized: "This word list was made by a newer version of Vocabulary-OS. Update the app to open it.")
-                return
-            } catch {
-                navigation.importError = String(localized: "This file isn't a Vocabulary-OS word list.")
-                return
-            }
+            let document = try WordListDocument.read(contentsOf: url)
             navigation.pendingImport = PendingImport(document: document, preview: try repository.preview(document))
+        } catch WordListDocument.ReadError.newerVersion {
+            navigation.importError = String(localized: "This word list was made by a newer version of Vocabulary-OS. Update the app to open it.")
+        } catch WordListDocument.ReadError.notAWordList {
+            navigation.importError = String(localized: "This file isn't a Vocabulary-OS word list.")
+        } catch WordListDocument.ReadError.tooLarge {
+            navigation.importError = String(localized: "This word list is too large to open.")
         } catch {
             navigation.importError = error.localizedDescription
         }
