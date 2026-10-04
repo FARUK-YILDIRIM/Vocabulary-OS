@@ -55,6 +55,15 @@ import VocabularyData
         #expect(model.canExplain)
     }
 
+    @Test func selectingAWordByItsSpellingPicksItsFirstOccurrence() {
+        let model = model("Danach treffe ich meine Freundin im Park, wo wir auf einer alten Bank sitzen und reden.")
+        model.selectFirst(matching: "Bank")
+
+        #expect(model.term == "Bank")
+        #expect(model.sentence == "Danach treffe ich meine Freundin im Park, wo wir auf einer alten Bank sitzen und reden.")
+        #expect(model.language == .german)
+    }
+
     @Test func explainingAndSavingDeliversTheInsight() async {
         let model = model("This website uses cookies for tracking.")
         model.tap(tokenAt: 3)

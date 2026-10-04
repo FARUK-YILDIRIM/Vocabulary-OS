@@ -38,6 +38,14 @@ import UniformTypeIdentifiers
         #expect(result.height == 480)
     }
 
+    @Test func makesUprightDisplayImagesOfAnySize() throws {
+        let sideways = TestImages.jpeg(TestImages.blank(width: 3024, height: 4032), exifOrientation: 6)
+        let image = try #require(ImageThumbnailer.image(of: sideways, maximumPixelSize: 2048))
+
+        #expect(image.width == 2048)
+        #expect(image.height == 1536)
+    }
+
     @Test func rejectsDataThatIsNotAnImage() {
         #expect(ImageThumbnailer.thumbnail(of: Data("nope".utf8)) == nil)
     }

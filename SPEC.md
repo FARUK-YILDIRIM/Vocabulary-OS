@@ -364,7 +364,7 @@ Conventions:
   but generation then fails. So:
   - UI tests use canned AI answers (`-vos-ai-stub YES`);
   - the real on-device model is exercised on macOS by `vos-eval` and `scripts/mac-smoke.sh --self-test`,
-    which captures a word inside the running app.
+    which captures a word inside the running app, from a sentence or from a generated book page.
 - **No network in tests:** HTTP is stubbed with a `URLProtocol` subclass.
 - **Bugs:** a failing reproduction test comes before the fix (prove-it pattern).
 - **Coverage goal:** about 90% of lines in VocabularyCore; at least 70% in AI and Data.

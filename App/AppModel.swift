@@ -170,6 +170,8 @@ struct LaunchOptions {
     static let aiStub = "vos-ai-stub"
     static let selfTest = "vos-self-test"
     static let seedLibrary = "vos-seed-library"
+    static let captureMode = "vos-capture-mode"
+    static let samplePage = "vos-sample-page"
 
     private let defaults: UserDefaults
 
@@ -184,6 +186,14 @@ struct LaunchOptions {
 
     /// Fill the in-memory library with sample words (Debug builds only, see `SampleLibrary`).
     var seedsLibrary: Bool { defaults.bool(forKey: Self.seedLibrary) }
+
+    /// Open Capture in this mode, e.g. `page`.
+    var captureMode: CaptureScreen.Mode? {
+        defaults.string(forKey: Self.captureMode).flatMap(CaptureScreen.Mode.init(rawValue:))
+    }
+
+    /// Load a generated book page into page capture (Debug builds only, see `SamplePage`).
+    var usesSamplePage: Bool { defaults.bool(forKey: Self.samplePage) }
 
     /// Debug-only end-to-end check to run at launch, e.g. `capture` (see `SelfTest`).
     var selfTest: String? { defaults.string(forKey: Self.selfTest) }

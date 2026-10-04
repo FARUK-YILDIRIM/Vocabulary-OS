@@ -31,8 +31,9 @@ classifier is `ClassifyImageRequest` (Swift API) / `VNClassifyImageRequest`.
     drag-and-drop on Mac).
   - Run Vision **`RecognizeDocumentsRequest`** (iOS/macOS 26). It returns paragraphs whose
     `transcript` joins wrapped lines, each with `words` (per-word observations and normalized boxes).
-  - The app draws tappable word boxes over the image. A tap extracts the sentence that contains the
-    word from the paragraph transcript.
+  - The app draws tappable word boxes over the image, which the learner can zoom so small print is
+    easy to hit. A tap extracts the sentence that contains the word from the paragraph transcript
+    and opens the capture flow with that word selected.
   - Words come with their punctuation (`Bank,`), which is trimmed. Each word is matched to its place
     in the transcript in reading order, so a word that appears twice gets the sentence it is in.
   - Recognition is guided by the learner's languages. The request supports all 19 catalog languages,

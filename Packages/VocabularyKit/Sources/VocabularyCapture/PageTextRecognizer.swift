@@ -29,6 +29,9 @@ public struct PageTextRecognizer: Sendable {
         do {
             observations = try await request.perform(on: imageData)
         } catch {
+            if Task.isCancelled {
+                throw .cancelled
+            }
             Self.logger.error("Page recognition failed: \(error.localizedDescription, privacy: .public)")
             throw .recognitionFailed
         }

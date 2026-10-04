@@ -2,10 +2,12 @@
 # macOS smoke test for the Debug build: the app launches, shows a window, keeps running and logs no
 # errors or faults from our subsystem. Visual review of macOS screens stays a manual checkpoint step.
 #
-# Usage:   scripts/mac-smoke.sh [--self-test | --services] [launch arguments...]   (run scripts/verify.sh first)
+# Usage:   scripts/mac-smoke.sh [--self-test [capture|page] | --services] [launch arguments...]
+#          (run scripts/verify.sh first)
 # Example: scripts/mac-smoke.sh -vos-preset-profile tr:en,de -vos-tab settings
 # --self-test captures a word with the real on-device model inside the app (App/Debug/SelfTest.swift),
-# which the iOS Simulator can't do because it has no model assets.
+# which the iOS Simulator can't do because it has no model assets: from a sentence (capture, the
+# default) or from a generated book page (page).
 # --services sends text through Services → "Capture in Vocabulary-OS" and expects the capture window.
 set -euo pipefail
 
@@ -16,10 +18,15 @@ DISPLAY_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$APP/Co
 BINARY="$APP/Contents/MacOS/VocabularyOS"
 
 self_test=0
+self_test_mode=capture
 services=0
 if [[ "${1:-}" == "--self-test" ]]; then
     self_test=1
     shift
+    if [[ "${1:-}" == "capture" || "${1:-}" == "page" ]]; then
+        self_test_mode="$1"
+        shift
+    fi
 elif [[ "${1:-}" == "--services" ]]; then
     services=1
     shift
@@ -36,7 +43,7 @@ logged_problems() {
 }
 
 if [[ $self_test -eq 1 ]]; then
-    open -n "$APP" --args -ui-testing YES -vos-preset-profile tr:en,de -vos-self-test capture "$@"
+    open -n "$APP" --args -ui-testing YES -vos-preset-profile tr:en,de -vos-self-test "$self_test_mode" "$@"
     for _ in $(seq 1 60); do
         pgrep -f "$BINARY" >/dev/null || break
         sleep 0.5
@@ -45,7 +52,7 @@ if [[ $self_test -eq 1 ]]; then
     result="$(/usr/bin/log show --start "$start" --style compact \
         --predicate 'subsystem == "app.vocabularyos" AND category == "selftest"' 2>/dev/null | grep -v '^Timestamp' || true)"
     echo "$result"
-    if grep -q "Self-test capture passed" <<<"$result"; then
+    if grep -q "Self-test $self_test_mode passed" <<<"$result"; then
         echo "macOS self-test passed"
         exit 0
     fi

@@ -77,6 +77,13 @@ public final class CaptureModel {
         select(TokenSelection.afterTap(on: index, current: selection))
     }
 
+    /// Selects the first word spelled exactly like `term`, as if the learner had tapped it.
+    public func selectFirst(matching term: String) {
+        if let index = tokens.tokens.firstIndex(where: { $0.text == term }) {
+            select(index...index)
+        }
+    }
+
     public func select(_ range: ClosedRange<Int>?) {
         explainTask?.cancel()
         selection = range

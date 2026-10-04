@@ -38,7 +38,7 @@ Done holds and its commit exists.
 - [x] T17 `feat(share)`: share extension inbox (iOS)
 - [x] T18 `feat(share)`: macOS share extension and Services menu — sharing from Safari needs a signed build (owner)
 - [x] T19 `feat(capture)`: page text recognition
-- [ ] T20 `feat(capture)`: page capture screen
+- [x] T20 `feat(capture)`: page capture screen
 - [ ] T21 `feat(capture)`: object capture
 - [ ] Checkpoint 4: Capture
 
@@ -57,5 +57,10 @@ Done holds and its commit exists.
 - [ ] T30 `feat(sharing)`: export and import
 - [ ] T31 `feat(i18n)`: Turkish localization
 - [ ] T32 `feat(ui)`: accessibility and polish
+  - Noticed while building T20:
+    - drag-and-drop photos onto page capture (ADR-005);
+    - in the selectable text, punctuation can wrap to the next line away from its word;
+    - under a capture, "Explained by" names the selected provider instead of the insight's source,
+      which only differs with canned test answers.
 - [ ] T33 `docs(release)`: open-source release readiness
 - [ ] Checkpoint 6: Ship
