@@ -134,7 +134,8 @@ Facts that shape the design:
      - **insight:** term, sentence, language names;
      - **quiz:** words and their meanings;
      - **podcast:** words;
-     - **object:** the chosen label. The photo is sent only if spec open question 3 is answered yes.
+     - **object:** the chosen label, and the photo when the learner turns on sending object photos
+       (ADR-005).
    - Generated insight is stored on the word, so repeated views make no new calls.
 
 ## Alternatives Considered

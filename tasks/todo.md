@@ -66,7 +66,12 @@ Done holds and its commit exists.
 - [x] T30 `feat(sharing)`: export and import — with the list management deferred from T12
 - [x] T31 `feat(i18n)`: Turkish localization — verify.sh now keeps the catalogs in step and requires Turkish
 - [x] T32 `feat(ui)`: accessibility and polish — the main screens pass the system audit at the default and the largest text size; the items noticed in T20, T27 and T28 are done
-- [ ] T33 `docs(release)`: open-source release readiness
+
+## Phase 7: The owner's answers and the ship review
+- [ ] T33 `feat(capture)`: object photos for cloud models, opt-in (owner's answer 3)
+- [ ] T34 `feat(ai)`: more providers and learner-added providers (owner's answer 4)
+- [ ] T35 `fix`: ship review findings (code, security and test reviews)
+- [ ] T36 `docs(release)`: open-source release readiness
   - Noticed while building T29:
     - Info.plist lacks the `remote-notification` background mode that ADR-002 lists for CloudKit
       sync, so changes from other devices arrive only while the app is open;

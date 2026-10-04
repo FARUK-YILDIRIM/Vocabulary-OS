@@ -568,18 +568,86 @@ because its files are tiny and only work together.
 - **Files:** views touched as needed; `App/Resources/Assets.xcassets`.
 - **Scope:** M.
 
-## Task T33: Open-source release readiness
+### Phase 7: The owner's answers and the ship review
+
+The owner answered the open questions on 2026-10-04 (SPEC.md → Open Questions). Answers 3 and 4 add
+T33 and T34. The ship review ran its three reviews (code, security, tests) after T32; T35 fixes what
+they found, and T36 prepares the release.
+
+## Task T33: Object photos for cloud models
+- **Description:** with the learner's permission (AI settings, off by default), object capture sends
+  the downscaled photo with the naming request, so a cloud model sees the object and can name it
+  without a label (SPEC C6, ADR-005).
+- **Acceptance criteria:**
+  - [ ] OpenAI-compatible requests carry the photo as an image part and Anthropic requests as a
+    base64 image block; the on-device model never gets it (tests).
+  - [ ] The photo is sent only when the setting is on and a cloud provider is in use, at most
+    1024 px and without metadata.
+  - [ ] With the photo, an object can be named with an empty label.
+- **Verification:** package tests; UI tests on iPhone and iPad; `scripts/verify.sh`.
+- **Dependencies:** T21.
+- **Files:** `VocabularyAI/GenerationClient.swift`, the cloud clients, `ObjectNamingService.swift`,
+  `SettingsStore.swift`, `ObjectCaptureModel.swift`, `ObjectCaptureFlowView.swift`,
+  `App/Settings/AISettingsView.swift`.
+- **Scope:** S.
+
+## Task T34: More providers and learner-added providers
+- **Description:**
+  - Add the popular providers that offer an OpenAI-compatible API to the catalog, each checked
+    against its documentation (ADR-003).
+  - Learners add, edit and delete their own OpenAI-compatible providers: a name, an address and an
+    optional key. These replace the single "Custom" entry.
+  - A key stays with its server: moving a provider to another host removes its key. Plain HTTP is
+    accepted only for local-network addresses.
+  - A provider at `localhost` is chosen per device; other choices still sync (ADR-002).
+- **Acceptance criteria:**
+  - [ ] A stubbed-network test checks the request shape of every catalog entry.
+  - [ ] Added providers sync, can be chosen and keep their keys under their own IDs.
+  - [ ] Moving an added provider to another host removes its key; public `http` addresses are
+    refused.
+  - [ ] Choosing a `localhost` provider leaves the other devices' choice alone.
+- **Verification:** package tests; the AI settings UI test on iPhone and iPad; `scripts/verify.sh`.
+- **Dependencies:** T16.
+- **Files:** `ProviderCatalog.swift`, `ProviderRouter.swift`, `SettingsStore.swift`,
+  `KeyValueBacking.swift`, `App/Settings/`, `Extensions/ShareExtension/ShareSession.swift`, ADR-003.
+- **Scope:** M.
+
+## Task T35: Ship review fixes
+- **Description:** fix what the reviews found before release; `docs/ship-review.md` records each
+  finding and its outcome. Among them:
+  - the word store failing to open (no silent in-memory store that swallows the Share extension's
+    inbox), and a schema setup that survives the first model change;
+  - synced or handed-off data that fails to decode is no longer thrown away;
+  - the capture language race, writes to words deleted under an open screen, and duplicates from
+    the Share extension;
+  - long cloud generations that time out after 60 s;
+  - CSV formula injection, and an HTTP session that caches nothing and never follows a redirect to
+    another host;
+  - UI tests isolated from the device's inbox, tighter accessibility audit filters, and a key test
+    that can fail.
+- **Acceptance criteria:**
+  - [ ] Each fixed finding has a test that failed before the fix.
+  - [ ] No Critical or High finding stays open without the owner's decision.
+- **Verification:** package tests; the full UI suites on iPhone and iPad; `scripts/verify.sh`.
+- **Dependencies:** T34.
+- **Scope:** M.
+
+## Task T36: Open-source release readiness
 - **Description:**
   - The README covers features, screenshots, build and signing setup, privacy and the
     architecture.
-  - Add the LICENSE (owner's choice), CONTRIBUTING.md and SECURITY.md.
-  - The ship review runs three reviews (code, security, tests) and records a GO/NO-GO decision.
+  - Add the MIT LICENSE, CONTRIBUTING.md and SECURITY.md, and set the bundle ID prefix.
+  - The ship review records a GO/NO-GO recommendation; the GO is the owner's.
+  - Noticed earlier: the `remote-notification` background mode that ADR-002 lists for CloudKit
+    sync; `scripts/mac-smoke.sh` counting windows on the current Space only; the empty macOS camera
+    usage text; `scripts/verify.sh` catching only warnings in source files.
 - **Acceptance criteria:**
   - [ ] A fresh clone builds following the README alone.
   - [ ] The ship review has no Critical findings open.
 - **Verification:** follow the README in a clean checkout; `scripts/verify.sh`.
-- **Dependencies:** T32.
-- **Files:** `README.md`, `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `docs/ship-review.md`.
+- **Dependencies:** T35.
+- **Files:** `README.md`, `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `docs/ship-review.md`,
+  `docs/screenshots/`, `Config/Base.xcconfig`, `project.yml`, `App/Info.plist`, `scripts/`.
 - **Scope:** S.
 
 ### Checkpoint 6 — Ship
@@ -601,5 +669,6 @@ because its files are tiny and only work together.
 
 ## Open Questions
 
-See [SPEC.md → Open Questions](../SPEC.md#open-questions). Questions 1 (signing identity) and 2
-(license) block only T33 and real-device sync. Question 3 (photos to cloud) affects T21.
+The owner answered all five on 2026-10-04 ([SPEC.md → Open Questions](../SPEC.md#open-questions)).
+Answers 3 and 4 added T33 and T34. Real-device sync still needs the owner's Team ID in the local
+signing file.

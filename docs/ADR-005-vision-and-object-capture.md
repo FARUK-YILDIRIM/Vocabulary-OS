@@ -2,7 +2,7 @@
 
 ## Status
 Accepted (revised 2026-10-04: APIs verified, technology chosen; page recognition details corrected
-when it was built)
+when it was built; sending object photos to cloud models made opt-in)
 
 ## Date
 2026-10-03
@@ -54,8 +54,11 @@ classifier is `ClassifyImageRequest` (Swift API) / `VNClassifyImageRequest`.
     choice per language: der/die/das, le/la/l', el/la, il/lo/la/l', o/a, de/het, and en/ett (en/et,
     en/ei/et) for the Scandinavian languages. Other languages get none.
   - Measured with the macOS on-device model: a cup photo classified as `cup` and named "die Tasse".
-  - Sending the photo itself to a vision-capable cloud model is **off by default**. It waits on
-    spec open question 3.
+  - Sending the photo to the learner's cloud provider is **opt-in** (the owner's answer to spec
+    question 3, 2026-10-04). With **Send object photos** on and a cloud provider in use, the naming
+    request carries the downscaled JPEG (long edge ≤ 1024 px, no metadata), so the model can see the
+    object and can name it without a label. It is off by default, and the on-device model reads
+    text only.
 - **Images:**
   - Only downscaled JPEG thumbnails (long edge ≤ 1024 px, quality 0.7) are stored, as
     `@Attribute(.externalStorage)`. Originals are not kept.

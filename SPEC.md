@@ -53,23 +53,29 @@ Each capability can be built and tested on its own. Build order goes top to bott
 **C2 — AI providers**
 - By default the app uses the Apple on-device model, with no key and no account. Settings shows its
   status: available, Apple Intelligence turned off, device not eligible, or model still downloading.
-- I can connect a cloud provider from a list we maintain: OpenAI, Anthropic, Google Gemini,
-  DeepSeek, OpenRouter, Mistral, or any OpenAI-compatible endpoint such as Ollama or LM Studio on a
-  Mac. Each entry links to the page where I create a key, offers recommended models, can refresh the
-  model list from the provider, and has a "Test connection" button.
+- I can connect a cloud provider from a list of the popular providers that we maintain (ADR-003
+  has the current list), or add my own: any OpenAI-compatible service, with a name, its address and
+  an optional key, such as Ollama or LM Studio on a Mac, or a company's gateway. I can add several,
+  edit them and delete them. Each listed provider links to the page where I create a key. Every
+  provider offers recommended models or my own model ID, can refresh the model list from the
+  provider, and has a "Test connection" button.
+- The provider I choose and the ones I add follow me to my other devices, except a provider at this
+  device's own address (`localhost`), which only this device uses.
 - Keys are stored only in the Keychain, synced through iCloud Keychain, and never written to logs,
   UserDefaults, SwiftData or exported files.
 - One provider and model is active at a time. If a cloud call fails I see an actionable message
   (invalid key, quota, network) and can retry or switch to the on-device model. There is no silent
   fallback.
 - Before the first cloud request I am told what is sent: the selected term, its sentence, and my
-  language names.
+  language names. Object photos are sent only if I turn that on (C6).
 - *Accept when:*
   - with no key, insight works on device;
   - with a key, requests go to the chosen provider (stubbed-network tests check the request shape
     for every provider family);
   - an invalid key surfaces as "invalid API key";
-  - a test asserts the key never appears in the settings store or logs.
+  - a test asserts the key never appears in the settings store or logs;
+  - a provider I add works like a listed one; its key is kept under its own name, and changing its
+    address to another server removes the key (tests).
 
 **C3 — Insight (meaning in context)**
 - Input:
@@ -143,9 +149,15 @@ Each capability can be built and tested on its own. Build order goes top to bott
   - The AI gives the object's name in my learning language (with article/gender where the language
     has one), a translation and a one-line meaning in my native language, and an example sentence.
   - If the suggestion fails, I type what the object is, in any language.
+  - If I turn on **Send object photos** in the AI settings and use a cloud provider, the photo goes
+    with the request, made smaller and without its location, so the model can see the object. It
+    can then name the object even when I leave the label empty. This is off by default, and the
+    on-device model never gets photos.
   - The word is saved with a downscaled photo.
 - *Accept when:* recognition tests on generated page images return the right sentence for a tapped
-  word; classification labels map to saved words; photos are stored at most 1024 px on the long edge.
+  word; classification labels map to saved words; photos are stored at most 1024 px on the long edge;
+  a photo is sent only when I allowed it and a cloud provider is in use, in the form each provider
+  family accepts (tests).
 
 **C7 — Review (spaced repetition)**
 - Saved words enter the review queue.
@@ -237,6 +249,8 @@ Each capability can be built and tested on its own. Build order goes top to bott
   - No analytics, telemetry or tracking.
   - The only network calls go to the AI provider the user configured, and only when they use an AI
     feature.
+  - Photos leave the device only when the learner turns on sending object photos to a cloud
+    provider.
   - User content is logged only with `privacy: .private`.
 - **Offline:** the library, review, stored podcasts and on-device AI work without a network.
 - **Accessibility:** Dynamic Type, VoiceOver labels on every control, sufficient contrast, and
@@ -447,12 +461,13 @@ v1 is done when all of these hold:
 
 ## Open Questions
 
-1. **Signing identity:** Real iCloud sync, the App Group and a signed Mac build need an Apple
-   Developer Team ID and a bundle ID prefix (for example `com.<you>.vocabularyos`). Until they are
-   provided, the app runs locally without sync. That covers the simulator and an ad-hoc signed Mac
-   build.
-2. **License:** MIT or Apache-2.0 for the open-source release?
-3. **Photos and cloud models:** for object capture, may the photo be sent to a vision-capable cloud
-   model (opt-in), or should photos never leave the device (labels only)?
-4. **Provider list:** is the list in C2 right?
-5. **v1.1 items:** are the four items deferred to v1.1 acceptable?
+The owner answered all five on 2026-10-04:
+1. **Signing identity:** the bundle ID prefix is `com.farukyildirim.vocabularyos`, which gives the
+   App Group `group.com.farukyildirim.vocabularyos` and the iCloud container
+   `iCloud.com.farukyildirim.vocabularyos`. The Team ID stays in the gitignored
+   `Config/Signing.local.xcconfig`.
+2. **License:** MIT.
+3. **Photos and cloud models:** yes, as an opt-in. Object photos may go to the learner's cloud
+   provider when they turn that on (C6).
+4. **Provider list:** list the popular providers, and let learners add their own (C2).
+5. **v1.1 items:** no change was asked for; the four items stay in v1.1.
