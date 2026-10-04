@@ -46,11 +46,19 @@ final class AccessibilityUITests: XCTestCase {
                 // Content passes under a screen's own bottom controls too, like under the tab bar.
                 let chrome = controls.map { CGRect(x: window.minX, y: $0.frame.minY - 20, width: window.width, height: window.maxY) }
                 let handler: (XCUIAccessibilityAuditIssue) -> Bool = { issue in
-                    if let chrome, let element = issue.element, element.frame.intersects(chrome) { return true }
+                    if let chrome, let element = issue.element, element.frame.intersects(chrome) {
+                        // Text passing under the controls is measured against them.
+                        if issue.auditType == .contrast && !element.isHittable { return true }
+                        // The controls stop growing at xxxLarge, as system bars do, and show large
+                        // in the large content viewer (SPEC, accessibility).
+                        if issue.auditType == .dynamicType { return true }
+                    }
                     // Toolbars cap their text size, as the system's do; a long press shows an item
-                    // large. These are the session sheets' toolbar items.
+                    // large. These are the session sheets' toolbar items, and the buttons in a
+                    // navigation bar, such as a sheet's Cancel and Save.
                     if issue.auditType == .dynamicType, let element = issue.element,
-                       ["flashcard-close", "flashcard-progress", "quiz-close", "quiz-progress"].contains(element.identifier) {
+                       ["flashcard-close", "flashcard-progress", "quiz-close", "quiz-progress"].contains(element.identifier)
+                        || (element.elementType == .button && element.frame.maxY < window.minY + 140) {
                         return true
                     }
                     if self.isExpected(issue, in: window, atLargestSize: size == "largest") { return true }
@@ -135,8 +143,14 @@ final class AccessibilityUITests: XCTestCase {
         // the platform's design and darken with Increase Contrast.
         if issue.auditType == .contrast && issue.compactDescription == "Contrast nearly passed" { return true }
         // Without an element the audit can't say where the text is: the tab bar's glass and the
-        // fades at the screen's edges.
-        guard let element = issue.element else { return true }
+        // fades at the screen's edges. Such issues are kept next to the screenshots, not failed.
+        guard let element = issue.element else {
+            let attachment = XCTAttachment(string: "\(issue.auditType) – \(issue.compactDescription) – no element")
+            attachment.name = "unlocated-issue"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            return true
+        }
         // Disabled controls are exempt from contrast requirements (WCAG 1.4.3).
         if issue.auditType == .contrast && !element.isEnabled { return true }
         // Text behind other views, such as a flashcard behind its rating buttons at the largest size,
@@ -149,9 +163,12 @@ final class AccessibilityUITests: XCTestCase {
         }
         // Content fades on purpose as it scrolls under the bars, at the top and under the floating
         // tab bar, and at the edges of a horizontal scroll view. Scrolled screens are audited twice,
-        // so that content is checked where it is clear.
-        if element.frame.maxY > window.maxY - 160 || element.frame.minY < window.minY + 180 { return true }
-        if element.frame.maxX > window.maxX || element.frame.minX < window.minX { return true }
+        // so that content is checked where it is clear. Only its contrast is let through: the
+        // bars' own items are audited like everything else.
+        if issue.auditType == .contrast {
+            if element.frame.maxY > window.maxY - 160 || element.frame.minY < window.minY + 180 { return true }
+            if element.frame.maxX > window.maxX || element.frame.minX < window.minX { return true }
+        }
         // The system search field reports its own placeholder as clipped, though it fits.
         if issue.auditType == .textClipped && element.elementType == .searchField { return true }
         // Settings' rows report their titles as clipped by a fraction of a point; they fit, as the
@@ -166,7 +183,9 @@ final class AccessibilityUITests: XCTestCase {
         return false
     }
 
-    /// WCAG contrast between the darkest and the lightest pixel of the element's screenshot.
+    /// WCAG contrast between the element's background, its most common color, and the color that
+    /// stands out most from it among those covering at least 1% of the element. A stray dark or light
+    /// pixel, such as an icon's, doesn't count.
     private func measuredContrast(of element: XCUIElement) -> Double? {
         guard let image = element.screenshot().image.cgImage else { return nil }
         let width = image.width, height = image.height
@@ -179,18 +198,29 @@ final class AccessibilityUITests: XCTestCase {
             context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
             return true
         }
-        guard drawn else { return nil }
+        guard drawn, width * height > 0 else { return nil }
         func linear(_ channel: UInt8) -> Double {
             let value = Double(channel) / 255
             return value <= 0.03928 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4)
         }
-        var darkest = 1.0, lightest = 0.0
+        // Luminance in 64 steps, with how many pixels have each.
+        let steps = 64
+        var counts = [Int](repeating: 0, count: steps)
+        var sums = [Double](repeating: 0, count: steps)
         for index in stride(from: 0, to: pixels.count, by: 4) {
             let luminance = 0.2126 * linear(pixels[index]) + 0.7152 * linear(pixels[index + 1]) + 0.0722 * linear(pixels[index + 2])
-            darkest = min(darkest, luminance)
-            lightest = max(lightest, luminance)
+            let step = min(Int(luminance * Double(steps)), steps - 1)
+            counts[step] += 1
+            sums[step] += luminance
         }
-        return (lightest + 0.05) / (darkest + 0.05)
+        guard let background = counts.indices.max(by: { counts[$0] < counts[$1] }) else { return nil }
+        let backgroundLuminance = sums[background] / Double(counts[background])
+        let minimumPixels = max(1, width * height / 100)
+        func contrast(_ step: Int) -> Double {
+            let luminance = sums[step] / Double(counts[step])
+            return (max(luminance, backgroundLuminance) + 0.05) / (min(luminance, backgroundLuminance) + 0.05)
+        }
+        return counts.indices.filter { $0 != background && counts[$0] >= minimumPixels }.map(contrast).max()
     }
 
     /// Keeps a description of each issue next to the screenshots, as well as failing the test.

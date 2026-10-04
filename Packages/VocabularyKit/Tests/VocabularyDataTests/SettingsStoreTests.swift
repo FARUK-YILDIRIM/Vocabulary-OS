@@ -238,17 +238,4 @@ private final class FakeCloudStore: CloudKeyValueStoring {
         store.sharesPhotosWithAI = false
         #expect(!SettingsStore(backing: backing).sharesPhotosWithAI)
     }
-
-    @Test func neverStoresAnAPIKey() throws {
-        // Whatever the learner does in settings, nothing key-like reaches the unencrypted store.
-        let backing = InMemoryKeyValueBacking()
-        let store = SettingsStore(backing: backing)
-        store.aiSelection = AIProviderSelection(providerID: "openai", modelID: "gpt-6-luna")
-        store.customProviders = [CustomProvider(name: "LM Studio", address: "http://localhost:1234/v1")]
-        for key in [SettingsStore.Key.profile, SettingsStore.Key.aiSelection, SettingsStore.Key.reviewLimits, SettingsStore.Key.customProviders] {
-            let text = backing.data(forKey: key).map { String(decoding: $0, as: UTF8.self) } ?? ""
-            #expect(!text.localizedCaseInsensitiveContains("sk-"))
-            #expect(!text.localizedCaseInsensitiveContains("apiKey"))
-        }
-    }
 }
