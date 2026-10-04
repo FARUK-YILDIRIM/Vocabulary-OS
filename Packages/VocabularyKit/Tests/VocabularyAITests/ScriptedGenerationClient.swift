@@ -17,9 +17,11 @@ actor ScriptedGenerationClient: GenerationClient {
 
     private var replies: [Reply]
     private(set) var calls: [Call] = []
+    nonisolated let supportsImages: Bool
 
-    init(_ replies: [Reply]) {
+    init(_ replies: [Reply], supportsImages: Bool = false) {
         self.replies = replies
+        self.supportsImages = supportsImages
     }
 
     func generate(_ request: GenerationRequest, schema: GenerationSchema) async throws(AIError) -> GeneratedContent {

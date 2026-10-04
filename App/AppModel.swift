@@ -120,6 +120,12 @@ final class AppModel {
         settings.customProviderURL
     }
 
+    /// Whether object capture sends the photo with the request: the learner allowed it and a cloud
+    /// provider is in use; the on-device model reads text only (ADR-005).
+    var sendsPhotosToAI: Bool {
+        settings.sharesPhotosWithAI && router.provider(for: settings.aiSelection).kind != .appleOnDevice
+    }
+
     var providerDisplayName: String {
         router.displayName(for: settings.aiSelection)
     }

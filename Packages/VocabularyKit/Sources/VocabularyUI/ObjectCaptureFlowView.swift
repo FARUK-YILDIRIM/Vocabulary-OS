@@ -92,11 +92,25 @@ public struct ObjectCaptureFlowView: View {
                 }
             }
             TextField(text: $model.label) {
-                Text("Or type what it is", bundle: .module)
+                if model.sendsPhoto {
+                    Text("Or type what it is (optional)", bundle: .module)
+                } else {
+                    Text("Or type what it is", bundle: .module)
+                }
             }
             .textFieldStyle(.roundedBorder)
             .autocorrectionDisabled()
             .accessibilityIdentifier("object-label-field")
+            if model.sendsPhoto {
+                Label {
+                    Text("Your AI provider sees the photo, so it can name the object even if you leave this empty.", bundle: .module)
+                } icon: {
+                    Image(systemName: "eye")
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .accessibilityIdentifier("object-sends-photo")
+            }
         }
     }
 

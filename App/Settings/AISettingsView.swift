@@ -52,10 +52,27 @@ struct AISettingsView: View {
             } footer: {
                 Text("Requests go straight from this device to the provider you choose, using your key. Keys stay in your Keychain and sync through iCloud Keychain.")
             }
+
+            Section {
+                Toggle("Send object photos", isOn: sharesPhotos)
+                    .accessibilityIdentifier("ai-send-photos")
+            } header: {
+                Text("Photos")
+            } footer: {
+                Text("When you name a photographed object, a cloud provider gets a smaller copy of the photo, without its location, so it can see the object. When this is off, only what you call the object is sent. The on-device model never needs the photo.")
+            }
         }
         .formStyle(.grouped)
         .navigationTitle("AI Provider")
         .onAppear { onDeviceAvailability = AppleOnDeviceClient().availability }
+    }
+
+    private var sharesPhotos: Binding<Bool> {
+        Binding {
+            app.settings.sharesPhotosWithAI
+        } set: {
+            app.settings.sharesPhotosWithAI = $0
+        }
     }
 
     private func keyStatus(for provider: ProviderDescriptor) -> LocalizedStringKey {

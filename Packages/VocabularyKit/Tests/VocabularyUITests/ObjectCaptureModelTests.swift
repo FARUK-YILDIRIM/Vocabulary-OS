@@ -1,6 +1,7 @@
 #if canImport(AppKit)
 import Foundation
 import FoundationModels
+import Synchronization
 import Testing
 import VocabularyAI
 import VocabularyCapture
@@ -17,11 +18,15 @@ import VocabularyData
         settings.profile = try LearnerProfile(native: .turkish, learning: [.english, .german])
     }
 
-    private func makeModel(client: any GenerationClient = TasseClient()) -> ObjectCaptureModel {
-        ObjectCaptureModel(settings: settings, destination: { [destination] photo in
-            destination.photo = photo
-            return destination
-        }) {
+    private func makeModel(client: any GenerationClient = TasseClient(), sharesPhoto: Bool = false) -> ObjectCaptureModel {
+        ObjectCaptureModel(
+            settings: settings,
+            destination: { [destination] photo in
+                destination.photo = photo
+                return destination
+            },
+            sharesPhoto: { sharesPhoto }
+        ) {
             InsightService(client: client, strategy: .stepwise, source: InsightSource(providerID: "test"))
         }
     }
@@ -96,6 +101,44 @@ import VocabularyData
         #expect(model.canName)
     }
 
+    @Test func whenPhotosMayBeSentTheNamingRequestCarriesASmallCopy() async throws {
+        let client = TasseClient(supportsImages: true)
+        let model = makeModel(client: client, sharesPhoto: true)
+        await model.load(ObjectImages.jpeg())
+        #expect(model.sendsPhoto)
+        model.name()
+        await model.waitForName()
+
+        #expect(model.phase == .named)
+        let image = try #require(client.requests.withLock { $0.first?.image })
+        let sent = try #require(ImageThumbnailer.image(of: image.jpegData, maximumPixelSize: 4096))
+        #expect(max(sent.width, sent.height) <= ImageThumbnailer.maximumPixelSize)
+    }
+
+    @Test func otherwiseOnlyTheLabelIsSent() async throws {
+        let client = TasseClient(supportsImages: true)
+        let model = makeModel(client: client)
+        await model.load(ObjectImages.jpeg())
+        #expect(!model.sendsPhoto)
+        model.name()
+        await model.waitForName()
+
+        #expect(client.requests.withLock { $0.count } == 1)
+        #expect(client.requests.withLock { $0.first?.image } == nil)
+    }
+
+    @Test func whenPhotosMayBeSentTheLabelCanBeLeftEmpty() async {
+        let model = makeModel(sharesPhoto: true)
+        await model.load(ObjectImages.jpeg())
+        model.label = ""
+        #expect(model.canName)
+
+        let labelOnly = makeModel()
+        await labelOnly.load(ObjectImages.jpeg())
+        labelOnly.label = ""
+        #expect(!labelOnly.canName)
+    }
+
     @Test func dataThatIsNotAnImageFails() async {
         let model = makeModel()
         await model.load(Data("nope".utf8))
@@ -111,11 +154,19 @@ import VocabularyData
     }
 }
 
-/// Answers every object-naming prompt with "die Tasse".
-private struct TasseClient: GenerationClient {
-    var failure: AIError?
+/// Answers every object-naming prompt with "die Tasse" and keeps the requests.
+private final class TasseClient: GenerationClient {
+    let failure: AIError?
+    let supportsImages: Bool
+    let requests = Mutex<[GenerationRequest]>([])
+
+    init(failure: AIError? = nil, supportsImages: Bool = false) {
+        self.failure = failure
+        self.supportsImages = supportsImages
+    }
 
     func generate(_ request: GenerationRequest, schema: GenerationSchema) async throws(AIError) -> GeneratedContent {
+        requests.withLock { $0.append(request) }
         if let failure { throw failure }
         do {
             return try GeneratedContent(json: #"{"name":"Tasse","article":"die","translation":"fincan","meaning":"İçecek içmek için kullanılan kulplu küçük kap.","example":"Die Tasse steht auf dem Tisch.","exampleTranslation":"Fincan masanın üstünde duruyor."}"#)

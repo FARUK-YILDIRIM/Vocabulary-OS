@@ -1629,6 +1629,16 @@
         }
       }
     },
+    "Photos" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğraflar"
+          }
+        }
+      }
+    },
     "Pick one or more. You can add languages later in Settings." : {
       "localizations" : {
         "tr" : {
@@ -2031,6 +2041,16 @@
         }
       }
     },
+    "Send object photos" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nesne fotoğraflarını gönder"
+          }
+        }
+      }
+    },
     "Sentence" : {
       "localizations" : {
         "tr" : {
@@ -2361,12 +2381,12 @@
         }
       }
     },
-    "To explain a word, Vocabulary-OS sends the word, its sentence and your language names to %@ with your API key. Quizzes and podcasts send the words you choose and their meanings. Requests go directly from this device; there is no Vocabulary-OS server." : {
+    "To explain a word, Vocabulary-OS sends the word, its sentence and your language names to %@ with your API key. Quizzes and podcasts send the words you choose and their meanings, and object photos are sent only if you turn that on. Requests go directly from this device; there is no Vocabulary-OS server." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bir kelimeyi açıklamak için Vocabulary-OS kelimeyi, cümlesini ve dillerinin adlarını API anahtarınla %@ sağlayıcısına gönderir. Testler ve podcast'ler seçtiğin kelimeleri ve anlamlarını gönderir. İstekler doğrudan bu cihazdan gider; Vocabulary-OS sunucusu yoktur."
+            "value" : "Bir kelimeyi açıklamak için Vocabulary-OS kelimeyi, cümlesini ve dillerinin adlarını API anahtarınla %@ sağlayıcısına gönderir. Testler ve podcast'ler seçtiğin kelimeleri ve anlamlarını gönderir; nesne fotoğrafları ise yalnızca bunu açarsan gönderilir. İstekler doğrudan bu cihazdan gider; Vocabulary-OS sunucusu yoktur."
           }
         }
       }
@@ -2483,6 +2503,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zaman"
+          }
+        }
+      }
+    },
+    "When you name a photographed object, a cloud provider gets a smaller copy of the photo, without its location, so it can see the object. When this is off, only what you call the object is sent. The on-device model never needs the photo." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğrafını çektiğin bir nesnenin adını bulurken bulut sağlayıcısı, nesneyi görebilmesi için fotoğrafın konum bilgisi olmayan küçük bir kopyasını alır. Bu kapalıyken yalnızca nesneye verdiğin ad gönderilir. Cihaz içi model fotoğrafa hiç ihtiyaç duymaz."
           }
         }
       }

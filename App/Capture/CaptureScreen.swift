@@ -85,6 +85,7 @@ struct CaptureScreen: View {
                 destination: { [repository = app.repository] photo in
                     LibraryCaptureDestination(repository: repository, photo: photo)
                 },
+                sharesPhoto: { [app] in app.sendsPhotosToAI },
                 insightService: app.makeInsightService
             )
         }

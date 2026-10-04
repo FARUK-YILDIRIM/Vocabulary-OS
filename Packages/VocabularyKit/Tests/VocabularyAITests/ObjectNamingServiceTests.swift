@@ -68,6 +68,49 @@ import VocabularyCore
         #expect(insight.examples.isEmpty)
     }
 
+    @Test func aPhotoGoesWithTheLabelToModelsThatReadImages() async throws {
+        let client = ScriptedGenerationClient([.json(tasse)], supportsImages: true)
+        var request = cupInGerman
+        request.photo = Data([0xFF, 0xD8, 0xFF])
+        _ = try await service(client).name(request)
+
+        let call = try #require(await client.calls.first)
+        #expect(call.request.image == GenerationImage(jpegData: Data([0xFF, 0xD8, 0xFF])))
+        #expect(call.request.prompt.contains("photo"))
+        #expect(call.request.prompt.contains("cup"))
+    }
+
+    @Test func withAPhotoTheModelNamesTheObjectWithoutALabel() async throws {
+        let client = ScriptedGenerationClient([.json(tasse)], supportsImages: true)
+        let request = ObjectNamingRequest(label: " ", language: .german, nativeLanguage: .turkish, photo: Data([0xFF, 0xD8, 0xFF]))
+        let insight = try await service(client).name(request)
+
+        #expect(insight.term == "die Tasse")
+        let prompt = try #require(await client.calls.first?.request.prompt)
+        #expect(prompt.contains("main object in the photo"))
+        #expect(prompt.contains("German"))
+    }
+
+    @Test func modelsThatReadOnlyTextGetTheLabelAlone() async throws {
+        let client = ScriptedGenerationClient([.json(tasse)])
+        var request = cupInGerman
+        request.photo = Data([0xFF, 0xD8, 0xFF])
+        _ = try await service(client).name(request)
+
+        let call = try #require(await client.calls.first)
+        #expect(call.request.image == nil)
+        #expect(!call.request.prompt.contains("photo"))
+    }
+
+    @Test func withoutALabelAModelThatReadsOnlyTextIsNotAsked() async {
+        let client = ScriptedGenerationClient([.json(tasse)])
+        let request = ObjectNamingRequest(label: "", language: .german, nativeLanguage: .turkish, photo: Data([0xFF, 0xD8, 0xFF]))
+        await #expect(throws: AIError.self) {
+            try await service(client).name(request)
+        }
+        #expect(await client.calls.isEmpty)
+    }
+
     @Test func failsWhenTheTranslationIsASentence() async {
         let json = #"{"name":"Tasse","article":"die","translation":"Bu, içecek içmek için kullanılan bir kaptır ve mutfakta durur.","meaning":"Küçük kulplu bir kap.","example":"Die Tasse ist voll.","exampleTranslation":"Fincan dolu."}"#
         await #expect(throws: AIError.self) {

@@ -4,15 +4,19 @@ import VocabularyCore
 
 /// A photographed object to name in one of the learner's languages (ADR-005).
 public struct ObjectNamingRequest: Sendable, Hashable {
-    /// What the object is: the classifier's English label, or what the learner typed.
+    /// What the object is: the classifier's English label, or what the learner typed. It may be
+    /// empty when the photo goes along.
     public var label: String
     public var language: LanguageCode
     public var nativeLanguage: LanguageCode
+    /// The downscaled photo, when the learner lets their cloud provider see it (ADR-005).
+    public var photo: Data?
 
-    public init(label: String, language: LanguageCode, nativeLanguage: LanguageCode) {
+    public init(label: String, language: LanguageCode, nativeLanguage: LanguageCode, photo: Data? = nil) {
         self.label = label
         self.language = language
         self.nativeLanguage = nativeLanguage
+        self.photo = photo
     }
 }
 
@@ -33,6 +37,14 @@ public struct ObjectNamingService: Sendable {
     }
 
     public func name(_ request: ObjectNamingRequest) async throws(AIError) -> WordInsight {
+        var request = request
+        request.label = request.label.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !client.supportsImages {
+            request.photo = nil
+        }
+        guard !request.label.isEmpty || request.photo != nil else {
+            throw .unknown("There is no label or photo to name")
+        }
         let name = try await ObjectNamingPrompts.name(request).run(on: client) { content throws(ValidationFailure) in
             try ObjectNamingValidator.name(content, request: request)
         }
@@ -88,11 +100,17 @@ enum ObjectNamingPrompts {
             InsightPrompts.text("example", "A short, natural \(learning) sentence of at most 10 words that uses the word."),
             InsightPrompts.text("exampleTranslation", "The \(native) translation of that sentence."),
         ]
+        let prompt = switch (request.photo, request.label.isEmpty) {
+        case (.some, true): "Name the main object in the photo in \(learning)."
+        case (.some, false): "Object in the photo: \(request.label). Name it in \(learning)."
+        case (.none, _): "Object: \(request.label). Name it in \(learning)."
+        }
         return PromptSpec(
             request: GenerationRequest(
                 instructions: "You name everyday objects for language learners whose native language is \(native). Write each field in the language it asks for.",
-                prompt: "Object: \(request.label). Name it in \(learning).",
-                maximumResponseTokens: 300
+                prompt: prompt,
+                maximumResponseTokens: 300,
+                image: request.photo.map(GenerationImage.init(jpegData:))
             ),
             schema: try InsightPrompts.schema("ObjectName", properties)
         )

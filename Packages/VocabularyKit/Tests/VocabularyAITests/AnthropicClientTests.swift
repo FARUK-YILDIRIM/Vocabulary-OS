@@ -38,6 +38,23 @@ import Testing
         #expect(items["minItems"] == nil, "Anthropic only accepts minItems 0 or 1")
     }
 
+    @Test func sendsAPhotoAsABase64ImageBlockBeforeTheText() async throws {
+        let (client, host) = try client(body: answer)
+        #expect(client.supportsImages)
+        var photoRequest = request
+        photoRequest.image = GenerationImage(jpegData: Data([0xFF, 0xD8, 0xFF]))
+        _ = try await client.generate(photoRequest, as: ProbeOutput.self)
+
+        let messages = try #require(StubURLProtocol.requests(to: host).first?.json["messages"] as? [[String: Any]])
+        let blocks = try #require(messages.first?["content"] as? [[String: Any]])
+        #expect(blocks.map { $0["type"] as? String } == ["image", "text"])
+        let source = try #require(blocks.first?["source"] as? [String: Any])
+        #expect(source["type"] as? String == "base64")
+        #expect(source["media_type"] as? String == "image/jpeg")
+        #expect(source["data"] as? String == "/9j/")
+        #expect(blocks.last?["text"] as? String == "Term: «Bank»")
+    }
+
     @Test func reportsRefusals() async throws {
         let (client, _) = try client(body: #"{"content":[{"type":"text","text":""}],"stop_reason":"refusal"}"#)
         await #expect(throws: AIError.refusal) {

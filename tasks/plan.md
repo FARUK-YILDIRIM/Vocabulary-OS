@@ -579,11 +579,11 @@ they found, and T36 prepares the release.
   the downscaled photo with the naming request, so a cloud model sees the object and can name it
   without a label (SPEC C6, ADR-005).
 - **Acceptance criteria:**
-  - [ ] OpenAI-compatible requests carry the photo as an image part and Anthropic requests as a
+  - [x] OpenAI-compatible requests carry the photo as an image part and Anthropic requests as a
     base64 image block; the on-device model never gets it (tests).
-  - [ ] The photo is sent only when the setting is on and a cloud provider is in use, at most
+  - [x] The photo is sent only when the setting is on and a cloud provider is in use, at most
     1024 px and without metadata.
-  - [ ] With the photo, an object can be named with an empty label.
+  - [x] With the photo, an object can be named with an empty label.
 - **Verification:** package tests; UI tests on iPhone and iPad; `scripts/verify.sh`.
 - **Dependencies:** T21.
 - **Files:** `VocabularyAI/GenerationClient.swift`, the cloud clients, `ObjectNamingService.swift`,

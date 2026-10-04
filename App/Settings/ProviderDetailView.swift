@@ -153,7 +153,7 @@ struct ProviderDetailView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("To explain a word, Vocabulary-OS sends the word, its sentence and your language names to \(provider.displayName) with your API key. Quizzes and podcasts send the words you choose and their meanings. Requests go directly from this device; there is no Vocabulary-OS server.")
+            Text("To explain a word, Vocabulary-OS sends the word, its sentence and your language names to \(provider.displayName) with your API key. Quizzes and podcasts send the words you choose and their meanings, and object photos are sent only if you turn that on. Requests go directly from this device; there is no Vocabulary-OS server.")
         }
     }
 

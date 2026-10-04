@@ -151,6 +151,16 @@
         }
       }
     },
+    "Or type what it is (optional)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya da ne olduğunu yaz (isteğe bağlı)"
+          }
+        }
+      }
+    },
     "Other meanings" : {
       "localizations" : {
         "tr" : {
@@ -327,6 +337,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vocabulary-OS ayarlarından ekleyebilirsin."
+          }
+        }
+      }
+    },
+    "Your AI provider sees the photo, so it can name the object even if you leave this empty." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yapay zekâ sağlayıcın fotoğrafı görür; burayı boş bıraksan da nesnenin adını bulabilir."
           }
         }
       }

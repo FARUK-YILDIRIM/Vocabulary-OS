@@ -20,6 +20,8 @@ public struct AnthropicClient: GenerationClient {
         self.session = session
     }
 
+    public var supportsImages: Bool { true }
+
     public func generate(_ request: GenerationRequest, schema: GenerationSchema) async throws(AIError) -> GeneratedContent {
         // Anthropic accepts minItems of only 0 or 1; validators enforce counts instead.
         let schemaObject = try JSONSchemaAdapter.jsonObject(for: schema, dropArrayBounds: true)
@@ -27,7 +29,7 @@ public struct AnthropicClient: GenerationClient {
             "model": model,
             "max_tokens": max(request.maximumResponseTokens * 4, 2048),
             "system": request.instructions,
-            "messages": [["role": "user", "content": request.prompt]],
+            "messages": [["role": "user", "content": userContent(for: request)]],
             "output_config": ["format": ["type": "json_schema", "schema": schemaObject]],
         ]
         var urlRequest = URLRequest(url: baseURL.appending(path: "messages"), timeoutInterval: ProviderHTTP.timeout)
@@ -59,6 +61,15 @@ public struct AnthropicClient: GenerationClient {
             throw .invalidOutput("The model list could not be read.")
         }
         return list.data.map(\.id).sorted()
+    }
+
+    /// The prompt, after the photo when there is one, as Anthropic recommends.
+    private func userContent(for request: GenerationRequest) -> Any {
+        guard let image = request.image else { return request.prompt }
+        return [
+            ["type": "image", "source": ["type": "base64", "media_type": image.mediaType, "data": image.jpegData.base64EncodedString()]],
+            ["type": "text", "text": request.prompt],
+        ]
     }
 
     private func authorize(_ request: inout URLRequest) {

@@ -54,22 +54,27 @@ public final class ObjectCaptureModel {
     private let settings: SettingsStore
     private let classify: (Data) async throws(CaptureError) -> [ObjectLabel]
     private let destination: (_ photo: Data?) -> any CaptureDestination
+    private let sharesPhoto: () -> Bool
     private let makeInsightService: () -> InsightService
 
     /// - Parameters:
     ///   - classify: labels for the photo; Vision's classifier unless a test replaces it.
     ///   - destination: where the word goes, given the photo to save with it, if any.
+    ///   - sharesPhoto: whether the photo goes to the AI with the request: the learner allows it and
+    ///     a cloud provider is selected (ADR-005).
     public init(
         settings: SettingsStore,
         classify: @escaping (Data) async throws(CaptureError) -> [ObjectLabel] = { data throws(CaptureError) in
             try await ObjectClassifier().labels(for: data)
         },
         destination: @escaping (_ photo: Data?) -> any CaptureDestination,
+        sharesPhoto: @escaping () -> Bool = { false },
         insightService: @escaping () -> InsightService
     ) {
         self.settings = settings
         self.classify = classify
         self.destination = destination
+        self.sharesPhoto = sharesPhoto
         self.makeInsightService = insightService
     }
 
@@ -77,8 +82,15 @@ public final class ObjectCaptureModel {
         settings.profile?.learning ?? []
     }
 
+    /// Whether naming sends a small copy of the photo, so the model can see the object.
+    public var sendsPhoto: Bool {
+        sharesPhoto()
+    }
+
+    /// A label is needed unless the model sees the photo.
     public var canName: Bool {
-        !label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && language != nil
+        let hasLabel = !label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return (hasLabel || (sendsPhoto && imageData != nil)) && language != nil
             && settings.profile != nil && phase != .naming && phase != .classifying
     }
 
@@ -124,7 +136,8 @@ public final class ObjectCaptureModel {
         let request = ObjectNamingRequest(
             label: label.trimmingCharacters(in: .whitespacesAndNewlines),
             language: language,
-            nativeLanguage: native
+            nativeLanguage: native,
+            photo: sendsPhoto ? photoThumbnail() : nil
         )
         let service = ObjectNamingService(makeInsightService())
         namingTask?.cancel()

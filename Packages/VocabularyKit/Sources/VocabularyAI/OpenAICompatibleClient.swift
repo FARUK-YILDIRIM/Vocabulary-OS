@@ -18,6 +18,8 @@ public struct OpenAICompatibleClient: GenerationClient {
         self.session = session
     }
 
+    public var supportsImages: Bool { true }
+
     public func generate(_ request: GenerationRequest, schema: GenerationSchema) async throws(AIError) -> GeneratedContent {
         let schemaObject = try JSONSchemaAdapter.jsonObject(for: schema, dropArrayBounds: false)
         var system = request.instructions + "\n\nReply with JSON only."
@@ -43,7 +45,7 @@ public struct OpenAICompatibleClient: GenerationClient {
         }
         body["messages"] = [
             ["role": "system", "content": system],
-            ["role": "user", "content": request.prompt],
+            ["role": "user", "content": userContent(for: request)],
         ]
         // Reasoning models count thinking against this limit; it caps cost, not the answer size.
         body[provider.tokenLimitField.rawValue] = max(request.maximumResponseTokens * 4, 2048)
@@ -79,6 +81,15 @@ public struct OpenAICompatibleClient: GenerationClient {
         }
         // Gemini's compatible endpoint prefixes IDs with "models/".
         return list.data.map { $0.id.hasPrefix("models/") ? String($0.id.dropFirst(7)) : $0.id }.sorted()
+    }
+
+    /// The prompt, followed by the photo as a data URL when there is one.
+    private func userContent(for request: GenerationRequest) -> Any {
+        guard let image = request.image else { return request.prompt }
+        return [
+            ["type": "text", "text": request.prompt],
+            ["type": "image_url", "image_url": ["url": "data:\(image.mediaType);base64,\(image.jpegData.base64EncodedString())"]],
+        ]
     }
 
     private func authorize(_ request: inout URLRequest) {

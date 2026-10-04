@@ -43,6 +43,7 @@ struct ProbeOutput {
         #expect(body["temperature"] == nil, "reasoning models reject custom temperatures")
         let messages = try #require(body["messages"] as? [[String: Any]])
         #expect(messages.map { $0["role"] as? String } == ["system", "user"])
+        #expect(messages.last?["content"] as? String == "Term: «cookie»", "a request without a photo sends plain text")
         let format = try #require(body["response_format"] as? [String: Any])
         #expect(format["type"] as? String == "json_schema")
         let jsonSchema = try #require(format["json_schema"] as? [String: Any])
@@ -72,6 +73,20 @@ struct ProbeOutput {
         let sent = try #require(StubURLProtocol.requests(to: host).first)
         #expect(sent.headers["X-OpenRouter-Title"] == "Vocabulary-OS")
         #expect((sent.json["provider"] as? [String: Any])?["require_parameters"] as? Bool == true)
+    }
+
+    @Test func sendsAPhotoAsAnImagePartAfterTheText() async throws {
+        let (client, host) = try client("openai")
+        #expect(client.supportsImages)
+        var photoRequest = request
+        photoRequest.image = GenerationImage(jpegData: Data([0xFF, 0xD8, 0xFF]))
+        _ = try await client.generate(photoRequest, as: ProbeOutput.self)
+
+        let messages = try #require(StubURLProtocol.requests(to: host).first?.json["messages"] as? [[String: Any]])
+        let parts = try #require(messages.last?["content"] as? [[String: Any]])
+        #expect(parts.map { $0["type"] as? String } == ["text", "image_url"])
+        #expect(parts.first?["text"] as? String == "Term: «cookie»")
+        #expect((parts.last?["image_url"] as? [String: Any])?["url"] as? String == "data:image/jpeg;base64,/9j/")
     }
 
     @Test func omitsAuthorizationForKeylessLocalServers() async throws {

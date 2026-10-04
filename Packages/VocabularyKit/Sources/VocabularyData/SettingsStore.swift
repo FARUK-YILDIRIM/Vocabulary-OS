@@ -17,6 +17,7 @@ public final class SettingsStore {
         public static let reviewLimits = "reviewLimits.v1"
         public static let customProviderBaseURL = "customProviderBaseURL.v1"
         public static let cloudPrivacy = "cloudPrivacyAcknowledged.v1"
+        public static let sharesPhotosWithAI = "sharesPhotosWithAI.v1"
     }
 
     public var profile: LearnerProfile? {
@@ -46,6 +47,12 @@ public final class SettingsStore {
         didSet { save(hasAcknowledgedCloudPrivacy, forKey: Key.cloudPrivacy) }
     }
 
+    /// Whether object capture may send the photo to a cloud provider (ADR-005). Off until the learner
+    /// turns it on; the on-device model never gets it.
+    public var sharesPhotosWithAI: Bool {
+        didSet { save(sharesPhotosWithAI, forKey: Key.sharesPhotosWithAI) }
+    }
+
     /// Onboarding is done once the learner has a native language and at least one learning language.
     public var isOnboarded: Bool { profile?.isReadyToLearn == true }
 
@@ -60,6 +67,7 @@ public final class SettingsStore {
         reviewLimits = Self.load(ReviewLimits.self, forKey: Key.reviewLimits, from: backing) ?? ReviewLimits()
         customProviderBaseURL = Self.load(String.self, forKey: Key.customProviderBaseURL, from: backing)
         hasAcknowledgedCloudPrivacy = Self.load(Bool.self, forKey: Key.cloudPrivacy, from: backing) ?? false
+        sharesPhotosWithAI = Self.load(Bool.self, forKey: Key.sharesPhotosWithAI, from: backing) ?? false
         backing.onExternalChange = { [weak self] keys in
             self?.applyExternalChange(keys)
         }
@@ -81,6 +89,8 @@ public final class SettingsStore {
                 customProviderBaseURL = Self.load(String.self, forKey: key, from: backing)
             case Key.cloudPrivacy:
                 hasAcknowledgedCloudPrivacy = Self.load(Bool.self, forKey: key, from: backing) ?? false
+            case Key.sharesPhotosWithAI:
+                sharesPhotosWithAI = Self.load(Bool.self, forKey: key, from: backing) ?? false
             default:
                 continue
             }

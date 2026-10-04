@@ -68,7 +68,7 @@ Done holds and its commit exists.
 - [x] T32 `feat(ui)`: accessibility and polish — the main screens pass the system audit at the default and the largest text size; the items noticed in T20, T27 and T28 are done
 
 ## Phase 7: The owner's answers and the ship review
-- [ ] T33 `feat(capture)`: object photos for cloud models, opt-in (owner's answer 3)
+- [x] T33 `feat(capture)`: object photos for cloud models, opt-in (owner's answer 3)
 - [ ] T34 `feat(ai)`: more providers and learner-added providers (owner's answer 4)
 - [ ] T35 `fix`: ship review findings (code, security and test reviews)
 - [ ] T36 `docs(release)`: open-source release readiness

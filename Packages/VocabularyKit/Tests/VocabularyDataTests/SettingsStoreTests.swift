@@ -158,6 +158,18 @@ private final class FakeCloudStore: CloudKeyValueStoring {
         #expect(reopened.hasAcknowledgedCloudPrivacy)
     }
 
+    @Test func sendingPhotosToTheAIIsOffUntilTheLearnerTurnsItOn() throws {
+        let backing = InMemoryKeyValueBacking()
+        let store = SettingsStore(backing: backing)
+        #expect(!store.sharesPhotosWithAI)
+
+        backing.simulateExternalChange(key: SettingsStore.Key.sharesPhotosWithAI, value: try JSONEncoder().encode(true))
+        #expect(store.sharesPhotosWithAI, "the choice follows the learner to their other devices")
+
+        store.sharesPhotosWithAI = false
+        #expect(!SettingsStore(backing: backing).sharesPhotosWithAI)
+    }
+
     @Test func parsesTheCustomEndpoint() {
         let settings = SettingsStore(backing: InMemoryKeyValueBacking())
         #expect(settings.customProviderURL == nil)

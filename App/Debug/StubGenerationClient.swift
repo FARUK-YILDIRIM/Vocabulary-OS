@@ -6,6 +6,9 @@ import VocabularyAI
 /// Canned AI answers for UI tests (`-vos-ai-stub YES`), so they run the same everywhere, with or
 /// without Apple Intelligence. Answers are picked by the schema's name.
 struct StubGenerationClient: GenerationClient {
+    /// Stands in for cloud models too, which can be sent a photo.
+    var supportsImages: Bool { true }
+
     func generate(_ request: GenerationRequest, schema: GenerationSchema) async throws(AIError) -> GeneratedContent {
         try? await Task.sleep(for: .milliseconds(300))
         let title = (try? JSONEncoder().encode(schema))
