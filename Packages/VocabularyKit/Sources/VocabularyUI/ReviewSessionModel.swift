@@ -46,9 +46,16 @@ public final class ReviewSessionModel {
     }
 
     public func rate(_ rating: ReviewRating) {
-        guard let current else { return }
+        guard current != nil, let id = queue.current else { return }
+        // The word may have been deleted while it was shown, here or on another device; a deleted
+        // model must not be touched, so it is fetched again.
+        guard let entry = try? repository.entry(id: id) else {
+            queue.answer(.good)
+            showNext()
+            return
+        }
         do {
-            try repository.record(rating, for: current, mode: .flashcard, now: now(), calendar: calendar)
+            try repository.record(rating, for: entry, mode: .flashcard, now: now(), calendar: calendar)
         } catch {
             errorMessage = error.localizedDescription
             return

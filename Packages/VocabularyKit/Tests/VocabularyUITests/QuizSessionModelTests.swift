@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import FoundationModels
 import Testing
 import VocabularyAI
@@ -76,6 +77,25 @@ import VocabularyData
         #expect(secondEntry.lapses == 1)
         #expect(session.missed.map(\.id) == [second.wordID])
         #expect(secondEntry.reviewLogs?.first?.mode == .quiz)
+    }
+
+    /// A word can be deleted while its question is shown, by sync from another device: the deletion
+    /// arrives through another context, as CloudKit's does.
+    @Test func answeringAboutADeletedWordRecordsNothing() async throws {
+        let session = try makeSession()
+        await session.start()
+        let question = try #require(session.current)
+        let other = ModelContext(words.container)
+        let id = question.wordID
+        let entry = try #require(try other.fetch(FetchDescriptor<VocabularyEntry>(predicate: #Predicate { $0.id == id })).first)
+        other.delete(entry)
+        try other.save()
+
+        session.answer(question.answerIndex)
+        #expect(session.phase == .answered(correct: true))
+        #expect(session.errorMessage == nil)
+        let progress = try reviews.progress(language: .english, now: now, calendar: calendar)
+        #expect(progress.reviews + progress.newWords == 0)
     }
 
     @Test func aWordAlreadyReviewedTodayKeepsItsSchedule() async throws {

@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 import Testing
 import VocabularyCore
 import VocabularyData
@@ -26,6 +27,13 @@ import VocabularyData
             // New words come in capture order.
             entry.createdAt = now.addingTimeInterval(Double(index - 10) * 60)
         }
+    }
+
+    private func deleteElsewhere(_ id: UUID) throws {
+        let other = ModelContext(words.container)
+        let entry = try #require(try other.fetch(FetchDescriptor<VocabularyEntry>(predicate: #Predicate { $0.id == id })).first)
+        other.delete(entry)
+        try other.save()
     }
 
     private func makeSession() throws -> ReviewSessionModel {
@@ -71,6 +79,19 @@ import VocabularyData
         let session = try makeSession()
         #expect(session.intervalPreview(for: .again) == 1)
         #expect(session.intervalPreview(for: .good) == 1)
+    }
+
+    /// A word can be deleted while its card is shown, by sync from another device: the deletion
+    /// arrives through another context, as CloudKit's does.
+    @Test func aWordDeletedWhileItIsShownIsSkippedWithoutALog() throws {
+        let session = try makeSession()
+        try deleteElsewhere(try #require(session.current).id)
+
+        session.rate(.good)
+        #expect(session.current?.term == "two")
+        #expect(session.errorMessage == nil)
+        let progress = try reviews.progress(language: .english, now: now, calendar: calendar)
+        #expect(progress.reviews + progress.newWords == 0, "no review is logged for a deleted word")
     }
 
     @Test func skipsWordsDeletedDuringTheSession() throws {

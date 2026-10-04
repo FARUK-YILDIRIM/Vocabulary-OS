@@ -30,7 +30,6 @@ public final class QuizSessionModel {
 
     private let plan: [QuizPlanItem]
     private let library: [QuizWord]
-    private let entries: [UUID: VocabularyEntry]
     private let source: QuizSource
     private let service: QuizService
     private let reviews: ReviewRepository
@@ -65,7 +64,6 @@ public final class QuizSessionModel {
         }
         total = plan.count
         self.library = library.map(\.quizWord)
-        entries = Dictionary(words.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         self.source = source
         self.service = service
         self.reviews = reviews
@@ -107,7 +105,9 @@ public final class QuizSessionModel {
         } else if let word = word(for: question) {
             missed.append(word)
         }
-        if let entry = entries[question.wordID] {
+        // Fetched again: the word may have been deleted since the quiz started, here or on another
+        // device, and a deleted model must not be touched.
+        if let entry = try? reviews.entry(id: question.wordID) {
             do {
                 try reviews.record(correct ? .good : .again, for: entry, mode: .quiz, now: now(), calendar: calendar)
                 errorMessage = nil

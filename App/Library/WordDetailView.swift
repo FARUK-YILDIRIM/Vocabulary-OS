@@ -65,6 +65,7 @@ struct WordDetailView: View {
                     Button("Lists…", systemImage: "list.bullet") { isChoosingLists = true }
                     Divider()
                     Button("Delete", systemImage: "trash", role: .destructive) { isConfirmingDelete = true }
+                        .disabled(isRegenerating)
                 } label: {
                     Label("More", systemImage: "ellipsis.circle")
                 }
@@ -96,10 +97,16 @@ struct WordDetailView: View {
         isRegenerating = true
         regenerateError = nil
         defer { isRegenerating = false }
-        let request = InsightRequest(term: entry.term, sentence: entry.context, language: language, nativeLanguage: native)
+        let id = entry.id
+        let service = app.makeInsightService()
         do throws(AIError) {
-            let insight = try await app.makeInsightService().insight(for: request)
-            try? app.repository.update(entry, with: insight)
+            // An object's word is named again, keeping its article and dictionary form apart.
+            let insight = entry.captureSource == .object
+                ? try await ObjectNamingService(service).name(ObjectNamingRequest(label: entry.lemma, language: language, nativeLanguage: native))
+                : try await service.insight(for: InsightRequest(term: entry.term, sentence: entry.context, language: language, nativeLanguage: native))
+            // The word may have been deleted meanwhile, here or on another device.
+            guard let current = try? app.repository.entry(id: id) else { return }
+            try? app.repository.update(current, with: insight)
         } catch {
             regenerateError = error.localizedDescription
         }
