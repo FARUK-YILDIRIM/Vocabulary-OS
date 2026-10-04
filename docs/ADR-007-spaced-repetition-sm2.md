@@ -43,7 +43,9 @@ and `lastReviewedAt`. Each review then works as follows:
    and `dailyReviewLimit` reviews (default 150). Both can be changed in Settings. Due words come
    first, the most overdue first, then new words in the order they were captured. Words already
    reviewed or introduced today count against the limits.
-8. **Every review** writes a `ReviewLog` (time, rating, mode, interval before and after).
+8. **Every review** writes a `ReviewLog`: time, rating, mode, interval and ease before and after,
+   whether the word was new, and whether the answer moved the schedule. Today's limits count the
+   logs that moved a schedule today. Deleting a word deletes its logs.
 
 ## Alternatives Considered
 - **FSRS:**

@@ -45,6 +45,10 @@ public final class VocabularyEntry {
     @Relationship(deleteRule: .nullify, inverse: \WordList.entries)
     public var lists: [WordList]? = []
 
+    /// Every answer given for this word; deleted with it.
+    @Relationship(deleteRule: .cascade, inverse: \ReviewLog.entry)
+    public var reviewLogs: [ReviewLog]? = []
+
     public init(insight: WordInsight, captureSource: CaptureSource, imageData: Data? = nil) {
         self.captureSourceRaw = captureSource.rawValue
         self.imageData = imageData

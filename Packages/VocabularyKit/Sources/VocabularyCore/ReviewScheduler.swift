@@ -26,6 +26,11 @@ public enum ReviewRating: String, CaseIterable, Codable, Sendable {
     }
 }
 
+/// Where an answer was given.
+public enum ReviewMode: String, CaseIterable, Codable, Sendable {
+    case flashcard, quiz
+}
+
 /// One SM-2 review step (ADR-007). Pure value logic: the same input always gives the same output.
 public struct ReviewScheduler: Sendable {
     public var minimumEase = 1.3

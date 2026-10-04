@@ -12,6 +12,7 @@ final class AppModel {
     let settings: SettingsStore
     let container: ModelContainer
     let repository: WordRepository
+    let reviews: ReviewRepository
     let secrets: any SecretStore
     let router: ProviderRouter
     /// Words saved in the Share extension, waiting to be imported; `nil` without an App Group.
@@ -27,7 +28,9 @@ final class AppModel {
     ) {
         self.settings = settings
         self.container = container
-        self.repository = WordRepository(container: container)
+        let repository = WordRepository(container: container)
+        self.repository = repository
+        self.reviews = ReviewRepository(words: repository)
         self.secrets = secrets
         self.router = ProviderRouter(secrets: secrets)
         self.inbox = inbox

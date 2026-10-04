@@ -48,7 +48,7 @@ Done holds and its commit exists.
 
 ## Phase 5: Practice
 - [x] T22 `feat(core)`: SM-2 scheduler and daily queue
-- [ ] T23 `feat(review)`: flashcard review and Today screen
+- [x] T23 `feat(review)`: flashcard review and Today screen
 - [ ] T24 `feat(ai)`: quiz generation and validation
 - [ ] T25 `feat(quiz)`: quiz session and grading
 - [ ] T26 `feat(speech)`: speech engine

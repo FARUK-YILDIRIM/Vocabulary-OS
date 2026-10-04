@@ -11,14 +11,7 @@ struct MainView: View {
     var body: some View {
         TabView(selection: $selection) {
             Tab("Today", systemImage: "sun.max", value: AppTab.today) {
-                NavigationStack {
-                    ContentUnavailableView(
-                        "Nothing to review yet",
-                        systemImage: "sun.max",
-                        description: Text("Words you capture will be scheduled for review here.")
-                    )
-                    .navigationTitle("Today")
-                }
+                TodayView()
             }
             Tab("Capture", systemImage: "text.viewfinder", value: AppTab.capture) {
                 CaptureScreen()
