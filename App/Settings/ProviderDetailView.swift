@@ -2,14 +2,19 @@ import SwiftUI
 import VocabularyAI
 import VocabularyCore
 
-/// Connect one cloud provider: key, model, connection test, and switching to it (SPEC C2).
+/// Connect one cloud provider: key, model, connection test, and switching to it (SPEC C2). For a
+/// provider the learner added, also its name and address, and deleting it.
 struct ProviderDetailView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.dismiss) private var dismiss
     let provider: ProviderDescriptor
 
     @State private var keyDraft = ""
     @State private var hasKey = false
+    @State private var nameDraft = ""
     @State private var serverDraft = ""
+    @State private var keyWasRemoved = false
+    @State private var isConfirmingDelete = false
     @State private var model = ""
     @State private var customModel = ""
     @State private var fetchedModels: [String] = []
@@ -23,7 +28,14 @@ struct ProviderDetailView: View {
         case failed(String)
     }
 
-    private var isCustom: Bool { provider.id == ProviderCatalog.customID }
+    /// The provider as the learner added it, if they did; kept current while it is edited here.
+    private var custom: CustomProvider? {
+        app.settings.customProviders.first { $0.id == provider.id }
+    }
+
+    private var isCustom: Bool { CustomProvider.isCustom(provider.id) }
+
+    private var name: String { custom?.name ?? provider.displayName }
 
     var body: some View {
         Form {
@@ -39,7 +51,9 @@ struct ProviderDetailView: View {
 
             if isCustom {
                 Section {
-                    TextField(ProviderCatalog.suggestedCustomBaseURL.absoluteString, text: $serverDraft)
+                    TextField("Name", text: $nameDraft)
+                        .accessibilityIdentifier("provider-name")
+                    TextField("Address", text: $serverDraft, prompt: Text(verbatim: ProviderCatalog.exampleCustomAddress))
                         .autocorrectionDisabled()
                         #if os(iOS)
                         .textInputAutocapitalization(.never)
@@ -47,11 +61,16 @@ struct ProviderDetailView: View {
                         #endif
                         .onSubmit(saveServer)
                         .accessibilityIdentifier("provider-server")
-                    Button("Save Address", action: saveServer)
+                    Button("Save Changes", action: saveServer)
+                        .disabled(nameDraft == custom?.name && serverDraft == custom?.address)
                 } header: {
-                    Text("Server address")
+                    Text("Server")
                 } footer: {
-                    Text("For example Ollama (port 11434) or LM Studio (port 1234) on your Mac or local network.")
+                    if keyWasRemoved {
+                        Text("The provider now points to another server, so its key was removed. Enter the key for the new server.")
+                    } else {
+                        Text("A key only ever goes to the server it was entered for: moving the provider to another server removes it.")
+                    }
                 }
             }
 
@@ -62,7 +81,7 @@ struct ProviderDetailView: View {
                     }
                     Button("Remove Key", role: .destructive, action: removeKey)
                 } else {
-                    SecureField(isCustom ? "Optional API key" : "Paste your API key", text: $keyDraft)
+                    SecureField(isCustom ? "API key (optional)" : "Paste your API key", text: $keyDraft)
                         .autocorrectionDisabled()
                         #if os(iOS)
                         .textInputAutocapitalization(.never)
@@ -89,12 +108,13 @@ struct ProviderDetailView: View {
                     #if os(iOS)
                     .textInputAutocapitalization(.never)
                     #endif
+                    .accessibilityIdentifier("provider-other-model")
                 if provider.supportsModelListing {
                     Button {
                         Task { await loadModels() }
                     } label: {
                         HStack {
-                            Text("Load Models from \(provider.displayName)")
+                            Text("Load Models from \(name)")
                             if isLoadingModels { Spacer(); ProgressView() }
                         }
                     }
@@ -140,20 +160,40 @@ struct ProviderDetailView: View {
             if let errorMessage {
                 Section {
                     Text(verbatim: errorMessage).foregroundStyle(.red)
+                        .accessibilityIdentifier("provider-error")
+                }
+            }
+
+            if isCustom {
+                Section {
+                    Button("Delete Provider", role: .destructive) {
+                        isConfirmingDelete = true
+                    }
+                    .accessibilityIdentifier("provider-delete")
                 }
             }
         }
         .formStyle(.grouped)
-        .navigationTitle(provider.displayName)
+        .navigationTitle(name)
         .onAppear(perform: load)
-        .alert("Before you use \(provider.displayName)", isPresented: $isShowingPrivacyNotice) {
+        .confirmationDialog("Delete \(name)?", isPresented: $isConfirmingDelete, titleVisibility: .visible) {
+            Button("Delete Provider", role: .destructive) {
+                if let custom {
+                    app.deleteCustomProvider(custom)
+                }
+                dismiss()
+            }
+        } message: {
+            Text("Its key is removed from your Keychain. Your words stay as they are.")
+        }
+        .alert("Before you use \(name)", isPresented: $isShowingPrivacyNotice) {
             Button("Continue") {
                 app.settings.hasAcknowledgedCloudPrivacy = true
                 select()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("To explain a word, Vocabulary-OS sends the word, its sentence and your language names to \(provider.displayName) with your API key. Quizzes and podcasts send the words you choose and their meanings, and object photos are sent only if you turn that on. Requests go directly from this device; there is no Vocabulary-OS server.")
+            Text("To explain a word, Vocabulary-OS sends the word, its sentence and your language names to \(name) with your API key. Quizzes and podcasts send the words you choose and their meanings, and object photos are sent only if you turn that on. Requests go directly from this device; there is no Vocabulary-OS server.")
         }
     }
 
@@ -181,7 +221,7 @@ struct ProviderDetailView: View {
 
     private var canUse: Bool {
         guard !selectedModel.isEmpty else { return false }
-        if isCustom { return app.settings.customProviderBaseURL != nil }
+        if isCustom { return custom?.url != nil }
         return hasKey
     }
 
@@ -191,7 +231,8 @@ struct ProviderDetailView: View {
 
     private func load() {
         hasKey = app.router.hasAPIKey(for: provider.id)
-        serverDraft = app.settings.customProviderBaseURL ?? ""
+        nameDraft = custom?.name ?? ""
+        serverDraft = custom?.address ?? ""
         if app.settings.aiSelection.providerID == provider.id, let current = app.settings.aiSelection.modelID {
             model = current
         } else {
@@ -223,24 +264,30 @@ struct ProviderDetailView: View {
     }
 
     private func saveServer() {
-        let trimmed = serverDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            app.settings.customProviderBaseURL = nil
-            return
+        guard var updated = custom else { return }
+        switch ServerAddress.validate(serverDraft) {
+        case .failure(let problem):
+            errorMessage = problem.message
+        case .success(let url):
+            let name = nameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !name.isEmpty {
+                updated.name = name
+            }
+            updated.address = url.absoluteString
+            keyWasRemoved = app.updateCustomProvider(updated)
+            hasKey = app.router.hasAPIKey(for: provider.id)
+            nameDraft = updated.name
+            serverDraft = updated.address
+            errorMessage = nil
+            testState = .idle
         }
-        guard let url = URL(string: trimmed), url.scheme == "http" || url.scheme == "https", url.host() != nil else {
-            errorMessage = String(localized: "Enter a full address such as http://localhost:11434/v1.")
-            return
-        }
-        errorMessage = nil
-        app.settings.customProviderBaseURL = url.absoluteString
     }
 
     private func loadModels() async {
         isLoadingModels = true
         defer { isLoadingModels = false }
         do throws(AIError) {
-            fetchedModels = try await app.router.availableModels(providerID: provider.id, customBaseURL: app.customBaseURL)
+            fetchedModels = try await app.router.availableModels(providerID: provider.id)
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
@@ -250,7 +297,7 @@ struct ProviderDetailView: View {
     private func testConnection() async {
         testState = .running
         do throws(AIError) {
-            try await app.router.testConnection(for: selection, customBaseURL: app.customBaseURL)
+            try await app.router.testConnection(for: selection)
             testState = .succeeded
         } catch {
             testState = .failed(error.localizedDescription)

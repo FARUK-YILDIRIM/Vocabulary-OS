@@ -21,16 +21,6 @@
         }
       }
     },
-    "Custom (OpenAI-compatible)" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Özel (OpenAI uyumlu)"
-          }
-        }
-      }
-    },
     "Enter your server's address in Settings." : {
       "localizations" : {
         "tr" : {

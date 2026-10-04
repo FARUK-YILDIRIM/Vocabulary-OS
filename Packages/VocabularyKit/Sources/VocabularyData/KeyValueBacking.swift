@@ -5,6 +5,9 @@ import Foundation
 public protocol KeyValueBacking: AnyObject {
     func data(forKey key: String) -> Data?
     func setData(_ data: Data?, forKey key: String)
+    /// Values that stay on this device and never sync.
+    func deviceData(forKey key: String) -> Data?
+    func setDeviceData(_ data: Data?, forKey key: String)
     /// Receives the keys another device changed. `SettingsStore` sets this.
     var onExternalChange: (([String]) -> Void)? { get set }
 }
@@ -13,6 +16,7 @@ public protocol KeyValueBacking: AnyObject {
 @MainActor
 public final class InMemoryKeyValueBacking: KeyValueBacking {
     private var values: [String: Data] = [:]
+    private var deviceValues: [String: Data] = [:]
     public var onExternalChange: (([String]) -> Void)?
 
     public init() {}
@@ -20,6 +24,10 @@ public final class InMemoryKeyValueBacking: KeyValueBacking {
     public func data(forKey key: String) -> Data? { values[key] }
 
     public func setData(_ data: Data?, forKey key: String) { values[key] = data }
+
+    public func deviceData(forKey key: String) -> Data? { deviceValues[key] }
+
+    public func setDeviceData(_ data: Data?, forKey key: String) { deviceValues[key] = data }
 
     /// Behaves like a change arriving from another device.
     public func simulateExternalChange(key: String, value: Data?) {
@@ -99,6 +107,15 @@ public final class UbiquitousKeyValueBacking: KeyValueBacking {
         }
     }
 
+    /// Only in the mirror, which the Share extension reads too.
+    public func deviceData(forKey key: String) -> Data? {
+        mirror.data(forKey: deviceKey(key))
+    }
+
+    public func setDeviceData(_ data: Data?, forKey key: String) {
+        mirror.set(data, forKey: deviceKey(key))
+    }
+
     func handleExternalChange(changedKeys: [String]) {
         for key in changedKeys {
             mirror.set(cloud?.data(forKey: key), forKey: mirrorKey(key))
@@ -107,4 +124,6 @@ public final class UbiquitousKeyValueBacking: KeyValueBacking {
     }
 
     private func mirrorKey(_ key: String) -> String { "vos.\(key)" }
+
+    private func deviceKey(_ key: String) -> String { "vos.device.\(key)" }
 }

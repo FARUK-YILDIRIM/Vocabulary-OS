@@ -601,11 +601,11 @@ they found, and T36 prepares the release.
     accepted only for local-network addresses.
   - A provider at `localhost` is chosen per device; other choices still sync (ADR-002).
 - **Acceptance criteria:**
-  - [ ] A stubbed-network test checks the request shape of every catalog entry.
-  - [ ] Added providers sync, can be chosen and keep their keys under their own IDs.
-  - [ ] Moving an added provider to another host removes its key; public `http` addresses are
+  - [x] A stubbed-network test checks the request shape of every catalog entry.
+  - [x] Added providers sync, can be chosen and keep their keys under their own IDs.
+  - [x] Moving an added provider to another host removes its key; public `http` addresses are
     refused.
-  - [ ] Choosing a `localhost` provider leaves the other devices' choice alone.
+  - [x] Choosing a `localhost` provider leaves the other devices' choice alone.
 - **Verification:** package tests; the AI settings UI test on iPhone and iPad; `scripts/verify.sh`.
 - **Dependencies:** T16.
 - **Files:** `ProviderCatalog.swift`, `ProviderRouter.swift`, `SettingsStore.swift`,

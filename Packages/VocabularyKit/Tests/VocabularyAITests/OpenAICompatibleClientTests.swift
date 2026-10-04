@@ -1,6 +1,7 @@
 import Foundation
 import FoundationModels
 import Testing
+import VocabularyCore
 @testable import VocabularyAI
 
 @Generable
@@ -14,15 +15,25 @@ struct ProbeOutput {
 @Suite struct OpenAICompatibleClientTests {
     private let request = GenerationRequest(instructions: "You are a dictionary.", prompt: "Term: «cookie»", maximumResponseTokens: 300)
 
+    private static let reply = #"{"choices":[{"message":{"content":"{\"word\":\"çerez\",\"items\":[\"a\",\"b\"]}"},"finish_reason":"stop"}]}"#
+
     private func client(
         _ providerID: String,
         apiKey: String? = "sk-test",
         status: Int = 200,
-        body: String = #"{"choices":[{"message":{"content":"{\"word\":\"çerez\",\"items\":[\"a\",\"b\"]}"},"finish_reason":"stop"}]}"#
+        body: String = Self.reply
     ) throws -> (OpenAICompatibleClient, String) {
-        let host = "\(providerID)-\(UUID().uuidString.lowercased()).test"
+        try client(try #require(ProviderCatalog.provider(id: providerID)), apiKey: apiKey, status: status, body: body)
+    }
+
+    private func client(
+        _ provider: ProviderDescriptor,
+        apiKey: String? = "sk-test",
+        status: Int = 200,
+        body: String = Self.reply
+    ) throws -> (OpenAICompatibleClient, String) {
+        let host = "\(provider.id)-\(UUID().uuidString.lowercased()).test"
         let session = StubURLProtocol.session(host: host) { _ in .json(status, body) }
-        let provider = try #require(ProviderCatalog.provider(id: providerID))
         let baseURL = try #require(URL(string: "https://\(host)/v1"))
         return (OpenAICompatibleClient(provider: provider, baseURL: baseURL, model: "test-model", apiKey: apiKey, session: session), host)
     }
@@ -38,7 +49,7 @@ struct ProbeOutput {
         #expect(sent.headers["Authorization"] == "Bearer sk-test")
         let body = sent.json
         #expect(body["model"] as? String == "test-model")
-        #expect(body["max_completion_tokens"] as? Int == 2048)
+        #expect(body["max_completion_tokens"] as? Int == 8192)
         #expect(body["max_tokens"] == nil)
         #expect(body["temperature"] == nil, "reasoning models reject custom temperatures")
         let messages = try #require(body["messages"] as? [[String: Any]])
@@ -59,7 +70,7 @@ struct ProbeOutput {
 
         let body = try #require(StubURLProtocol.requests(to: host).first).json
         #expect((body["response_format"] as? [String: Any])?["type"] as? String == "json_object")
-        #expect(body["max_tokens"] as? Int == 2048)
+        #expect(body["max_tokens"] as? Int == 8192)
         let messages = try #require(body["messages"] as? [[String: Any]])
         let system = try #require(messages.first?["content"] as? String)
         #expect(system.contains("JSON"))
@@ -90,9 +101,67 @@ struct ProbeOutput {
     }
 
     @Test func omitsAuthorizationForKeylessLocalServers() async throws {
-        let (client, host) = try client("custom", apiKey: nil)
+        let ollama = ProviderDescriptor(custom: CustomProvider(name: "Ollama", address: "http://localhost:11434/v1"))
+        let (client, host) = try client(ollama, apiKey: nil)
         _ = try await client.generate(request, as: ProbeOutput.self)
-        #expect(try #require(StubURLProtocol.requests(to: host).first).headers["Authorization"] == nil)
+        let sent = try #require(StubURLProtocol.requests(to: host).first)
+        #expect(sent.headers["Authorization"] == nil)
+        #expect(sent.json["max_tokens"] == nil && sent.json["max_completion_tokens"] == nil, "servers disagree on the field")
+        let format = try #require(sent.json["response_format"] as? [String: Any])
+        #expect((format["json_schema"] as? [String: Any])?["strict"] as? Bool == false)
+    }
+
+    /// Every provider we list gets the request its documentation asks for (ADR-003).
+    @Test(arguments: ProviderCatalog.all.filter { $0.kind == .openAICompatible })
+    func everyListedProviderGetsTheRequestItsDocumentationDescribes(_ provider: ProviderDescriptor) async throws {
+        let (client, host) = try client(provider)
+        _ = try await client.generate(request, as: ProbeOutput.self)
+
+        let sent = try #require(StubURLProtocol.requests(to: host).first)
+        #expect(sent.url.path() == "/v1/chat/completions")
+        #expect(sent.headers["Authorization"] == "Bearer sk-test")
+        let body = sent.json
+        if let field = provider.tokenLimitField {
+            let other: TokenLimitField = field == .maxTokens ? .maxCompletionTokens : .maxTokens
+            #expect(body[field.rawValue] as? Int == 8192)
+            #expect(body[other.rawValue] == nil, "providers reject both fields together")
+        } else {
+            #expect(body["max_tokens"] == nil && body["max_completion_tokens"] == nil)
+        }
+        #expect(body["temperature"] == nil)
+
+        let format = try #require(body["response_format"] as? [String: Any])
+        let schema: [String: Any]?
+        switch provider.structuredOutput {
+        case .jsonSchema(let strict):
+            #expect(format["type"] as? String == "json_schema")
+            let jsonSchema = try #require(format["json_schema"] as? [String: Any])
+            #expect(jsonSchema["strict"] as? Bool == strict)
+            #expect(jsonSchema["name"] as? String == "vocabulary_output")
+            schema = jsonSchema["schema"] as? [String: Any]
+        case .jsonObject:
+            #expect(format["type"] as? String == "json_object")
+            schema = nil
+        case .jsonObjectWithSchema:
+            #expect(format["type"] as? String == "json_object")
+            schema = format["schema"] as? [String: Any]
+            #expect(schema != nil)
+        case .guided, .anthropicOutputFormat:
+            Issue.record("\(provider.id) doesn't use Chat Completions")
+            schema = nil
+        }
+        if let schema {
+            let items = try #require((schema["properties"] as? [String: Any])?["items"] as? [String: Any])
+            #expect((items["minItems"] == nil) == provider.quirks.contains(.dropsArrayBounds), "\(provider.id)")
+        }
+        #expect((body["enable_thinking"] as? Bool == false) == provider.quirks.contains(.turnsOffQwenThinking))
+        #expect(((body["thinking"] as? [String: Any])?["type"] as? String == "disabled") == provider.quirks.contains(.turnsOffThinking))
+    }
+
+    @Test func dropsReasoningThatAModelWritesIntoItsAnswer() async throws {
+        let thinking = #"{"choices":[{"message":{"content":"<think>The user wants {word}…</think>{\"word\":\"çerez\",\"items\":[\"a\",\"b\"]}"},"finish_reason":"stop"}]}"#
+        let (client, _) = try client("together", body: thinking)
+        #expect(try await client.generate(request, as: ProbeOutput.self).word == "çerez")
     }
 
     @Test func readsJSONWrappedInCodeFences() async throws {
@@ -154,6 +223,18 @@ struct ProbeOutput {
         )
         #expect(try await client.listModels() == ["gpt-5.4-nano", "gpt-6-luna"])
         #expect(StubURLProtocol.requests(to: host).first?.url.path() == "/v1/models")
+    }
+
+    @Test func readsModelListsGivenAsABareArrayAndLeavesOutOtherKindsOfModels() async throws {
+        let host = "together-models-\(UUID().uuidString.lowercased()).test"
+        let session = StubURLProtocol.session(host: host) { _ in
+            .json(200, #"[{"id":"Qwen/Qwen3.5-9B","type":"chat"},{"id":"black-forest-labs/FLUX.2","type":"image"},{"id":"BAAI/bge-m3","type":"embedding"},{"id":"openai/gpt-oss-120b","type":"chat"}]"#)
+        }
+        let client = OpenAICompatibleClient(
+            provider: try #require(ProviderCatalog.provider(id: "together")),
+            baseURL: try #require(URL(string: "https://\(host)/v1")), model: "openai/gpt-oss-120b", apiKey: "key", session: session
+        )
+        #expect(try await client.listModels() == ["Qwen/Qwen3.5-9B", "openai/gpt-oss-120b"])
     }
 }
 

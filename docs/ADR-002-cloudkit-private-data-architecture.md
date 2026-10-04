@@ -53,6 +53,10 @@ The first version of this ADR assumed SwiftData supports CloudKit sharing throug
      into the mirror, so the mirror is never older than what the app last read.
    - Only the app writes settings. A value the extension wrote would never reach iCloud and would be
      overwritten at the app's next launch, so the extension cannot add a learning language.
+   - The AI providers the learner added sync like any setting, and so does the choice of provider,
+     with one exception: choosing a provider at the device's own address (`localhost`) is kept on
+     that device only, in the App Group defaults and never in iCloud, because the other devices
+     can't reach it (SPEC C2). A Mac using Ollama doesn't send the iPhone to its own localhost.
 3. **Secrets: Keychain generic passwords.**
    - Attributes: `kSecAttrSynchronizable = true` (iCloud Keychain), `kSecAttrAccessibleWhenUnlocked`,
      and `kSecUseDataProtectionKeychain = true` on macOS.

@@ -2,7 +2,8 @@ import Foundation
 import FoundationModels
 
 /// Chat Completions client for OpenAI and every provider that speaks the same API: Gemini's
-/// OpenAI-compatible endpoint, DeepSeek, OpenRouter, Mistral, and local servers (ADR-003).
+/// OpenAI-compatible endpoint, the other providers in the catalog, and the learner's own servers
+/// (ADR-003).
 public struct OpenAICompatibleClient: GenerationClient {
     public let provider: ProviderDescriptor
     public let baseURL: URL
@@ -21,7 +22,7 @@ public struct OpenAICompatibleClient: GenerationClient {
     public var supportsImages: Bool { true }
 
     public func generate(_ request: GenerationRequest, schema: GenerationSchema) async throws(AIError) -> GeneratedContent {
-        let schemaObject = try JSONSchemaAdapter.jsonObject(for: schema, dropArrayBounds: false)
+        let schemaObject = try JSONSchemaAdapter.jsonObject(for: schema, dropArrayBounds: provider.quirks.contains(.dropsArrayBounds))
         var system = request.instructions + "\n\nReply with JSON only."
         var body: [String: Any] = ["model": model]
         switch provider.structuredOutput {
@@ -40,6 +41,8 @@ public struct OpenAICompatibleClient: GenerationClient {
             Example of the shape (replace every value):
             \(JSONSchemaAdapter.jsonString(JSONSchemaAdapter.example(for: schemaObject)))
             """
+        case .jsonObjectWithSchema:
+            body["response_format"] = ["type": "json_object", "schema": schemaObject]
         case .guided, .anthropicOutputFormat:
             throw .unknown("\(provider.id) does not use the Chat Completions API")
         }
@@ -47,11 +50,20 @@ public struct OpenAICompatibleClient: GenerationClient {
             ["role": "system", "content": system],
             ["role": "user", "content": userContent(for: request)],
         ]
-        // Reasoning models count thinking against this limit; it caps cost, not the answer size.
-        body[provider.tokenLimitField.rawValue] = max(request.maximumResponseTokens * 4, 2048)
+        // Reasoning models count thinking against this limit, and many think by default; it caps
+        // cost, not the answer size.
+        if let field = provider.tokenLimitField {
+            body[field.rawValue] = max(request.maximumResponseTokens * 4, 8192)
+        }
         // No temperature: reasoning models reject anything but their default.
         if provider.quirks.contains(.openRouterRequireParameters) {
             body["provider"] = ["require_parameters": true]
+        }
+        if provider.quirks.contains(.turnsOffQwenThinking) {
+            body["enable_thinking"] = false
+        }
+        if provider.quirks.contains(.turnsOffThinking) {
+            body["thinking"] = ["type": "disabled"]
         }
 
         var urlRequest = URLRequest(url: baseURL.appending(path: "chat/completions"), timeoutInterval: ProviderHTTP.timeout)
@@ -72,15 +84,24 @@ public struct OpenAICompatibleClient: GenerationClient {
         var request = URLRequest(url: baseURL.appending(path: "models"), timeoutInterval: ProviderHTTP.timeout)
         authorize(&request)
         let data = try await ProviderHTTP.send(request, session: session)
+        struct Model: Decodable {
+            let id: String
+            let type: String?
+        }
         struct List: Decodable {
-            struct Model: Decodable { let id: String }
             let data: [Model]
         }
-        guard let list = try? JSONDecoder().decode(List.self, from: data) else {
+        // Most providers wrap the list in `data`; Together returns a bare array.
+        guard let models = (try? JSONDecoder().decode(List.self, from: data).data) ?? (try? JSONDecoder().decode([Model].self, from: data)) else {
             throw .invalidOutput("The model list could not be read.")
         }
-        // Gemini's compatible endpoint prefixes IDs with "models/".
-        return list.data.map { $0.id.hasPrefix("models/") ? String($0.id.dropFirst(7)) : $0.id }.sorted()
+        // Some lists also hold image, audio and embedding models, which can't write text.
+        let otherKinds: Set = ["image", "embedding", "moderation", "rerank", "audio", "video", "transcription", "tts"]
+        return models
+            .filter { $0.type.map { !otherKinds.contains($0.lowercased()) } ?? true }
+            // Gemini's compatible endpoint prefixes IDs with "models/".
+            .map { $0.id.hasPrefix("models/") ? String($0.id.dropFirst(7)) : $0.id }
+            .sorted()
     }
 
     /// The prompt, followed by the photo as a data URL when there is one.

@@ -18,6 +18,8 @@ public enum StructuredOutputMode: Sendable, Hashable {
     case jsonObject
     /// Anthropic `output_config.format`.
     case anthropicOutputFormat
+    /// `response_format: {type: "json_object", schema: …}`, Cohere's form of a schema.
+    case jsonObjectWithSchema
 }
 
 /// The request field that caps output length.
@@ -37,6 +39,12 @@ public struct ProviderQuirks: OptionSet, Sendable, Hashable {
     public static let openRouterTitleHeader = ProviderQuirks(rawValue: 1 << 1)
     /// The JSON prompt must contain the word "json" and an example (DeepSeek JSON mode).
     public static let jsonModeNeedsExampleInPrompt = ProviderQuirks(rawValue: 1 << 2)
+    /// The schema can't bound array lengths (`minItems`, `maxItems`); validators check counts instead.
+    public static let dropsArrayBounds = ProviderQuirks(rawValue: 1 << 3)
+    /// Qwen models think by default, which eats the output budget: `enable_thinking: false`.
+    public static let turnsOffQwenThinking = ProviderQuirks(rawValue: 1 << 4)
+    /// The models think by default: `thinking: {type: "disabled"}` (Z.ai).
+    public static let turnsOffThinking = ProviderQuirks(rawValue: 1 << 5)
 }
 
 /// A model we recommend for a provider. The learner can also pick any model the provider lists.
@@ -61,7 +69,9 @@ public struct ProviderDescriptor: Identifiable, Sendable, Hashable {
     /// Where the learner creates a key.
     public let apiKeyPageURL: URL?
     public let structuredOutput: StructuredOutputMode
-    public let tokenLimitField: TokenLimitField
+    /// `nil` sends no limit: learners' own servers disagree on the field, and Qwen asks for none
+    /// with JSON output.
+    public let tokenLimitField: TokenLimitField?
     public let quirks: ProviderQuirks
     public let recommendedModels: [ModelDescriptor]
     /// Whether `GET …/models` lists the models available to a key.
@@ -73,11 +83,32 @@ public struct ProviderDescriptor: Identifiable, Sendable, Hashable {
     }
 }
 
+extension ProviderDescriptor {
+    /// A provider the learner added: an OpenAI-compatible server at their address, with an optional
+    /// key (SPEC C2). The schema isn't strict and no output limit is sent, since such servers differ
+    /// in what they accept.
+    public init(custom provider: CustomProvider) {
+        self.init(
+            id: provider.id,
+            displayName: provider.name,
+            kind: .openAICompatible,
+            baseURL: provider.url,
+            requiresAPIKey: false,
+            apiKeyPageURL: nil,
+            structuredOutput: .jsonSchema(strict: false),
+            tokenLimitField: nil,
+            quirks: [],
+            recommendedModels: [],
+            supportsModelListing: true
+        )
+    }
+}
+
 /// The providers and models we ship. Model IDs change often; review this list every release.
 ///
-/// Last verified against each provider's documentation on 2026-10-04 (sources in ADR-003).
+/// Last verified against each provider's documentation on 2026-10-04 (sources in ADR-003). Learners
+/// add other OpenAI-compatible services themselves (`CustomProvider`).
 public enum ProviderCatalog {
-    public static let customID = "custom"
 
     public static let onDevice = ProviderDescriptor(
         id: AIProviderSelection.onDevice.providerID,
@@ -93,22 +124,8 @@ public enum ProviderCatalog {
         supportsModelListing: false
     )
 
-    public static let custom = ProviderDescriptor(
-        id: customID,
-        displayName: String(localized: "Custom (OpenAI-compatible)", bundle: .module),
-        kind: .openAICompatible,
-        baseURL: nil,
-        requiresAPIKey: false,
-        apiKeyPageURL: nil,
-        structuredOutput: .jsonSchema(strict: false),
-        tokenLimitField: .maxTokens,
-        quirks: [],
-        recommendedModels: [],
-        supportsModelListing: true
-    )
-
-    /// Ollama's default address; LM Studio uses http://localhost:1234/v1.
-    public static let suggestedCustomBaseURL = url("http://localhost:11434/v1")
+    /// Ollama's default address, shown as an example; LM Studio uses http://localhost:1234/v1.
+    public static let exampleCustomAddress = "http://localhost:11434/v1"
 
     public static let all: [ProviderDescriptor] = [
         onDevice,
@@ -163,6 +180,22 @@ public enum ProviderCatalog {
             supportsModelListing: true
         ),
         ProviderDescriptor(
+            id: "xai",
+            displayName: "xAI Grok",
+            kind: .openAICompatible,
+            baseURL: url("https://api.x.ai/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://console.x.ai/team/default/api-keys"),
+            structuredOutput: .jsonSchema(strict: true),
+            tokenLimitField: .maxCompletionTokens,
+            quirks: [],
+            recommendedModels: [
+                ModelDescriptor(id: "grok-4.3", acceptsImages: true),
+                ModelDescriptor(id: "grok-4.20-0309-non-reasoning", acceptsImages: true),
+            ],
+            supportsModelListing: true
+        ),
+        ProviderDescriptor(
             id: "deepseek",
             displayName: "DeepSeek",
             kind: .openAICompatible,
@@ -175,6 +208,174 @@ public enum ProviderCatalog {
             recommendedModels: [
                 ModelDescriptor(id: "deepseek-flash", acceptsImages: true),
                 ModelDescriptor(id: "deepseek-v4-pro", acceptsImages: false),
+            ],
+            supportsModelListing: true
+        ),
+        ProviderDescriptor(
+            id: "mistral",
+            displayName: "Mistral",
+            kind: .openAICompatible,
+            baseURL: url("https://api.mistral.ai/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://console.mistral.ai/api-keys"),
+            structuredOutput: .jsonSchema(strict: true),
+            tokenLimitField: .maxTokens,
+            quirks: [],
+            recommendedModels: [
+                ModelDescriptor(id: "mistral-small-latest", acceptsImages: false),
+                ModelDescriptor(id: "ministral-8b-latest", acceptsImages: true),
+            ],
+            supportsModelListing: true
+        ),
+        ProviderDescriptor(
+            id: "qwen",
+            displayName: "Alibaba Qwen",
+            kind: .openAICompatible,
+            // The shared international address; keys work only in the region they were made in.
+            baseURL: url("https://dashscope-intl.aliyuncs.com/compatible-mode/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://modelstudio.console.alibabacloud.com/ap-southeast-1/settings/api-key"),
+            // JSON Schema output isn't offered in this region yet.
+            structuredOutput: .jsonObject,
+            tokenLimitField: nil,
+            quirks: [.jsonModeNeedsExampleInPrompt, .turnsOffQwenThinking],
+            recommendedModels: [
+                ModelDescriptor(id: "qwen3.8-flash", acceptsImages: true),
+                ModelDescriptor(id: "qwen3.7-flash", acceptsImages: true),
+                ModelDescriptor(id: "qwen-flash", acceptsImages: false),
+            ],
+            supportsModelListing: false
+        ),
+        ProviderDescriptor(
+            id: "kimi",
+            displayName: "Moonshot Kimi",
+            kind: .openAICompatible,
+            baseURL: url("https://api.moonshot.ai/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://platform.kimi.ai/console/api-keys"),
+            structuredOutput: .jsonSchema(strict: true),
+            tokenLimitField: .maxCompletionTokens,
+            quirks: [.dropsArrayBounds],
+            recommendedModels: [
+                ModelDescriptor(id: "kimi-k2.6", acceptsImages: true),
+                ModelDescriptor(id: "kimi-k3", acceptsImages: true),
+            ],
+            supportsModelListing: true
+        ),
+        ProviderDescriptor(
+            id: "zai",
+            displayName: "Z.ai GLM",
+            kind: .openAICompatible,
+            baseURL: url("https://api.z.ai/api/paas/v4"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://z.ai/manage-apikey/apikey-list"),
+            structuredOutput: .jsonObject,
+            tokenLimitField: .maxTokens,
+            quirks: [.jsonModeNeedsExampleInPrompt, .turnsOffThinking],
+            recommendedModels: [
+                ModelDescriptor(id: "glm-4.7-flashx", acceptsImages: false),
+                ModelDescriptor(id: "glm-4.7-flash", acceptsImages: false),
+            ],
+            supportsModelListing: false
+        ),
+        ProviderDescriptor(
+            id: "cohere",
+            displayName: "Cohere",
+            kind: .openAICompatible,
+            baseURL: url("https://api.cohere.ai/compatibility/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://dashboard.cohere.com/api-keys"),
+            structuredOutput: .jsonObjectWithSchema,
+            tokenLimitField: .maxTokens,
+            quirks: [.dropsArrayBounds],
+            recommendedModels: [
+                ModelDescriptor(id: "command-r-08-2024", acceptsImages: false),
+                ModelDescriptor(id: "command-a-03-2025", acceptsImages: false),
+            ],
+            supportsModelListing: false
+        ),
+        ProviderDescriptor(
+            id: "groq",
+            displayName: "Groq",
+            kind: .openAICompatible,
+            baseURL: url("https://api.groq.com/openai/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://console.groq.com/keys"),
+            structuredOutput: .jsonSchema(strict: true),
+            tokenLimitField: .maxCompletionTokens,
+            quirks: [.dropsArrayBounds],
+            recommendedModels: [
+                ModelDescriptor(id: "openai/gpt-oss-120b", acceptsImages: false),
+                ModelDescriptor(id: "openai/gpt-oss-20b", acceptsImages: false),
+                ModelDescriptor(id: "qwen/qwen3.8-27b", acceptsImages: true),
+            ],
+            supportsModelListing: true
+        ),
+        ProviderDescriptor(
+            id: "cerebras",
+            displayName: "Cerebras",
+            kind: .openAICompatible,
+            baseURL: url("https://api.cerebras.ai/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://cloud.cerebras.ai"),
+            structuredOutput: .jsonSchema(strict: true),
+            tokenLimitField: .maxCompletionTokens,
+            quirks: [.dropsArrayBounds],
+            recommendedModels: [
+                ModelDescriptor(id: "gpt-oss-120b", acceptsImages: false),
+                ModelDescriptor(id: "qwen-3.8-27b", acceptsImages: true),
+            ],
+            supportsModelListing: true
+        ),
+        ProviderDescriptor(
+            id: "together",
+            displayName: "Together AI",
+            kind: .openAICompatible,
+            baseURL: url("https://api.together.ai/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://api.together.ai/settings/projects/~current/api-keys"),
+            structuredOutput: .jsonSchema(strict: false),
+            tokenLimitField: .maxTokens,
+            quirks: [.dropsArrayBounds],
+            recommendedModels: [
+                ModelDescriptor(id: "openai/gpt-oss-120b", acceptsImages: false),
+                ModelDescriptor(id: "Qwen/Qwen3.5-9B", acceptsImages: true),
+                ModelDescriptor(id: "deepseek-ai/DeepSeek-V4.1-Flash", acceptsImages: false),
+            ],
+            supportsModelListing: true
+        ),
+        ProviderDescriptor(
+            id: "fireworks",
+            displayName: "Fireworks AI",
+            kind: .openAICompatible,
+            baseURL: url("https://api.fireworks.ai/inference/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://app.fireworks.ai/settings/users/api-keys"),
+            structuredOutput: .jsonSchema(strict: false),
+            tokenLimitField: .maxTokens,
+            quirks: [],
+            recommendedModels: [
+                ModelDescriptor(id: "accounts/fireworks/models/glm-5p3-flash", acceptsImages: true),
+                ModelDescriptor(id: "accounts/fireworks/models/deepseek-v4p1-flash", acceptsImages: true),
+                ModelDescriptor(id: "accounts/fireworks/models/gpt-oss-120b", acceptsImages: false),
+            ],
+            supportsModelListing: false
+        ),
+        ProviderDescriptor(
+            id: "huggingface",
+            displayName: "Hugging Face",
+            kind: .openAICompatible,
+            baseURL: url("https://router.huggingface.co/v1"),
+            requiresAPIKey: true,
+            apiKeyPageURL: url("https://huggingface.co/settings/tokens/new?ownUserPermissions=inference.serverless.write&tokenType=fineGrained"),
+            structuredOutput: .jsonSchema(strict: false),
+            tokenLimitField: .maxTokens,
+            quirks: [.dropsArrayBounds],
+            // A ":provider" suffix picks a host that enforces the schema.
+            recommendedModels: [
+                ModelDescriptor(id: "openai/gpt-oss-120b", acceptsImages: false),
+                ModelDescriptor(id: "zai-org/GLM-5.3-Flash:baseten", acceptsImages: true),
+                ModelDescriptor(id: "deepseek-ai/DeepSeek-V4.1-Flash:baseten", acceptsImages: true),
             ],
             supportsModelListing: true
         ),
@@ -196,23 +397,6 @@ public enum ProviderCatalog {
             ],
             supportsModelListing: true
         ),
-        ProviderDescriptor(
-            id: "mistral",
-            displayName: "Mistral",
-            kind: .openAICompatible,
-            baseURL: url("https://api.mistral.ai/v1"),
-            requiresAPIKey: true,
-            apiKeyPageURL: url("https://console.mistral.ai/api-keys"),
-            structuredOutput: .jsonSchema(strict: true),
-            tokenLimitField: .maxTokens,
-            quirks: [],
-            recommendedModels: [
-                ModelDescriptor(id: "mistral-small-latest", acceptsImages: false),
-                ModelDescriptor(id: "ministral-8b-latest", acceptsImages: true),
-            ],
-            supportsModelListing: true
-        ),
-        custom,
     ]
 
     public static func provider(id: String) -> ProviderDescriptor? {

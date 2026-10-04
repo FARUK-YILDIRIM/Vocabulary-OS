@@ -20,7 +20,7 @@ import VocabularyCore
     }
 
     @Test func cloudProvidersUseHTTPSAndLinkToTheirKeyPage() throws {
-        for provider in ProviderCatalog.all where provider.kind != .appleOnDevice && provider.id != ProviderCatalog.customID {
+        for provider in ProviderCatalog.all where provider.kind != .appleOnDevice {
             let baseURL = try #require(provider.baseURL, "\(provider.id) has no base URL")
             #expect(baseURL.scheme == "https", "\(provider.id)")
             #expect(provider.apiKeyPageURL?.scheme == "https", "\(provider.id)")
@@ -29,12 +29,25 @@ import VocabularyCore
         }
     }
 
-    @Test func theCustomEndpointIsConfiguredByTheLearner() {
-        let custom = ProviderCatalog.custom
-        #expect(custom.kind == .openAICompatible)
-        #expect(custom.baseURL == nil)
-        #expect(!custom.requiresAPIKey)
-        #expect(ProviderCatalog.suggestedCustomBaseURL.absoluteString == "http://localhost:11434/v1")
+    @Test func learnerProvidersSpeakTheOpenAICompatibleAPIWithAnOptionalKey() {
+        let provider = ProviderDescriptor(custom: CustomProvider(id: "custom-1", name: "Studio", address: "http://mac-mini.local:1234/v1"))
+        #expect(provider.id == "custom-1")
+        #expect(provider.displayName == "Studio")
+        #expect(provider.kind == .openAICompatible)
+        #expect(provider.baseURL == URL(string: "http://mac-mini.local:1234/v1"))
+        #expect(!provider.requiresAPIKey)
+        #expect(provider.apiKeyPageURL == nil)
+        #expect(provider.tokenLimitField == nil, "servers disagree on the field, so none is sent")
+        #expect(provider.supportsModelListing)
+        #expect(ProviderCatalog.exampleCustomAddress == "http://localhost:11434/v1")
+    }
+
+    @Test func listsThePopularProviders() {
+        let ids = ProviderCatalog.all.map(\.id)
+        for id in ["openai", "anthropic", "gemini", "xai", "deepseek", "mistral", "qwen", "kimi", "zai", "cohere", "groq", "cerebras", "together", "fireworks", "huggingface", "openrouter"] {
+            #expect(ids.contains(id), "\(id)")
+        }
+        #expect(!ids.contains { CustomProvider.isCustom($0) }, "learner providers are not in the catalog")
     }
 
     @Test func providerQuirksFollowTheirAPIs() throws {
@@ -43,6 +56,12 @@ import VocabularyCore
         #expect(try #require(ProviderCatalog.provider(id: "deepseek")).structuredOutput == .jsonObject)
         #expect(try #require(ProviderCatalog.provider(id: "anthropic")).kind == .anthropic)
         #expect(try #require(ProviderCatalog.provider(id: "openrouter")).quirks.contains(.openRouterRequireParameters))
+        #expect(try #require(ProviderCatalog.provider(id: "cohere")).structuredOutput == .jsonObjectWithSchema)
+        #expect(try #require(ProviderCatalog.provider(id: "cerebras")).quirks.contains(.dropsArrayBounds))
+        #expect(try #require(ProviderCatalog.provider(id: "qwen")).quirks.contains(.turnsOffQwenThinking))
+        #expect(try #require(ProviderCatalog.provider(id: "zai")).quirks.contains(.turnsOffThinking))
+        #expect(try #require(ProviderCatalog.provider(id: "together")).tokenLimitField == .maxTokens)
+        #expect(try #require(ProviderCatalog.provider(id: "xai")).tokenLimitField == .maxCompletionTokens)
         #expect(ProviderCatalog.provider(id: "nope") == nil)
     }
 }

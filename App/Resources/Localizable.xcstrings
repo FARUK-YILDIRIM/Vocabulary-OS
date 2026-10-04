@@ -95,6 +95,16 @@
         }
       }
     },
+    "A key only ever goes to the server it was entered for: moving the provider to another server removes it." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bir anahtar yalnızca girildiği sunucuya gider: sağlayıcıyı başka bir sunucuya taşımak anahtarı kaldırır."
+          }
+        }
+      }
+    },
     "A narrator tells a short story." : {
       "localizations" : {
         "tr" : {
@@ -185,6 +195,16 @@
         }
       }
     },
+    "API key (optional)" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "API anahtarı (isteğe bağlı)"
+          }
+        }
+      }
+    },
     "About 2 minutes" : {
       "localizations" : {
         "tr" : {
@@ -215,12 +235,32 @@
         }
       }
     },
+    "Add" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ekle"
+          }
+        }
+      }
+    },
     "Add Language" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dil Ekle"
+          }
+        }
+      }
+    },
+    "Add a Provider" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcı Ekle"
           }
         }
       }
@@ -241,6 +281,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bir kelimeyi kendi sayfasından ekle: Diğer, sonra Listeler."
+          }
+        }
+      }
+    },
+    "Address" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adres"
           }
         }
       }
@@ -291,6 +341,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zaten kayıtlı"
+          }
+        }
+      }
+    },
+    "Any service with an OpenAI-compatible API: Ollama or LM Studio on your Mac, Azure OpenAI, Amazon Bedrock or your company's gateway." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OpenAI uyumlu API'si olan her hizmet: Mac'indeki Ollama ya da LM Studio, Azure OpenAI, Amazon Bedrock ya da şirketinin ağ geçidi."
           }
         }
       }
@@ -545,6 +605,16 @@
         }
       }
     },
+    "Delete %@?" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ silinsin mi?"
+          }
+        }
+      }
+    },
     "Delete List" : {
       "localizations" : {
         "tr" : {
@@ -561,6 +631,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Planı Sil"
+          }
+        }
+      }
+    },
+    "Delete Provider" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcıyı Sil"
           }
         }
       }
@@ -665,12 +745,12 @@
         }
       }
     },
-    "Enter a full address such as http://localhost:11434/v1." : {
+    "Enter a full address that starts with https:// or http://." : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "http://localhost:11434/v1 gibi tam bir adres gir."
+            "value" : "https:// ya da http:// ile başlayan tam bir adres gir."
           }
         }
       }
@@ -761,16 +841,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O gün tekrar zamanı gelen kelimeler için kartlar."
-          }
-        }
-      }
-    },
-    "For example Ollama (port 11434) or LM Studio (port 1234) on your Mac or local network." : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Örneğin Mac'indeki ya da yerel ağındaki Ollama (port 11434) veya LM Studio (port 1234)."
           }
         }
       }
@@ -949,6 +1019,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kullanımda"
+          }
+        }
+      }
+    },
+    "Its key is removed from your Keychain. Your words stay as they are." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anahtarı Anahtar Zinciri'nden kaldırılır. Kelimelerin olduğu gibi kalır."
           }
         }
       }
@@ -1443,16 +1523,6 @@
         }
       }
     },
-    "Not set up" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ayarlanmadı"
-          }
-        }
-      }
-    },
     "Not supported on this device" : {
       "localizations" : {
         "tr" : {
@@ -1555,16 +1625,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Yalnızca bir %1$@ ses yüklü, bu yüzden iki sunucu da onu kullanıyor. İki ses duymak için şuradan bir tane daha indir: %2$@."
-          }
-        }
-      }
-    },
-    "Optional API key" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "İsteğe bağlı API anahtarı"
           }
         }
       }
@@ -1909,12 +1969,12 @@
         }
       }
     },
-    "Save Address" : {
+    "Save Changes" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Adresi Kaydet"
+            "value" : "Değişiklikleri Kaydet"
           }
         }
       }
@@ -2061,22 +2121,12 @@
         }
       }
     },
-    "Server address" : {
+    "Server" : {
       "localizations" : {
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sunucu adresi"
-          }
-        }
-      }
-    },
-    "Server set" : {
-      "localizations" : {
-        "tr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sunucu ayarlı"
+            "value" : "Sunucu"
           }
         }
       }
@@ -2301,6 +2351,16 @@
         }
       }
     },
+    "The address is the part before /chat/completions: for example http://localhost:11434/v1 for Ollama on this Mac, or https://YOUR-RESOURCE.openai.azure.com/openai/v1 for Azure OpenAI." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adres, /chat/completions'tan önceki kısımdır: örneğin bu Mac'teki Ollama için http://localhost:11434/v1, Azure OpenAI için https://KAYNAK-ADI.openai.azure.com/openai/v1."
+          }
+        }
+      }
+    },
     "The answer is “%@”." : {
       "localizations" : {
         "tr" : {
@@ -2317,6 +2377,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Model indiriliyor"
+          }
+        }
+      }
+    },
+    "The provider now points to another server, so its key was removed. Enter the key for the new server." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcı artık başka bir sunucuyu gösteriyor, bu yüzden anahtarı kaldırıldı. Yeni sunucunun anahtarını gir."
           }
         }
       }
@@ -2473,6 +2543,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bu Sağlayıcıyı Kullan"
+          }
+        }
+      }
+    },
+    "Use https:// for a server on the internet, so your key and words travel encrypted. Plain http:// works only for this device and your local network." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "İnternetteki bir sunucu için https:// kullan; böylece anahtarın ve kelimelerin şifreli gider. Düz http:// yalnızca bu cihaz ve yerel ağın için çalışır."
           }
         }
       }
@@ -2643,6 +2723,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ana dilin"
+          }
+        }
+      }
+    },
+    "Your own providers" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kendi sağlayıcıların"
           }
         }
       }

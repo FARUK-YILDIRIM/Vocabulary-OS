@@ -144,18 +144,71 @@ private final class FakeCloudStore: CloudKeyValueStoring {
 
 @MainActor
 @Suite struct ProviderSettingsTests {
-    @Test func persistsTheCustomEndpointAndPrivacyAcknowledgement() {
+    @Test func persistsTheLearnersProvidersAndPrivacyAcknowledgement() {
         let backing = InMemoryKeyValueBacking()
         let store = SettingsStore(backing: backing)
-        #expect(store.customProviderBaseURL == nil)
+        #expect(store.customProviders.isEmpty)
         #expect(!store.hasAcknowledgedCloudPrivacy)
 
-        store.customProviderBaseURL = "http://localhost:11434/v1"
+        let studio = CustomProvider(name: "LM Studio", address: "http://mac-mini.local:1234/v1")
+        store.customProviders = [studio]
         store.hasAcknowledgedCloudPrivacy = true
 
         let reopened = SettingsStore(backing: backing)
-        #expect(reopened.customProviderBaseURL == "http://localhost:11434/v1")
+        #expect(reopened.customProviders == [studio])
         #expect(reopened.hasAcknowledgedCloudPrivacy)
+    }
+
+    @Test func providersAddedOnAnotherDeviceAppear() throws {
+        let backing = InMemoryKeyValueBacking()
+        let store = SettingsStore(backing: backing)
+        let gateway = CustomProvider(name: "Gateway", address: "https://ai.example.com/v1")
+        backing.simulateExternalChange(key: SettingsStore.Key.customProviders, value: try JSONEncoder().encode([gateway]))
+        #expect(store.customProviders == [gateway])
+    }
+
+    @Test func aProviderOnThisDeviceIsChosenForThisDeviceOnly() throws {
+        let backing = InMemoryKeyValueBacking()
+        let store = SettingsStore(backing: backing)
+        let openAI = AIProviderSelection(providerID: "openai", modelID: "gpt-6-luna")
+        store.aiSelection = openAI
+        let ollama = CustomProvider(name: "Ollama", address: "http://localhost:11434/v1")
+        store.customProviders = [ollama]
+
+        let local = AIProviderSelection(providerID: ollama.id, modelID: "llama4")
+        store.aiSelection = local
+        #expect(store.aiSelection == local)
+        let shared = try #require(backing.data(forKey: SettingsStore.Key.aiSelection))
+        #expect(try JSONDecoder().decode(AIProviderSelection.self, from: shared) == openAI, "the other devices keep their choice")
+
+        // Another device switches to Claude; this one stays with its own server.
+        let claude = AIProviderSelection(providerID: "anthropic")
+        backing.simulateExternalChange(key: SettingsStore.Key.aiSelection, value: try JSONEncoder().encode(claude))
+        #expect(store.aiSelection == local)
+
+        // A provider every device can reach is shared again.
+        store.aiSelection = openAI
+        #expect(store.aiSelection == openAI)
+        #expect(backing.deviceData(forKey: SettingsStore.Key.deviceAISelection) == nil)
+
+        store.aiSelection = local
+        #expect(SettingsStore(backing: backing).aiSelection == local, "this device's choice survives a relaunch")
+    }
+
+    @Test func removingAProviderForgetsTheChoiceOfIt() {
+        let store = SettingsStore(backing: InMemoryKeyValueBacking())
+        let ollama = CustomProvider(name: "Ollama", address: "http://localhost:11434/v1")
+        let gateway = CustomProvider(name: "Gateway", address: "https://ai.example.com/v1")
+        store.customProviders = [ollama, gateway]
+        store.aiSelection = AIProviderSelection(providerID: "openai")
+        store.aiSelection = AIProviderSelection(providerID: ollama.id, modelID: "llama4")
+
+        store.removeCustomProvider(id: ollama.id)
+        #expect(store.aiSelection == AIProviderSelection(providerID: "openai"), "back to the choice the devices share")
+        store.aiSelection = AIProviderSelection(providerID: gateway.id, modelID: "gpt-6-luna")
+        store.removeCustomProvider(id: gateway.id)
+        #expect(store.aiSelection == .onDevice)
+        #expect(store.customProviders.isEmpty)
     }
 
     @Test func sendingPhotosToTheAIIsOffUntilTheLearnerTurnsItOn() throws {
@@ -170,20 +223,13 @@ private final class FakeCloudStore: CloudKeyValueStoring {
         #expect(!SettingsStore(backing: backing).sharesPhotosWithAI)
     }
 
-    @Test func parsesTheCustomEndpoint() {
-        let settings = SettingsStore(backing: InMemoryKeyValueBacking())
-        #expect(settings.customProviderURL == nil)
-        settings.customProviderBaseURL = " http://localhost:11434/v1\n"
-        #expect(settings.customProviderURL == URL(string: "http://localhost:11434/v1"))
-    }
-
     @Test func neverStoresAnAPIKey() throws {
         // Whatever the learner does in settings, nothing key-like reaches the unencrypted store.
         let backing = InMemoryKeyValueBacking()
         let store = SettingsStore(backing: backing)
         store.aiSelection = AIProviderSelection(providerID: "openai", modelID: "gpt-6-luna")
-        store.customProviderBaseURL = "http://localhost:1234/v1"
-        for key in [SettingsStore.Key.profile, SettingsStore.Key.aiSelection, SettingsStore.Key.reviewLimits, SettingsStore.Key.customProviderBaseURL] {
+        store.customProviders = [CustomProvider(name: "LM Studio", address: "http://localhost:1234/v1")]
+        for key in [SettingsStore.Key.profile, SettingsStore.Key.aiSelection, SettingsStore.Key.reviewLimits, SettingsStore.Key.customProviders] {
             let text = backing.data(forKey: key).map { String(decoding: $0, as: UTF8.self) } ?? ""
             #expect(!text.localizedCaseInsensitiveContains("sk-"))
             #expect(!text.localizedCaseInsensitiveContains("apiKey"))

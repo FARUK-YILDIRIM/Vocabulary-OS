@@ -69,7 +69,7 @@ Done holds and its commit exists.
 
 ## Phase 7: The owner's answers and the ship review
 - [x] T33 `feat(capture)`: object photos for cloud models, opt-in (owner's answer 3)
-- [ ] T34 `feat(ai)`: more providers and learner-added providers (owner's answer 4)
+- [x] T34 `feat(ai)`: more providers and learner-added providers (owner's answer 4) — none of the new providers tried with a real key yet
 - [ ] T35 `fix`: ship review findings (code, security and test reviews)
 - [ ] T36 `docs(release)`: open-source release readiness
   - Noticed while building T29:

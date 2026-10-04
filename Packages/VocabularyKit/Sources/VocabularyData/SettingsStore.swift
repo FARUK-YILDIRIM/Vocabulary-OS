@@ -15,31 +15,48 @@ public final class SettingsStore {
         public static let profile = "profile.v1"
         public static let aiSelection = "aiSelection.v1"
         public static let reviewLimits = "reviewLimits.v1"
-        public static let customProviderBaseURL = "customProviderBaseURL.v1"
+        public static let customProviders = "customProviders.v1"
         public static let cloudPrivacy = "cloudPrivacyAcknowledged.v1"
         public static let sharesPhotosWithAI = "sharesPhotosWithAI.v1"
+        /// Stays on this device: the choice of a provider at this device's own address.
+        public static let deviceAISelection = "deviceAISelection.v1"
     }
 
     public var profile: LearnerProfile? {
         didSet { save(profile, forKey: Key.profile) }
     }
 
+    /// The provider and model in use. Choosing a provider at this device's own address (`localhost`)
+    /// changes only this device's choice; every other choice syncs (SPEC C2).
     public var aiSelection: AIProviderSelection {
-        didSet { save(aiSelection, forKey: Key.aiSelection) }
+        get { deviceAISelection ?? sharedAISelection }
+        set {
+            if customProviders.first(where: { $0.id == newValue.providerID })?.isOnThisDevice == true {
+                deviceAISelection = newValue
+            } else {
+                deviceAISelection = nil
+                sharedAISelection = newValue
+            }
+        }
+    }
+
+    /// The choice the learner's devices share.
+    private var sharedAISelection: AIProviderSelection {
+        didSet { save(sharedAISelection, forKey: Key.aiSelection) }
+    }
+
+    /// This device's own choice, which wins over the shared one.
+    private var deviceAISelection: AIProviderSelection? {
+        didSet { backing.setDeviceData(deviceAISelection.flatMap { try? JSONEncoder().encode($0) }, forKey: Key.deviceAISelection) }
+    }
+
+    /// Providers the learner added (SPEC C2). Their keys are in the Keychain, never here.
+    public var customProviders: [CustomProvider] {
+        didSet { save(customProviders, forKey: Key.customProviders) }
     }
 
     public var reviewLimits: ReviewLimits {
         didSet { save(reviewLimits, forKey: Key.reviewLimits) }
-    }
-
-    /// Address of the learner's own OpenAI-compatible server (Ollama, LM Studio), if any.
-    public var customProviderBaseURL: String? {
-        didSet { save(customProviderBaseURL, forKey: Key.customProviderBaseURL) }
-    }
-
-    /// `customProviderBaseURL` as a URL, ignoring surrounding whitespace.
-    public var customProviderURL: URL? {
-        customProviderBaseURL.flatMap { URL(string: $0.trimmingCharacters(in: .whitespacesAndNewlines)) }
     }
 
     /// Whether the learner has seen what is sent to cloud providers (SPEC C2).
@@ -63,13 +80,27 @@ public final class SettingsStore {
     public init(backing: any KeyValueBacking) {
         self.backing = backing
         profile = Self.load(LearnerProfile.self, forKey: Key.profile, from: backing)
-        aiSelection = Self.load(AIProviderSelection.self, forKey: Key.aiSelection, from: backing) ?? .onDevice
+        sharedAISelection = Self.load(AIProviderSelection.self, forKey: Key.aiSelection, from: backing) ?? .onDevice
+        deviceAISelection = backing.deviceData(forKey: Key.deviceAISelection)
+            .flatMap { try? JSONDecoder().decode(AIProviderSelection.self, from: $0) }
         reviewLimits = Self.load(ReviewLimits.self, forKey: Key.reviewLimits, from: backing) ?? ReviewLimits()
-        customProviderBaseURL = Self.load(String.self, forKey: Key.customProviderBaseURL, from: backing)
+        customProviders = Self.load([CustomProvider].self, forKey: Key.customProviders, from: backing) ?? []
         hasAcknowledgedCloudPrivacy = Self.load(Bool.self, forKey: Key.cloudPrivacy, from: backing) ?? false
         sharesPhotosWithAI = Self.load(Bool.self, forKey: Key.sharesPhotosWithAI, from: backing) ?? false
         backing.onExternalChange = { [weak self] keys in
             self?.applyExternalChange(keys)
+        }
+    }
+
+    /// Removes a provider the learner added. If it was in use, this device goes back to the choice
+    /// the other devices share, or to the on-device model when that was the removed provider too.
+    public func removeCustomProvider(id: String) {
+        customProviders.removeAll { $0.id == id }
+        if deviceAISelection?.providerID == id {
+            deviceAISelection = nil
+        }
+        if sharedAISelection.providerID == id {
+            sharedAISelection = .onDevice
         }
     }
 
@@ -82,11 +113,11 @@ public final class SettingsStore {
             case Key.profile:
                 profile = Self.load(LearnerProfile.self, forKey: key, from: backing)
             case Key.aiSelection:
-                aiSelection = Self.load(AIProviderSelection.self, forKey: key, from: backing) ?? .onDevice
+                sharedAISelection = Self.load(AIProviderSelection.self, forKey: key, from: backing) ?? .onDevice
             case Key.reviewLimits:
                 reviewLimits = Self.load(ReviewLimits.self, forKey: key, from: backing) ?? ReviewLimits()
-            case Key.customProviderBaseURL:
-                customProviderBaseURL = Self.load(String.self, forKey: key, from: backing)
+            case Key.customProviders:
+                customProviders = Self.load([CustomProvider].self, forKey: key, from: backing) ?? []
             case Key.cloudPrivacy:
                 hasAcknowledgedCloudPrivacy = Self.load(Bool.self, forKey: key, from: backing) ?? false
             case Key.sharesPhotosWithAI:

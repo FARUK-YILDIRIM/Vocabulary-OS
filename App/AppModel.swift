@@ -24,7 +24,6 @@ final class AppModel {
     /// Speaks words, listening questions and podcasts with on-device voices (ADR-008).
     let speech = SpeechPlayer()
     let secrets: any SecretStore
-    let router: ProviderRouter
     /// Words saved in the Share extension, waiting to be imported; `nil` without an App Group.
     let inbox: CaptureInbox?
     @ObservationIgnored private let options: LaunchOptions
@@ -46,7 +45,6 @@ final class AppModel {
         self.plans = PlanRepository(words: repository)
         self.navigation = AppNavigation(tab: options.initialTab ?? .today)
         self.secrets = secrets
-        self.router = ProviderRouter(secrets: secrets)
         self.inbox = inbox
         self.options = options
     }
@@ -113,11 +111,31 @@ final class AppModel {
             return InsightService(client: StubGenerationClient(), strategy: .stepwise, source: InsightSource(providerID: "stub"))
         }
         #endif
-        return router.insightService(for: settings.aiSelection, customBaseURL: customBaseURL)
+        return router.insightService(for: settings.aiSelection)
     }
 
-    var customBaseURL: URL? {
-        settings.customProviderURL
+    /// Built when used, so the providers the learner added are current.
+    var router: ProviderRouter {
+        ProviderRouter(secrets: secrets, customProviders: settings.customProviders)
+    }
+
+    /// Saves an edited provider the learner added. A key only ever goes to the server it was entered
+    /// for, so moving the provider to another server removes its key; returns whether it did
+    /// (SPEC C2).
+    @discardableResult
+    func updateCustomProvider(_ provider: CustomProvider) -> Bool {
+        guard let index = settings.customProviders.firstIndex(where: { $0.id == provider.id }) else { return false }
+        let movesServer = CustomProvider.movesToAnotherServer(from: settings.customProviders[index], to: provider)
+        settings.customProviders[index] = provider
+        guard movesServer, router.hasAPIKey(for: provider.id) else { return false }
+        try? secrets.setSecret(nil, for: provider.id)
+        return true
+    }
+
+    /// Removes a provider the learner added, and its key.
+    func deleteCustomProvider(_ provider: CustomProvider) {
+        try? secrets.setSecret(nil, for: provider.id)
+        settings.removeCustomProvider(id: provider.id)
     }
 
     /// Whether object capture sends the photo with the request: the learner allowed it and a cloud
@@ -133,7 +151,7 @@ final class AppModel {
     /// The name shown under an insight for the provider that produced it.
     func providerName(for providerID: String) -> String {
         if providerID == "stub" { return String(localized: "Test answers") }
-        return ProviderCatalog.provider(id: providerID)?.displayName ?? providerID
+        return router.provider(id: providerID)?.displayName ?? providerID
     }
 
     // MARK: Plans

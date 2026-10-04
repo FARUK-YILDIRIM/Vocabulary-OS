@@ -1,14 +1,16 @@
 # ADR-003: On-device AI by default, bring-your-own-key cloud providers
 
 ## Status
-Accepted (revised 2026-10-04: provider APIs and on-device behavior verified)
+Accepted (revised 2026-10-04: provider APIs and on-device behavior verified; the owner asked for the
+popular providers and for providers the learner adds)
 
 ## Date
 2026-10-03
 
 ## Context
 The owner decided:
-- We ship a list of providers and models.
+- We ship a list of providers and models: the popular ones (answer to spec question 4).
+- The learner can also add their own provider (same answer).
 - The learner creates an API key with the provider and enters it in the app. They can use any model
   from the list, or the on-device model.
 - The **Apple on-device model is the default**. A key is optional.
@@ -56,6 +58,16 @@ Facts that shape the design:
   | Mistral | `https://api.mistral.ai/v1/chat/completions`, Bearer | `json_schema` (`strict` defaults to false; we send true) | `max_tokens` | per model |
   | Local (Ollama `:11434/v1`, LM Studio `:1234/v1`) | no key | `json_schema` (LM Studio documented; Ollama not confirmed) | `max_tokens` | Ollama base64 only |
   | Anthropic | `POST https://api.anthropic.com/v1/messages`, `x-api-key`, `anthropic-version: 2023-06-01` | `output_config.format: {type: json_schema}` (GA). **Forced `tool_choice` returns 400 on the newest models.** | `max_tokens` (required) | base64 block |
+  | xAI | `https://api.x.ai/v1`, Bearer (Chat Completions is marked legacy but has no end date) | `json_schema` strict | `max_completion_tokens` | data URL |
+  | Alibaba Qwen | `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`, Bearer; keys work only in their region | **`json_object` only** in this region; "json" must be in the prompt; no token limit with JSON output; thinking on by default (`enable_thinking: false`) | `max_completion_tokens` | data URL |
+  | Moonshot Kimi | `https://api.moonshot.ai/v1`, Bearer | `json_schema` strict; `temperature` must not be sent | `max_completion_tokens` | base64 only |
+  | Z.ai GLM | `https://api.z.ai/api/paas/v4`, Bearer | **`json_object` only**, text models only; thinking on by default (`thinking: {type: disabled}`) | `max_tokens` | vision models only |
+  | Cohere | `https://api.cohere.ai/compatibility/v1`, Bearer | **`{type: json_object, schema}`**; OpenAI's `json_schema` shape returns 400; no `minItems` | `max_tokens` | not documented |
+  | Groq | `https://api.groq.com/openai/v1`, Bearer | `json_schema` strict on gpt-oss and Qwen 3.8 | `max_completion_tokens` | Qwen 3.8 only |
+  | Cerebras | `https://api.cerebras.ai/v1`, Bearer | `json_schema` strict; **no `minItems`/`maxItems`** | `max_completion_tokens` | Qwen 3.8 only, base64 |
+  | Together AI | `https://api.together.ai/v1`, Bearer | `json_schema` (strict subset undocumented) | `max_tokens` | data URL; **`/models` is a bare array** |
+  | Fireworks AI | `https://api.fireworks.ai/inference/v1`, Bearer | `json_schema`, enforced | `max_tokens` (default 2048) | data URL; model IDs start with `accounts/fireworks/models/` |
+  | Hugging Face | `https://router.huggingface.co/v1`, Bearer (fine-grained token) | `json_schema`; enforcement depends on the host, so models pin one (`model:host`) | `max_tokens` | data URL |
 
 - **Error bodies differ too:**
   - OpenAI: `{"error":{…}}`.
@@ -68,8 +80,8 @@ Facts that shape the design:
    - `GenerationClient` generates any `@Generable` output type, plus dynamic schemas.
    - Implementations:
      - `AppleOnDeviceClient` (FoundationModels);
-     - `OpenAICompatibleClient` (OpenAI, Gemini through its OpenAI-compatible endpoint, DeepSeek,
-       OpenRouter, Mistral, custom/local);
+     - `OpenAICompatibleClient` (OpenAI, Gemini through its OpenAI-compatible endpoint and every
+       other listed provider but Anthropic, and the learner's own providers);
      - `AnthropicClient` (Messages API with `output_config.format`).
    - No provider SDKs.
 2. **Outputs are defined once** as `@Generable` structs:
@@ -93,16 +105,49 @@ Facts that shape the design:
    | OpenAI | `gpt-6-luna`, `gpt-5.4-nano`, `gpt-5.4-mini` | |
    | Anthropic | `claude-haiku-4-5`, `claude-sonnet-5-5` | |
    | Google Gemini | `gemini-3.1-flash-lite`, `gemini-3.5-flash-lite`, `gemini-3.8-flash` | |
+   | xAI | `grok-4.3`, `grok-4.20-0309-non-reasoning` | |
    | DeepSeek | `deepseek-flash` | |
-   | OpenRouter | `google/gemini-3.1-flash-lite`, `openai/gpt-6-luna`, `deepseek/deepseek-v4.1-flash`, `mistralai/mistral-small-2603` | |
    | Mistral | `mistral-small-latest`, `ministral-8b-latest` | |
-   | Custom OpenAI-compatible | — | base URL chosen by the learner |
+   | Alibaba Qwen | `qwen3.8-flash`, `qwen3.7-flash`, `qwen-flash` | thinking turned off |
+   | Moonshot Kimi | `kimi-k2.6`, `kimi-k3` | prepaid, low limits at the first tier |
+   | Z.ai GLM | `glm-4.7-flashx`, `glm-4.7-flash` | text only; thinking turned off |
+   | Cohere | `command-r-08-2024`, `command-a-03-2025` | trial keys: 1,000 calls a month |
+   | Groq | `openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b` | |
+   | Cerebras | `gpt-oss-120b`, `qwen-3.8-27b` | |
+   | Together AI | `openai/gpt-oss-120b`, `Qwen/Qwen3.5-9B`, `deepseek-ai/DeepSeek-V4.1-Flash` | |
+   | Fireworks AI | `accounts/fireworks/models/glm-5p3-flash`, `…/deepseek-v4p1-flash`, `…/gpt-oss-120b` | |
+   | Hugging Face | `openai/gpt-oss-120b`, `zai-org/GLM-5.3-Flash:baseten`, `deepseek-ai/DeepSeek-V4.1-Flash:baseten` | |
+   | OpenRouter | `google/gemini-3.1-flash-lite`, `openai/gpt-6-luna`, `deepseek/deepseek-v4.1-flash`, `mistralai/mistral-small-2603` | |
+
+   Not listed, checked on 2026-10-04:
+   - Perplexity: Sonar's Chat Completions reached end of support on 2026-09-27; its successor
+     speaks the Responses API, and its Chat Completions router is in private preview.
+   - Meta's Llama API shut down on 2026-07-06; its successor, the Meta Model API, is a public
+     preview whose cheapest model trains on the prompts it gets.
+   - MiniMax offers no structured output on Chat Completions.
+   - Azure OpenAI and Amazon Bedrock have an address per resource or region; learners add them as
+     their own providers.
+
+   Every listed provider's request shape is checked against its documentation by a stubbed-network
+   test; none has been tried with a real key yet.
+4. **Providers the learner adds:**
+   - Any service with an OpenAI-compatible Chat Completions API: a name, an address (the part before
+     `/chat/completions`) and an optional key. Ollama, LM Studio, Azure OpenAI, Amazon Bedrock and
+     company gateways all fit.
+   - Requests use a JSON Schema that isn't strict and send no output limit, since such servers
+     disagree on what they accept (Azure's reasoning models reject `max_tokens`).
+   - Plain `http` is accepted only for this device and the local network; elsewhere the address must
+     be `https`, so the key and the learner's words travel encrypted.
+   - A key is stored under the provider's own ID and only ever goes to the server it was entered
+     for: moving the provider to another host, port or scheme removes its key.
+   - The providers sync with the settings and their keys with iCloud Keychain. Choosing a provider
+     at `localhost` changes only that device's choice (ADR-002), since the others can't reach it.
 
    - Each entry also has its key page URL, structured-output mode, token-limit field and image
      support.
    - The learner can refresh the model list from the provider (`GET …/models`) or type any model ID.
      Model IDs change often, so the catalog is data, not logic.
-4. **On-device strategy:**
+5. **On-device strategy:**
    - Small steps, one task per call:
      1. **Sense** (in English): situation, English gloss, lemma, part of speech.
      2. **Native:** translation, meaning, grammar note. Language names are injected through
@@ -112,24 +157,31 @@ Facts that shape the design:
      session per task.
    - Check `SystemLanguageModel.default.availability` and `supportedLanguages` before offering
      on-device AI for a language.
-5. **Cloud strategy:**
+6. **Cloud strategy:**
    - One call returns the full insight schema.
    - Quiz and podcast are generated in batches.
    - OpenAI uses `max_completion_tokens`. OpenRouter sends `provider.require_parameters: true` and an
      `X-OpenRouter-Title: Vocabulary-OS` header.
-   - DeepSeek uses `json_object`, with the schema and an example embedded in the prompt.
-6. **Validation everywhere:**
+   - DeepSeek, Qwen and Z.ai use `json_object`, with the schema and an example embedded in the
+     prompt; Cohere gets the schema in its own `json_object` form.
+   - Array bounds are dropped for providers whose strict mode rejects them; validators check counts.
+   - The output limit is at least 8,192 tokens, since many models now reason by default and count
+     that against it. It caps cost, not the answer. Qwen and Z.ai models are asked not to think.
+   - Reasoning that a model writes into its answer between `<think>` tags is dropped before the
+     JSON is read.
+7. **Validation everywhere:**
    - Every output passes a validator for language, length, required words and option sets before it
      is shown or stored.
    - On failure there is one retry with a corrective note, then a clear error.
-7. **Selection and fallback:**
+8. **Selection and fallback:**
    - One active provider and model. The default is on-device when it's available.
    - If on-device is unavailable (device not eligible, Apple Intelligence off, model not ready, or the
      language unsupported), the app explains why and suggests connecting a provider.
    - There is no silent fallback between providers. Errors offer "Retry" and "Use on-device model".
-8. **Keys and privacy:**
+9. **Keys and privacy:**
    - Keys live in the Keychain (ADR-002) and are only sent to the host of the provider they belong to.
-   - Custom endpoints may use `http` only for local network hosts (`NSAllowsLocalNetworking`).
+   - The learner's own providers may use `http` only for this device and the local network
+     (`NSAllowsLocalNetworking`, and the address check in item 4).
    - Before the first cloud call, the app shows what is sent:
      - **insight:** term, sentence, language names;
      - **quiz:** words and their meanings;
@@ -162,7 +214,8 @@ Facts that shape the design:
 ## Consequences
 - Works offline and for free on Apple-Intelligence devices. Quality is lower than cloud models, so
   the UI says so and makes connecting a provider easy.
-- Adding a provider that speaks Chat Completions is a catalog entry, not code.
+- Adding a provider that speaks Chat Completions is a catalog entry, plus a quirk when it differs.
+  Providers we don't list can still be used, by adding them as the learner's own.
 - Model IDs go stale. The catalog needs review each release, and live listing covers the gaps.
 - On-device prompts must be re-evaluated (`vos-eval`) when Apple ships a new model version: the
   model changes with 26.4 and 27.0.
@@ -208,3 +261,29 @@ Facts that shape the design:
 - Local servers:
   - Ollama: https://docs.ollama.com/api/openai-compatibility
   - LM Studio: https://lmstudio.ai/docs/developer/openai-compat/structured-output
+- xAI: https://docs.x.ai/developers/rest-api-reference/inference/chat-completions ,
+  https://docs.x.ai/developers/model-capabilities/text/structured-outputs ,
+  https://docs.x.ai/developers/models
+- Alibaba Qwen: https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-openai-chat-completions ,
+  https://www.alibabacloud.com/help/en/model-studio/qwen-structured-output ,
+  https://www.alibabacloud.com/help/en/model-studio/regions
+- Moonshot Kimi: https://platform.kimi.ai/docs/api/chat , https://platform.kimi.ai/docs/guide/response_format ,
+  https://platform.kimi.ai/docs/api/models-overview
+- Z.ai: https://docs.z.ai/api-reference/llm/chat-completion , https://docs.z.ai/guides/capabilities/struct-output ,
+  https://docs.z.ai/guides/capabilities/thinking-mode
+- Cohere: https://docs.cohere.com/docs/compatibility-api , https://docs.cohere.com/docs/structured-outputs
+- Groq: https://console.groq.com/docs/openai , https://console.groq.com/docs/structured-outputs ,
+  https://console.groq.com/docs/models
+- Cerebras: https://inference-docs.cerebras.ai/resources/openai ,
+  https://inference-docs.cerebras.ai/capabilities/structured-outputs
+- Together AI: https://docs.together.ai/docs/inference/openai-compatibility ,
+  https://docs.together.ai/reference/models
+- Fireworks AI: https://docs.fireworks.ai/tools-sdks/openai-compatibility ,
+  https://docs.fireworks.ai/structured-responses/structured-response-formatting
+- Hugging Face: https://huggingface.co/docs/inference-providers/tasks/chat-completion ,
+  https://huggingface.co/docs/inference-providers/guides/structured-output
+- Not listed: https://docs.perplexity.ai/docs/agent-api/migrate-from-sonar/overview ,
+  https://llama.developer.meta.com/docs/llama-api-deprecation/ ,
+  https://platform.minimax.io/docs/api-reference/text-chat-openai ,
+  https://learn.microsoft.com/en-us/azure/foundry/openai/api-version-lifecycle ,
+  https://docs.aws.amazon.com/bedrock/latest/userguide/inference-chat-completions.html

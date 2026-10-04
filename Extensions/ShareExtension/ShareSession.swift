@@ -21,7 +21,7 @@ final class ShareSession {
     private(set) var state = State.loading
     @ObservationIgnored private var settings: SettingsStore
     @ObservationIgnored private let inbox: CaptureInbox?
-    @ObservationIgnored private let router: ProviderRouter
+    @ObservationIgnored private let secrets: any SecretStore
     @ObservationIgnored private var usesAIStub = false
 
     init() {
@@ -31,7 +31,7 @@ final class ShareSession {
         // The extension only reads settings: values it wrote would never reach iCloud.
         settings = SettingsStore(backing: UbiquitousKeyValueBacking(cloud: nil, mirror: defaults))
         inbox = group?.inbox
-        router = ProviderRouter(secrets: KeychainSecretStore(accessGroup: group?.identifier))
+        secrets = KeychainSecretStore(accessGroup: group?.identifier)
         #if DEBUG
         applyTestHooks(from: defaults)
         #endif
@@ -51,7 +51,7 @@ final class ShareSession {
 
     /// The name shown under an insight.
     var providerName: String {
-        usesAIStub ? String(localized: "Test answers") : router.displayName(for: settings.aiSelection)
+        usesAIStub ? String(localized: "Test answers") : Self.router(secrets: secrets, settings: settings).displayName(for: settings.aiSelection)
     }
 
     func start(with text: String) {
@@ -64,24 +64,29 @@ final class ShareSession {
             return
         }
         // Captured by value, so the model's closure doesn't keep the session alive.
-        let router = router, settings = settings, usesAIStub = usesAIStub
+        let secrets = secrets, settings = settings, usesAIStub = usesAIStub
         state = .capturing(CaptureModel(
             text: text,
             captureSource: .shareSheet,
             settings: settings,
             destination: InboxCaptureDestination(inbox: inbox)
         ) {
-            Self.insightService(router: router, settings: settings, usesAIStub: usesAIStub)
+            Self.insightService(secrets: secrets, settings: settings, usesAIStub: usesAIStub)
         })
     }
 
+    /// Knows the providers the learner added in the app.
+    private static func router(secrets: any SecretStore, settings: SettingsStore) -> ProviderRouter {
+        ProviderRouter(secrets: secrets, customProviders: settings.customProviders)
+    }
+
     /// Built at the moment of use, like the app's, so the current provider and key apply.
-    private static func insightService(router: ProviderRouter, settings: SettingsStore, usesAIStub: Bool) -> InsightService {
+    private static func insightService(secrets: any SecretStore, settings: SettingsStore, usesAIStub: Bool) -> InsightService {
         #if DEBUG
         if usesAIStub {
             return InsightService(client: StubGenerationClient(), strategy: .stepwise, source: InsightSource(providerID: "stub"))
         }
         #endif
-        return router.insightService(for: settings.aiSelection, customBaseURL: settings.customProviderURL)
+        return router(secrets: secrets, settings: settings).insightService(for: settings.aiSelection)
     }
 }

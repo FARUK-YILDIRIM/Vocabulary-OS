@@ -117,9 +117,11 @@ enum JSONSchemaAdapter {
         return nil
     }
 
-    /// Parses a reply into content that a `Generable` type or a validator can read.
+    /// Parses a reply into content that a `Generable` type or a validator can read. Reasoning some
+    /// models write into the answer, between `<think>` tags, is left out first.
     static func content(fromReply text: String) throws(AIError) -> GeneratedContent {
-        guard let json = extractJSONObject(from: text) else {
+        let answer = text.replacing(/(?s)<think>.*?<\/think>/, with: "")
+        guard let json = extractJSONObject(from: answer) else {
             throw .invalidOutput("The answer contained no JSON object.")
         }
         do {
