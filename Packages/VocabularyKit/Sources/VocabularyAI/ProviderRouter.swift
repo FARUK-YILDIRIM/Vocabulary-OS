@@ -19,10 +19,11 @@ public struct ProviderRouter: Sendable {
     private let session: URLSession
 
     /// - Parameter customProviders: the providers the learner added (SPEC C2).
-    public init(secrets: any SecretStore, customProviders: [CustomProvider] = [], session: URLSession = .shared) {
+    public init(secrets: any SecretStore, customProviders: [CustomProvider] = [], session: URLSession? = nil) {
         self.secrets = secrets
         self.customProviders = customProviders
-        self.session = session
+        // Provider requests keep nothing on disk and follow no redirect to another server.
+        self.session = session ?? ProviderHTTP.session
     }
 
     /// A provider from the catalog or one the learner added.

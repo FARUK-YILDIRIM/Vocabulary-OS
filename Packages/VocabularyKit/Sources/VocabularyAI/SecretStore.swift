@@ -100,7 +100,7 @@ public struct KeychainSecretStore: SecretStore {
     }
 
     /// The full item first (synced, shared), then a local fallback for builds without entitlements.
-    private func attributeVariants(for account: String) -> [[String: Any]] {
+    func attributeVariants(for account: String) -> [[String: Any]] {
         var base: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -118,9 +118,11 @@ public struct KeychainSecretStore: SecretStore {
         var local = base
         local[kSecAttrSynchronizable as String] = kCFBooleanFalse
         #if os(macOS)
-        // Ad-hoc signed builds can't use the data protection keychain at all.
+        // Ad-hoc signed builds can't use the data protection keychain at all, so they fall back to
+        // the login keychain. Signed builds, which have the App Group, never look there: any app
+        // could have put an item there under our service name (security review).
         local[kSecUseDataProtectionKeychain as String] = nil
-        return [full, local]
+        return accessGroup == nil ? [full, local] : [full]
         #else
         // Without a group or sync, the two variants are the same item.
         return accessGroup == nil && !synchronizes ? [full] : [full, local]

@@ -200,6 +200,62 @@ struct ProbeOutput {
         }
     }
 
+    @Test(arguments: [(URLError.Code.timedOut, AIError.timedOut), (.notConnectedToInternet, AIError.network("")), (.cancelled, AIError.cancelled)])
+    func reportsWhatTheNetworkDid(_ code: URLError.Code, _ expected: AIError) async throws {
+        let host = "transport-\(UUID().uuidString.lowercased()).test"
+        let session = StubURLProtocol.session(host: host) { _ in .failing(code) }
+        let client = OpenAICompatibleClient(
+            provider: try #require(ProviderCatalog.provider(id: "openai")),
+            baseURL: try #require(URL(string: "https://\(host)/v1")), model: "gpt-6-luna", apiKey: "sk", session: session
+        )
+        do {
+            _ = try await client.generate(request, as: ProbeOutput.self)
+            Issue.record("expected \(expected)")
+        } catch {
+            if case .network = expected {
+                guard case .network = error else {
+                    Issue.record("got \(error)")
+                    return
+                }
+            } else {
+                #expect(error == expected)
+            }
+        }
+    }
+
+    /// Answers arrive only when they are complete, so a long podcast or quiz needs more than a
+    /// minute with a slow model (code review).
+    @Test func longAnswersGetMoreTimeThanShortOnes() async throws {
+        let (client, host) = try client("openai")
+        _ = try await client.generate(request, as: ProbeOutput.self)
+        var long = request
+        long.maximumResponseTokens = 2_000
+        _ = try await client.generate(long, as: ProbeOutput.self)
+
+        let timeouts = StubURLProtocol.requests(to: host).map(\.timeout)
+        #expect(timeouts == [60, 300])
+    }
+
+    /// A key must not follow a redirect to another server (security review).
+    @Test func doesNotFollowARedirectToAnotherServer() async throws {
+        let elsewhere = "elsewhere-\(UUID().uuidString.lowercased()).test"
+        StubURLProtocol.answer(host: elsewhere) { _ in .json(200, Self.reply) }
+        let (client, host) = try client("openai", body: "")
+        StubURLProtocol.answer(host: host) { _ in .redirect(to: URL(string: "https://\(elsewhere)/v1/chat/completions")!) }
+
+        await #expect(throws: AIError.self) {
+            try await client.generate(request, as: ProbeOutput.self)
+        }
+        #expect(StubURLProtocol.requests(to: elsewhere).isEmpty, "nothing, and no key, reached the other server")
+    }
+
+    @Test func providerRequestsKeepNothingOnDisk() {
+        let configuration = ProviderHTTP.session.configuration
+        #expect(configuration.urlCache == nil)
+        #expect(configuration.httpCookieStorage == nil)
+        #expect(configuration.urlCredentialStorage == nil)
+    }
+
     @Test func understandsPlainTextErrors() async throws {
         let host = "deepseek-plain-\(UUID().uuidString.lowercased()).test"
         let session = StubURLProtocol.session(host: host) { _ in .text(401, "Authentication Fails (no such user)") }

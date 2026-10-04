@@ -141,6 +141,16 @@
         }
       }
     },
+    "The provider took too long to answer. Try again, or choose a faster model in Settings." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sağlayıcı yanıt vermekte çok gecikti. Yeniden dene ya da Ayarlar'dan daha hızlı bir model seç."
+          }
+        }
+      }
+    },
     "The request was cancelled." : {
       "localizations" : {
         "tr" : {

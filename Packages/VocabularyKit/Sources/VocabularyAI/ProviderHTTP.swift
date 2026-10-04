@@ -1,8 +1,30 @@
 import Foundation
 
+import VocabularyCore
+
 /// HTTP plumbing shared by the cloud clients: sending, and turning failures into `AIError`.
 enum ProviderHTTP {
     static let timeout: TimeInterval = 60
+    /// For long answers: a podcast or a whole quiz arrives only when it is complete.
+    static let longTimeout: TimeInterval = 300
+
+    /// How long a request may wait for its answer.
+    static func timeout(for request: GenerationRequest) -> TimeInterval {
+        request.maximumResponseTokens > 600 ? longTimeout : timeout
+    }
+
+    /// The session for provider requests. It keeps nothing on disk, so no response or request (with
+    /// its key) lands in a cache, and it never follows a redirect to another server, which would
+    /// take the key along (security review).
+    static let session = makeSession(configuration: .ephemeral)
+
+    static func makeSession(configuration: URLSessionConfiguration) -> URLSession {
+        configuration.urlCache = nil
+        configuration.httpCookieStorage = nil
+        configuration.urlCredentialStorage = nil
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        return URLSession(configuration: configuration, delegate: RedirectGuard(), delegateQueue: nil)
+    }
 
     /// Sends the request and returns the body of a 2xx response.
     static func send(_ request: URLRequest, session: URLSession) async throws(AIError) -> Data {
@@ -12,6 +34,8 @@ enum ProviderHTTP {
             (data, response) = try await session.data(for: request)
         } catch let error as URLError where error.code == .cancelled {
             throw .cancelled
+        } catch let error as URLError where error.code == .timedOut {
+            throw .timedOut
         } catch is CancellationError {
             throw .cancelled
         } catch {
@@ -83,5 +107,22 @@ enum ProviderHTTP {
         }
         collect(json)
         return parts.joined(separator: " ")
+    }
+}
+
+/// Lets a request follow a redirect only to the same server: scheme, host and port.
+private final class RedirectGuard: NSObject, URLSessionTaskDelegate {
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest
+    ) async -> URLRequest? {
+        guard let origin = task.originalRequest?.url, let target = request.url,
+              ServerAddress.isSameServer(origin, target)
+        else {
+            return nil
+        }
+        return request
     }
 }

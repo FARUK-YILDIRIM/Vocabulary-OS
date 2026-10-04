@@ -26,6 +26,8 @@ public enum AIError: Error, Hashable, Sendable, LocalizedError {
     case quotaExceeded
     case modelUnavailable
     case network(String)
+    /// The provider sent nothing back in time; long answers arrive only when they are complete.
+    case timedOut
     case server(status: Int)
     case cancelled
     case unknown(String)
@@ -64,6 +66,8 @@ public enum AIError: Error, Hashable, Sendable, LocalizedError {
             String(localized: "This model isn't available for your key. Choose another model in Settings.", bundle: .module)
         case .network:
             String(localized: "The provider couldn't be reached. Check your connection.", bundle: .module)
+        case .timedOut:
+            String(localized: "The provider took too long to answer. Try again, or choose a faster model in Settings.", bundle: .module)
         case .server(let status):
             String(localized: "The provider had a problem (HTTP \(status)). Try again later.", bundle: .module)
         case .cancelled:

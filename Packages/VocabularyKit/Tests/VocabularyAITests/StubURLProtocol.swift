@@ -1,5 +1,6 @@
 import Foundation
 import Synchronization
+@testable import VocabularyAI
 
 /// Answers HTTP requests in tests without touching the network. Handlers are registered per host, so
 /// tests running in parallel never see each other's responses.
@@ -8,6 +9,18 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         var status: Int
         var body: Data
         var headers: [String: String] = ["Content-Type": "application/json"]
+        /// Fails the request the way the network would, instead of answering it.
+        var failure: URLError.Code?
+        /// Redirects the request to this URL.
+        var redirect: URL?
+
+        static func failing(_ code: URLError.Code) -> Response {
+            Response(status: 0, body: Data(), failure: code)
+        }
+
+        static func redirect(to url: URL) -> Response {
+            Response(status: 302, body: Data(), headers: ["Location": url.absoluteString], redirect: url)
+        }
 
         static func json(_ status: Int, _ body: String) -> Response {
             Response(status: status, body: Data(body.utf8))
@@ -24,6 +37,7 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         let url: URL
         let headers: [String: String]
         let body: Data
+        let timeout: TimeInterval
 
         var json: [String: Any] {
             (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
@@ -36,9 +50,18 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     /// Returns a session whose requests to `host` are answered by `handler`.
     static func session(host: String, handler: @escaping @Sendable (Recorded) -> Response) -> URLSession {
         handlers.withLock { $0[host] = handler }
+        return ProviderHTTP.makeSession(configuration: configuration)
+    }
+
+    /// Answers requests to `host` too, for a test that uses another host's session.
+    static func answer(host: String, handler: @escaping @Sendable (Recorded) -> Response) {
+        handlers.withLock { $0[host] = handler }
+    }
+
+    private static var configuration: URLSessionConfiguration {
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [StubURLProtocol.self]
-        return URLSession(configuration: configuration)
+        return configuration
     }
 
     static func requests(to host: String) -> [Recorded] {
@@ -57,7 +80,8 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
             method: request.httpMethod ?? "GET",
             url: url,
             headers: request.allHTTPHeaderFields ?? [:],
-            body: Self.body(of: request)
+            body: Self.body(of: request),
+            timeout: request.timeoutInterval
         )
         Self.recorded.withLock { $0[host, default: []].append(recordedRequest) }
         guard let handler = Self.handlers.withLock({ $0[host] }) else {
@@ -65,7 +89,19 @@ final class StubURLProtocol: URLProtocol, @unchecked Sendable {
             return
         }
         let response = handler(recordedRequest)
+        if let failure = response.failure {
+            client?.urlProtocol(self, didFailWithError: URLError(failure))
+            return
+        }
         let http = HTTPURLResponse(url: url, statusCode: response.status, httpVersion: "HTTP/1.1", headerFields: response.headers)
+        if let redirect = response.redirect, let http {
+            var next = request
+            next.url = redirect
+            client?.urlProtocol(self, wasRedirectedTo: next, redirectResponse: http)
+            client?.urlProtocol(self, didReceive: http, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocolDidFinishLoading(self)
+            return
+        }
         if let http {
             client?.urlProtocol(self, didReceive: http, cacheStoragePolicy: .notAllowed)
         }

@@ -66,6 +66,19 @@ import VocabularyCore
     }
 }
 
+@Suite struct KeychainItemTests {
+    #if os(macOS)
+    /// Any process can create items in the login keychain; a signed build only trusts its own.
+    @Test func aSignedMacBuildNeverReadsTheLoginKeychain() {
+        let signed = KeychainSecretStore(accessGroup: "group.com.example.vocabularyos").attributeVariants(for: "openai")
+        #expect(signed.count == 1)
+        #expect(signed.allSatisfy { $0[kSecUseDataProtectionKeychain as String] as? Bool == true })
+        let unsigned = KeychainSecretStore(accessGroup: nil).attributeVariants(for: "openai")
+        #expect(unsigned.count == 2, "an ad-hoc build has nowhere else to keep keys")
+    }
+    #endif
+}
+
 @Suite struct InMemorySecretStoreTests {
     @Test func storesReplacesAndDeletesSecrets() throws {
         let store = InMemorySecretStore()

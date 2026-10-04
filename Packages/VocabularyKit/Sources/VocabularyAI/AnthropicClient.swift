@@ -13,11 +13,12 @@ public struct AnthropicClient: GenerationClient {
     private let apiKey: String
     private let session: URLSession
 
-    public init(baseURL: URL, model: String, apiKey: String, session: URLSession = .shared) {
+    public init(baseURL: URL, model: String, apiKey: String, session: URLSession? = nil) {
         self.baseURL = baseURL
         self.model = model
         self.apiKey = apiKey
-        self.session = session
+        // Provider requests keep nothing on disk and follow no redirect to another server.
+        self.session = session ?? ProviderHTTP.session
     }
 
     public var supportsImages: Bool { true }
@@ -32,7 +33,7 @@ public struct AnthropicClient: GenerationClient {
             "messages": [["role": "user", "content": userContent(for: request)]],
             "output_config": ["format": ["type": "json_schema", "schema": schemaObject]],
         ]
-        var urlRequest = URLRequest(url: baseURL.appending(path: "messages"), timeoutInterval: ProviderHTTP.timeout)
+        var urlRequest = URLRequest(url: baseURL.appending(path: "messages"), timeoutInterval: ProviderHTTP.timeout(for: request))
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         authorize(&urlRequest)

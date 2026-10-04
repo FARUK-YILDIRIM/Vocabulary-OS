@@ -11,12 +11,13 @@ public struct OpenAICompatibleClient: GenerationClient {
     private let apiKey: String?
     private let session: URLSession
 
-    public init(provider: ProviderDescriptor, baseURL: URL, model: String, apiKey: String?, session: URLSession = .shared) {
+    public init(provider: ProviderDescriptor, baseURL: URL, model: String, apiKey: String?, session: URLSession? = nil) {
         self.provider = provider
         self.baseURL = baseURL
         self.model = model
         self.apiKey = apiKey
-        self.session = session
+        // Provider requests keep nothing on disk and follow no redirect to another server.
+        self.session = session ?? ProviderHTTP.session
     }
 
     public var supportsImages: Bool { true }
@@ -66,7 +67,7 @@ public struct OpenAICompatibleClient: GenerationClient {
             body["thinking"] = ["type": "disabled"]
         }
 
-        var urlRequest = URLRequest(url: baseURL.appending(path: "chat/completions"), timeoutInterval: ProviderHTTP.timeout)
+        var urlRequest = URLRequest(url: baseURL.appending(path: "chat/completions"), timeoutInterval: ProviderHTTP.timeout(for: request))
         urlRequest.httpMethod = "POST"
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         authorize(&urlRequest)
