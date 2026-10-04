@@ -70,8 +70,8 @@ Done holds and its commit exists.
 ## Phase 7: The owner's answers and the ship review
 - [x] T33 `feat(capture)`: object photos for cloud models, opt-in (owner's answer 3)
 - [x] T34 `feat(ai)`: more providers and learner-added providers (owner's answer 4) — none of the new providers tried with a real key yet
-- [ ] T35 `fix`: ship review findings (code, security and test reviews)
-- [ ] T36 `docs(release)`: open-source release readiness
+- [x] T35 `fix`: ship review findings (code, security and test reviews) — both High code findings, the Medium ones and the test review's Highs fixed or tightened; what stays open, and why, is in docs/ship-review.md
+- [x] T36 `docs(release)`: open-source release readiness — the ship review recommends publishing the repository; a store release waits for the owner's checks
   - Noticed while building T29:
     - Info.plist lacks the `remote-notification` background mode that ADR-002 lists for CloudKit
       sync, so changes from other devices arrive only while the app is open;
@@ -80,4 +80,4 @@ Done holds and its commit exists.
   - Noticed while building T30, done early because T33's verify needed it: the macOS build warned
     that `NSCameraUsageDescription` is empty (it was set for iOS only in project.yml), and
     `scripts/verify.sh` only caught warnings in source files.
-- [ ] Checkpoint 6: Ship
+- [ ] Checkpoint 6: Ship — success criteria 1–13 checked in docs/ship-review.md (11, sync, needs a signed build); awaiting the owner's GO

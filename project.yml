@@ -3,7 +3,7 @@
 name: VocabularyOS
 
 options:
-  bundleIdPrefix: com.example.vocabularyos
+  bundleIdPrefix: com.farukyildirim.vocabularyos
   developmentLanguage: en
   deploymentTarget:
     iOS: "26.0"

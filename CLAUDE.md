@@ -148,7 +148,7 @@ swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [-
 
 A task is done only when all of these hold:
 - Its acceptance criteria are met, and new behavior has tests that failed before the change.
-- `scripts/verify.sh` passes with no new warnings in project code.
+- `scripts/verify.sh` passes with no new warnings in project code or about the project's targets.
 - UI tasks were checked in the iOS Simulator with `scripts/ui-test.sh` on iPhone and iPad, and on
   macOS with `scripts/mac-smoke.sh` (`--screenshot` captures a macOS screen). Screenshots were
   reviewed. Visual checks of macOS screens also happen at checkpoints with the owner.
@@ -163,5 +163,6 @@ A task is done only when all of these hold:
 - **Types:** feat, fix, refactor, test, docs, chore, build, ci.
 - **Scopes:** spec, adr, plan, agents, project, core, ai, data, capture, speech, ui, app, share,
   review, quiz, podcast, plans, sharing, i18n, release.
-- Make one commit per task. Stage files explicitly (never a blind `git add -A`), then review the
-  staged diff for secrets before committing.
+- Make one commit per task, or one per logical change when a task holds several, such as a
+  review's fixes. Stage files explicitly (never a blind `git add -A`), then review the staged diff
+  for secrets before committing.

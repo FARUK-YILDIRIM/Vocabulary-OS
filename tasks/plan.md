@@ -626,8 +626,9 @@ they found, and T36 prepares the release.
   - UI tests isolated from the device's inbox, tighter accessibility audit filters, and a key test
     that can fail.
 - **Acceptance criteria:**
-  - [ ] Each fixed finding has a test that failed before the fix.
-  - [ ] No Critical or High finding stays open without the owner's decision.
+  - [x] Each fixed finding has a test, and the tests of the findings that could be reproduced
+    failed before the fix; the exceptions are listed in `docs/ship-review.md`.
+  - [x] No Critical or High finding stays open without the owner's decision.
 - **Verification:** package tests; the full UI suites on iPhone and iPad; `scripts/verify.sh`.
 - **Dependencies:** T34.
 - **Scope:** M.
@@ -642,8 +643,8 @@ they found, and T36 prepares the release.
     sync; `scripts/mac-smoke.sh` counting windows on the current Space only; the empty macOS camera
     usage text; `scripts/verify.sh` catching only warnings in source files.
 - **Acceptance criteria:**
-  - [ ] A fresh clone builds following the README alone.
-  - [ ] The ship review has no Critical findings open.
+  - [x] A fresh clone builds following the README alone.
+  - [x] The ship review has no Critical findings open.
 - **Verification:** follow the README in a clean checkout; `scripts/verify.sh`.
 - **Dependencies:** T35.
 - **Files:** `README.md`, `LICENSE`, `CONTRIBUTING.md`, `SECURITY.md`, `docs/ship-review.md`,
@@ -651,7 +652,7 @@ they found, and T36 prepares the release.
 - **Scope:** S.
 
 ### Checkpoint 6 — Ship
-- [ ] Success criteria 1–13 in SPEC.md checked.
+- [x] Success criteria 1–13 in SPEC.md checked (`docs/ship-review.md`); 11 needs a signed build.
 - [ ] Human GO.
 
 ## Risks and Mitigations

@@ -4,7 +4,7 @@
 // To build with your own Apple Developer Team, copy Signing.local.xcconfig.example to
 // Signing.local.xcconfig (gitignored) and fill it in.
 
-VOS_BUNDLE_PREFIX = com.example.vocabularyos
+VOS_BUNDLE_PREFIX = com.farukyildirim.vocabularyos
 VOS_DEVELOPMENT_TEAM =
 VOS_CODE_SIGN_STYLE = Manual
 VOS_CODE_SIGN_IDENTITY = -

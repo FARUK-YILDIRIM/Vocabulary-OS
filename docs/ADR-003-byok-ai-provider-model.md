@@ -17,7 +17,7 @@ The owner decided:
 
 AI is used for:
 1. The meaning of a term **in its sentence**, with a translation into the learner's native language.
-   VocOrbit's core feature: "cookie" on a website is not "cookie" in milk.
+   The app's core feature: "cookie" on a website is not "cookie" in milk.
 2. Breaking ties when a lone word's language is ambiguous (ADR-004).
 3. Naming a photographed object in a learning language (ADR-005).
 4. Generating quizzes.

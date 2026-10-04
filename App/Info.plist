@@ -83,10 +83,13 @@
 	<!-- Opened files are read where they are and imported; the app never changes them. -->
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
-	<!-- Podcasts keep speaking when the screen locks or another app comes forward (ADR-008). macOS ignores it. -->
+	<!-- Podcasts keep speaking when the screen locks or another app comes forward (ADR-008), and
+	     CloudKit's silent pushes bring changes from other devices while the app is in the background
+	     (ADR-002). macOS ignores both. -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
+		<string>remote-notification</string>
 	</array>
 	<!-- Plain HTTP only to local-network AI servers such as Ollama or LM Studio (ADR-003). -->
 	<key>NSAppTransportSecurity</key>
