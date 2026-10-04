@@ -40,7 +40,11 @@ Done holds and its commit exists.
 - [x] T19 `feat(capture)`: page text recognition
 - [x] T20 `feat(capture)`: page capture screen
 - [x] T21 `feat(capture)`: object capture — on-device naming checked by the macOS self-test (the Simulator has neither the model nor the classifier)
-- [ ] Checkpoint 4: Capture
+- [ ] Checkpoint 4: Capture — automated checks passed 2026-10-04: text, share sheet (from Reminders),
+  page and object capture save words in the UI tests on iPhone and iPad; the Services menu opens the
+  capture window on the Mac; page and object capture work with the real on-device model in the macOS
+  self-tests. Owner checks: sharing on the Mac in a signed build, the Mac file picker, the camera on a
+  device. Awaiting owner review.
 
 ## Phase 5: Practice
 - [ ] T22 `feat(core)`: SM-2 scheduler and daily queue
