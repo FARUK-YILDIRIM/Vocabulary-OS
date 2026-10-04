@@ -47,7 +47,7 @@ Done holds and its commit exists.
   device. Awaiting owner review.
 
 ## Phase 5: Practice
-- [ ] T22 `feat(core)`: SM-2 scheduler and daily queue
+- [x] T22 `feat(core)`: SM-2 scheduler and daily queue
 - [ ] T23 `feat(review)`: flashcard review and Today screen
 - [ ] T24 `feat(ai)`: quiz generation and validation
 - [ ] T25 `feat(quiz)`: quiz session and grading

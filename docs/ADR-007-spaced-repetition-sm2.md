@@ -27,19 +27,22 @@ Per word we keep `ease` (start 2.5, minimum 1.3), `repetitions`, `lapses`, `inte
 and `lastReviewedAt`. Each review then works as follows:
 1. **Again:**
    - `repetitions = 0`, `lapses += 1`, `intervalDays = 1`.
-   - Within the current session the card is shown again before the session ends. That second showing
-     does not change the schedule.
+   - Within the current session the card is shown again, after three other cards (or at the end of a
+     shorter queue). That second showing does not change the schedule.
 2. **Hard, Good or Easy:**
    - `repetitions += 1`.
    - `intervalDays` is 1 after the first success, 6 after the second, and after that
      `round(intervalDays × ease)`, using the ease value from before this review.
-3. `ease = max(1.3, ease + Δq)`.
+3. `ease = max(1.3, ease + Δq)`. Every change is a whole number of hundredths, so the stored ease is
+   rounded to hundredths to keep floating-point drift out of the schedule.
 4. `dueAt = startOfDay(now) + intervalDays` days, in the learner's current calendar.
 5. **At most one schedule change per word per calendar day.** Later answers on the same day (for
    example in a quiz) are logged but don't move the schedule.
 6. **Quiz answers map to ratings:** correct → Good, wrong → Again.
 7. **New words** are due immediately. Today shows at most `dailyNewLimit` new words (default 15)
-   and `dailyReviewLimit` reviews (default 150). Both can be changed in Settings.
+   and `dailyReviewLimit` reviews (default 150). Both can be changed in Settings. Due words come
+   first, the most overdue first, then new words in the order they were captured. Words already
+   reviewed or introduced today count against the limits.
 8. **Every review** writes a `ReviewLog` (time, rating, mode, interval before and after).
 
 ## Alternatives Considered

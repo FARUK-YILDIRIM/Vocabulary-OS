@@ -28,6 +28,16 @@ public struct CardState: Codable, Hashable, Sendable {
     /// Never reviewed yet.
     public var isNew: Bool { lastReviewedAt == nil }
 
+    /// Due at `date`: new words always are, others from the start of their due day.
+    public func isDue(at date: Date) -> Bool {
+        dueAt <= date
+    }
+
+    /// Whether the word was already reviewed on the calendar day of `date`.
+    public func wasReviewed(on date: Date, calendar: Calendar) -> Bool {
+        lastReviewedAt.map { calendar.isDate($0, inSameDayAs: date) } ?? false
+    }
+
     /// An interval this long means the word is well known (SPEC C4 "mastered" filter).
     public static let masteredIntervalDays = 21
 }
