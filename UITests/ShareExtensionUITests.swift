@@ -56,7 +56,9 @@ final class ShareExtensionUITests: XCTestCase {
         newReminder.tap()
         reminders.typeText(text)
 
-        reminders.textFields["Title"].tap(withNumberOfTaps: 3, numberOfTouches: 1)
+        // Earlier runs leave their reminders behind; the new one is the last.
+        let titles = reminders.textFields.matching(identifier: "Title")
+        titles.element(boundBy: max(titles.count - 1, 0)).tap(withNumberOfTaps: 3, numberOfTouches: 1)
         let more = reminders.buttons["Forward"]
         XCTAssertTrue(more.waitForExistence(timeout: 3))
         more.tap()
