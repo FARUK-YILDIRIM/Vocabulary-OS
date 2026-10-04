@@ -50,7 +50,7 @@ Done holds and its commit exists.
 - [x] T22 `feat(core)`: SM-2 scheduler and daily queue
 - [x] T23 `feat(review)`: flashcard review and Today screen
 - [x] T24 `feat(ai)`: quiz generation and validation
-- [ ] T25 `feat(quiz)`: quiz session and grading
+- [x] T25 `feat(quiz)`: quiz session and grading — listening questions come with the speech engine (T26)
 - [ ] T26 `feat(speech)`: speech engine
 - [ ] T27 `feat(podcast)`: podcast script generation
 - [ ] T28 `feat(podcast)`: podcast setup and player

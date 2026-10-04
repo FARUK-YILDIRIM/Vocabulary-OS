@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum AppTab: String, Hashable {
-    case today, capture, library, settings
+    case today, capture, practice, library, settings
 }
 
 /// The main navigation: a tab bar on iPhone, a sidebar on iPad and Mac.
@@ -15,6 +15,9 @@ struct MainView: View {
             }
             Tab("Capture", systemImage: "text.viewfinder", value: AppTab.capture) {
                 CaptureScreen()
+            }
+            Tab("Practice", systemImage: "graduationcap", value: AppTab.practice) {
+                PracticeView()
             }
             Tab("Library", systemImage: "books.vertical", value: AppTab.library) {
                 LibraryView()

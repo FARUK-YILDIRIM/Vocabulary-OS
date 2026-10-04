@@ -1,14 +1,15 @@
 #if DEBUG
 import Foundation
 import os
+import VocabularyAI
 import VocabularyCore
 import VocabularyUI
 #if os(macOS)
 import AppKit
 #endif
 
-/// Debug-only end-to-end checks with the real AI provider (`-vos-self-test capture`, `page` or
-/// `object`).
+/// Debug-only end-to-end checks with the real AI provider (`-vos-self-test capture`, `page`,
+/// `object` or `quiz`).
 ///
 /// The iOS Simulator has no on-device model assets, so `scripts/mac-smoke.sh --self-test` runs these
 /// in the macOS build. Each captures a word, explains it, saves it, logs the outcome and quits. UI
@@ -24,6 +25,8 @@ enum SelfTest {
             await captureFromPage(app: app)
         case "object":
             await captureObject(app: app)
+        case "quiz":
+            await quiz(app: app)
         default:
             return
         }
@@ -107,6 +110,47 @@ enum SelfTest {
         model.save()
         let entry = try? app.repository.existingEntry(lemma: insight.lemma, language: insight.language)
         logger.notice("Self-test object passed: \(label, privacy: .public) → \(insight.term, privacy: .public) (\(insight.language.rawValue, privacy: .public)) → \(insight.translation, privacy: .public) | \(insight.meaning, privacy: .public) | \(insight.examples.first?.sentence ?? "no example", privacy: .public) | photo=\(entry?.imageData != nil)")
+    }
+
+    /// A quiz over the sample words: the first question must be ready in under 5 s (SPEC C8).
+    private static func quiz(app: AppModel) async {
+        SampleLibrary.seed(into: app.repository)
+        let session: QuizSessionModel
+        do {
+            session = QuizSessionModel(
+                language: .english,
+                words: try app.quizzes.words(language: .english, source: .all, limit: 10),
+                library: try app.quizzes.library(),
+                kinds: [.cloze, .meaning, .reverse],
+                source: .all,
+                service: QuizService(app.makeInsightService()),
+                reviews: app.reviews,
+                quizzes: app.quizzes
+            )
+        } catch {
+            logger.error("Self-test quiz failed: \(error.localizedDescription, privacy: .public)")
+            return
+        }
+        let start = ContinuousClock.now
+        await session.start()
+        let firstQuestion = ContinuousClock.now - start
+        var valid = 0
+        var prompts: [String] = []
+        while let question = session.current {
+            if let word = session.word(for: question), (try? QuizValidator.validate(question, for: word)) != nil {
+                valid += 1
+            }
+            prompts.append("\(question.kind.rawValue): \(question.prompt)")
+            session.answer(question.answerIndex)
+            await session.next()
+        }
+        let seconds = Double(firstQuestion.components.seconds) + Double(firstQuestion.components.attoseconds) / 1e18
+        let summary = "first question in \(String(format: "%.2f", seconds)) s | \(valid)/\(session.answeredCount) valid | \(prompts.joined(separator: " · "))"
+        if session.answeredCount > 0, valid == session.answeredCount, seconds < 5 {
+            logger.notice("Self-test quiz passed: \(summary, privacy: .public)")
+        } else {
+            logger.error("Self-test quiz failed: \(summary, privacy: .public)")
+        }
     }
 
     private static func logFailure(_ test: String, phase: CaptureModel.Phase) {

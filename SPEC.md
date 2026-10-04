@@ -156,6 +156,8 @@ Each capability can be built and tested on its own. Build order goes top to bott
   boundaries in the user's time zone; reviewing a card persists a review log and the new due date.
 
 **C8 — Quiz**
+- Quizzes start from the Practice tab. A language needs at least four saved words, because wrong
+  answers come from my other words.
 - I choose:
   - a language;
   - the words: due, recent, favorites, a list, or all;
