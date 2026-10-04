@@ -43,6 +43,15 @@ import Testing
         #expect(highlights.map(\.wordID) == [phrase.id, dogs.id])
     }
 
+    /// A short word's prefix rule would match unrelated longer words; its inflections come through
+    /// the dictionary form instead.
+    @Test func shortWordsMatchCloselyOnly() {
+        let ran = word("ran", lemma: "run")
+        let text = "A random choice. She ran, and she runs, and running is fun."
+        #expect(found(WordOccurrences.find([ran], in: text, language: .english), in: text) == ["ran", "runs", "running"])
+        #expect(found(WordOccurrences.find([word("Tee", .german)], in: "Der Teekessel und der Tees.", language: .german), in: "Der Teekessel und der Tees.") == ["Tees"])
+    }
+
     @Test func findsNothingWithoutTheWord() {
         #expect(WordOccurrences.find([word("umbrella")], in: "The train was late.", language: .english).isEmpty)
     }

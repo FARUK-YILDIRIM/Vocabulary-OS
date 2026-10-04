@@ -365,12 +365,40 @@ struct PlanEditorView: View {
     }
 }
 
-/// The days a plan runs: a toggle for each day, in the locale's week order.
+/// The days a plan runs: a toggle for each day, in the locale's week order. At accessibility text
+/// sizes the days are listed one per row, with their full names.
 private struct WeekdayPicker: View {
     @Binding var selection: Set<Int>
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     private let calendar = Calendar.current
 
     var body: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(alignment: .leading) {
+                ForEach(PlanText.weekdays(calendar: calendar), id: \.self) { weekday in
+                    Toggle(calendar.standaloneWeekdaySymbols[weekday - 1], isOn: isOn(weekday))
+                        .accessibilityIdentifier("plan-day-\(weekday)")
+                }
+            }
+        } else {
+            row
+        }
+    }
+
+    private func isOn(_ weekday: Int) -> Binding<Bool> {
+        Binding(
+            get: { selection.contains(weekday) },
+            set: { isOn in
+                if isOn {
+                    selection.insert(weekday)
+                } else {
+                    selection.remove(weekday)
+                }
+            }
+        )
+    }
+
+    private var row: some View {
         HStack(spacing: 6) {
             ForEach(PlanText.weekdays(calendar: calendar), id: \.self) { weekday in
                 let isOn = selection.contains(weekday)

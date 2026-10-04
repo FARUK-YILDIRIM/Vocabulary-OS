@@ -25,7 +25,6 @@ struct QuizSessionView: View {
                         ToolbarItem(placement: .primaryAction) {
                             Text("\(min(model.answeredCount + 1, model.total)) of \(model.total)")
                                 .monospacedDigit()
-                                .foregroundStyle(.secondary)
                                 .accessibilityIdentifier("quiz-progress")
                         }
                     }

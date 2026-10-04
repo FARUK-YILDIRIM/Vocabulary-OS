@@ -58,7 +58,6 @@ struct PodcastEpisodeRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(verbatim: episode.title)
-                .lineLimit(2)
             Text(verbatim: details)
                 .font(.caption)
                 .foregroundStyle(.secondary)

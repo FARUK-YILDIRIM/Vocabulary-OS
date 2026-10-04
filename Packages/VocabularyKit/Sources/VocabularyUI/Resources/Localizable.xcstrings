@@ -251,6 +251,16 @@
         }
       }
     },
+    "Sentence" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cümle"
+          }
+        }
+      }
+    },
     "Show Examples" : {
       "localizations" : {
         "tr" : {

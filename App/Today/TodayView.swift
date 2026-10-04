@@ -68,7 +68,7 @@ struct TodayView: View {
     }
 
     private func row(for summary: Summary) -> some View {
-        HStack(spacing: 12) {
+        AdaptiveStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(verbatim: summary.language.localizedName())
                     .font(.headline)

@@ -561,8 +561,8 @@ because its files are tiny and only work together.
 - **Description:** VoiceOver labels and traits, Dynamic Type checks, empty and error states, and
   the app icon.
 - **Acceptance criteria:**
-  - [ ] An Accessibility Inspector audit has no errors on the main screens.
-  - [ ] The largest Dynamic Type size is usable.
+  - [x] An Accessibility Inspector audit has no errors on the main screens.
+  - [x] The largest Dynamic Type size is usable.
 - **Verification:** Simulator audit screenshots.
 - **Dependencies:** T31.
 - **Files:** views touched as needed; `App/Resources/Assets.xcassets`.

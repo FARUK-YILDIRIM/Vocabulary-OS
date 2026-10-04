@@ -12,6 +12,7 @@ struct ObjectCaptureView: View {
     var body: some View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .photoDropDestination(onImage: load)
             #if DEBUG
             .onAppear {
                 // Not a view task: SwiftUI cancels those when the view is rebuilt, as on macOS at launch.
@@ -42,7 +43,7 @@ struct ObjectCaptureView: View {
                 PhotoSourceButtons(onImage: load)
             }
         default:
-            ObjectCaptureFlowView(model: model, providerName: app.providerDisplayName)
+            ObjectCaptureFlowView(model: model, providerName: app.providerName(for:))
         }
     }
 

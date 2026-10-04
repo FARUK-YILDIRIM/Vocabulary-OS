@@ -10,7 +10,7 @@ struct QuickCaptureView: View {
     var body: some View {
         Group {
             if app.settings.isOnboarded {
-                CaptureFlowView(model: model, providerName: app.providerDisplayName)
+                CaptureFlowView(model: model, providerName: app.providerName(for:))
             } else {
                 ContentUnavailableView {
                     Label("Choose Your Languages First", systemImage: "globe")

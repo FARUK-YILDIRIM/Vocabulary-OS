@@ -61,7 +61,7 @@ struct ShareCaptureView: View {
         case .loading:
             ProgressView()
         case .capturing(let model):
-            CaptureFlowView(model: model, providerName: session.providerName, host: .shareExtension)
+            CaptureFlowView(model: model, providerName: { _ in session.providerName }, host: .shareExtension)
                 .onChange(of: model.phase) { _, phase in
                     if phase == .saved {
                         didSave = true

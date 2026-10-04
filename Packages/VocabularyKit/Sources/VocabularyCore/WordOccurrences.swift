@@ -25,7 +25,7 @@ public enum WordOccurrences {
                 }
             } else {
                 let forms = Set([word.term.matchingKey, word.lemma.matchingKey])
-                for (token, lemma) in zip(tokens, lemmas) where QuizValidator.isForm(token.text, of: word) || lemma.map(forms.contains) == true {
+                for (token, lemma) in zip(tokens, lemmas) where isForm(token.text, of: word) || lemma.map(forms.contains) == true {
                     matches.append(Match(wordID: word.id, range: token.range))
                 }
             }
@@ -45,6 +45,18 @@ public enum WordOccurrences {
             highlights.append(match)
         }
         return highlights
+    }
+
+    /// The text as written or inflected. A word under four letters allows only two more letters: its
+    /// prefix also starts unrelated words ("ran" in "random"), and its longer inflections come through
+    /// the dictionary form. Quiz checks keep the wider rule, where matching too much is the safe side.
+    static func isForm(_ text: String, of word: QuizWord) -> Bool {
+        [word.term, word.lemma].contains { form in
+            let key = form.matchingKey
+            guard key.count < 4 else { return QuizValidator.isForm(text, ofText: form) }
+            let candidate = text.matchingKey
+            return !key.isEmpty && candidate.hasPrefix(key) && candidate.count <= key.count + 2
+        }
     }
 
     /// The dictionary form of each token, or `nil` where the language has no lemmatizer.

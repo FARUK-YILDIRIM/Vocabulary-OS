@@ -38,7 +38,7 @@ public final class PodcastPlaybackModel {
         voices = catalog.podcastVoices(style: episode.style, language: language)
         words = Self.savedWords(in: episode, podcasts: podcasts)
         segments = voices.segments(for: script, language: language)
-        player = SpeechPlayer(engine: engine ?? SystemSpeechEngine(), catalog: catalog)
+        player = SpeechPlayer(engine: engine ?? SystemSpeechEngine(interruptsOtherAudio: true), catalog: catalog)
         position = min(max(0, episode.resumeSegment), max(0, script.segments.count - 1))
         player.onPositionChange = { [weak self] index in
             self?.positionChanged(to: index)

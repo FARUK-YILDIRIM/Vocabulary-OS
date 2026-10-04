@@ -17,6 +17,7 @@ struct PageCaptureView: View {
     var body: some View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .photoDropDestination(onImage: load)
             .sheet(isPresented: isCapturing) { captureSheet }
             #if DEBUG
             .onAppear {
@@ -143,7 +144,7 @@ struct PageCaptureView: View {
     private var captureSheet: some View {
         if let capture = model.capture {
             NavigationStack {
-                CaptureFlowView(model: capture, providerName: app.providerDisplayName)
+                CaptureFlowView(model: capture, providerName: app.providerName(for:))
                     .navigationTitle("Capture")
                     #if os(iOS)
                     .navigationBarTitleDisplayMode(.inline)

@@ -53,6 +53,7 @@ scripts/mac-smoke.sh --self-test [capture|page|object|quiz|speech|podcast]  # th
 scripts/mac-smoke.sh --services                     # Services → "Capture in Vocabulary-OS" opens the capture window
 scripts/mac-smoke.sh --screenshot out.png [args]    # also saves the window (Screen Recording permission), e.g. -vos-podcast newest
 scripts/strings.sh sync [DERIVED_DATA] | check      # String Catalogs: add the strings a build found; check Turkish
+swift scripts/tools/make-app-icon.swift             # redraws the app icon into Assets.xcassets
 swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [--verbose]   # live on-device prompt evaluation
 ```
 

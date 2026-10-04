@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 import VocabularyCore
 import VocabularyData
+import VocabularyUI
 
 /// Saved words of one learning language, with filters, search and sort (SPEC C4), its lists, and
 /// sharing and import (SPEC C11).
@@ -128,7 +129,8 @@ private struct LibraryHeader: View {
                             Text(option.title)
                         }
                         .buttonStyle(.bordered)
-                        .tint(filter == option ? .accentColor : .secondary)
+                        // Primary, not secondary: gray text on a gray chip is hard to read.
+                        .tint(filter == option ? .accentColor : .primary)
                         .accessibilityAddTraits(filter == option ? .isSelected : [])
                         .accessibilityIdentifier("library-filter-\(option.rawValue)")
                     }
@@ -235,7 +237,7 @@ struct WordRow: View {
     let entry: VocabularyEntry
 
     var body: some View {
-        HStack(spacing: 12) {
+        AdaptiveStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: entry.term).font(.headline)
                 Text(verbatim: entry.translation).foregroundStyle(.secondary)

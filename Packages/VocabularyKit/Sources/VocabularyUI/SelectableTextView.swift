@@ -17,10 +17,15 @@ public struct SelectableTextView: View {
         FlowLayout(lineSpacing: 4) {
             ForEach(pieces) { piece in
                 switch piece.kind {
-                case .word(let index, let word):
-                    WordChip(word: word, isSelected: selection?.contains(index) == true)
-                        .onTapGesture { onTap(index) }
-                        .accessibilityIdentifier("token-\(index)")
+                case .word(let index, let word, let before, let after):
+                    // The punctuation touching a word moves with it, so a line never starts with it.
+                    HStack(spacing: 0) {
+                        if !before.isEmpty { punctuation(before) }
+                        WordChip(word: word, isSelected: selection?.contains(index) == true)
+                            .onTapGesture { onTap(index) }
+                            .accessibilityIdentifier("token-\(index)")
+                        if !after.isEmpty { punctuation(after) }
+                    }
                 case .space(let text):
                     Text(verbatim: text).font(.title3)
                 case .lineBreak:
@@ -31,10 +36,16 @@ public struct SelectableTextView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// One laid-out piece: a word, the punctuation or spaces after it, or a line break.
-    private struct Piece: Identifiable {
+    /// VoiceOver moves word by word, so punctuation would only interrupt.
+    private func punctuation(_ text: String) -> some View {
+        Text(verbatim: text).font(.title3).accessibilityHidden(true)
+    }
+
+    /// One laid-out piece: a word with the punctuation touching it, the spaces between words, or a
+    /// line break.
+    struct Piece: Identifiable {
         enum Kind {
-            case word(index: Int, text: String)
+            case word(index: Int, text: String, before: String, after: String)
             case space(String)
             case lineBreak
         }
@@ -45,13 +56,29 @@ public struct SelectableTextView: View {
         static func make(from text: TokenizedText) -> [Piece] {
             var pieces: [Piece] = []
             var wordIndex = 0
-            for segment in text.segments {
+            var before = ""
+            let segments = text.segments
+            for (position, segment) in segments.enumerated() {
                 switch segment {
                 case .word(let token):
-                    pieces.append(Piece(id: pieces.count, kind: .word(index: wordIndex, text: token.text)))
+                    pieces.append(Piece(id: pieces.count, kind: .word(index: wordIndex, text: token.text, before: before, after: "")))
+                    before = ""
                     wordIndex += 1
                 case .separator(let separator):
-                    let lines = separator.split(separator: "\n", omittingEmptySubsequences: false)
+                    var rest = Substring(separator)
+                    // Punctuation right after a word ("cookies,") ends that word's piece.
+                    let after = rest.prefix { !$0.isWhitespace }
+                    if !after.isEmpty, let last = pieces.indices.last, case .word(let index, let word, let wordBefore, let wordAfter) = pieces[last].kind {
+                        pieces[last] = Piece(id: pieces[last].id, kind: .word(index: index, text: word, before: wordBefore, after: wordAfter + after))
+                        rest = rest.dropFirst(after.count)
+                    }
+                    // Punctuation right before a word ("«hallo") starts the next word's piece.
+                    if segments.indices.contains(position + 1), case .word = segments[position + 1] {
+                        let leading = rest.reversed().prefix { !$0.isWhitespace }.count
+                        before = String(rest.suffix(leading))
+                        rest = rest.dropLast(leading)
+                    }
+                    let lines = rest.split(separator: "\n", omittingEmptySubsequences: false)
                     for (offset, line) in lines.enumerated() {
                         if offset > 0 {
                             pieces.append(Piece(id: pieces.count, kind: .lineBreak))

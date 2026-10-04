@@ -7,8 +7,8 @@ final class PodcastUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    /// Canned AI answers write a twelve-line dialogue: two lines per part and one more line for each
-    /// of the four English words.
+    /// Canned AI answers write a sixteen-line dialogue: two lines in each of the six parts of a short
+    /// episode, and one more line for each of the four English words.
     func testCreatingAndPlayingAPodcast() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -34,7 +34,7 @@ final class PodcastUITests: XCTestCase {
         XCTAssertTrue(title.waitForExistence(timeout: 30), "The episode should open in the player")
         XCTAssertEqual(title.label, "A Day in Town")
         let position = app.staticTexts["podcast-position"]
-        XCTAssertEqual(position.label, "Line 1 of 12")
+        XCTAssertEqual(position.label, "Line 1 of 16")
         attachScreenshot(of: app, named: "02-player")
 
         // A saved word in the transcript opens its detail.
@@ -51,14 +51,14 @@ final class PodcastUITests: XCTestCase {
         play.tap()
         XCTAssertEqual(play.label, "Pause")
         attachScreenshot(of: app, named: "04-playing")
-        for _ in 0..<6 {
+        for _ in 0..<10 {
             app.buttons["podcast-next"].tap()
         }
-        expectation(for: NSPredicate(format: "label == %@", "Line 12 of 12"), evaluatedWith: position)
+        expectation(for: NSPredicate(format: "label == %@", "Line 16 of 16"), evaluatedWith: position)
         waitForExpectations(timeout: 60)
         expectation(for: NSPredicate(format: "label == %@", "Play"), evaluatedWith: play)
         waitForExpectations(timeout: 30)
-        XCTAssertEqual(position.label, "Line 1 of 12")
+        XCTAssertEqual(position.label, "Line 1 of 16")
 
         // The new episode is listed above the sample one, and can be deleted.
         app.navigationBars.buttons.element(boundBy: 0).tap()

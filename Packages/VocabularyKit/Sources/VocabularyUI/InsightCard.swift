@@ -17,7 +17,7 @@ public struct InsightCard: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline) {
+                AdaptiveStack(alignment: .firstTextBaseline) {
                     Text(verbatim: insight.term).font(.title2.bold())
                     if let details = headwordDetails {
                         Text(verbatim: details).foregroundStyle(.secondary)
@@ -30,6 +30,9 @@ public struct InsightCard: View {
                                 Image(systemName: "speaker.wave.2")
                             }
                             .labelStyle(.iconOnly)
+                            // A full-size target, though the icon is small.
+                            .frame(minWidth: 44, minHeight: 44)
+                            .contentShape(.rect)
                         }
                         .buttonStyle(.borderless)
                         .accessibilityIdentifier("insight-listen")
@@ -84,7 +87,7 @@ public struct InsightCard: View {
             if let providerName {
                 Text("Explained by \(providerName)", bundle: .module)
                     .font(.caption)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

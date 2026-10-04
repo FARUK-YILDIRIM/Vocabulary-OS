@@ -27,8 +27,8 @@ classifier is `ClassifyImageRequest` (Swift API) / `VNClassifyImageRequest`.
   - Text is tokenized with `NLTokenizer`. The learner taps a word or selects a span. The context is
     the sentence containing the selection (`NLTokenizer(unit: .sentence)`).
 - **Book page:**
-  - The learner takes a photo (camera on iPhone/iPad) or picks an image (PhotosPicker, Files,
-    drag-and-drop on Mac).
+  - The learner takes a photo (camera on iPhone/iPad) or picks an image (PhotosPicker, Files, or
+    drag-and-drop on a Mac or iPad, which object capture accepts too).
   - Run Vision **`RecognizeDocumentsRequest`** (iOS/macOS 26). It returns paragraphs whose
     `transcript` joins wrapped lines, each with `words` (per-word observations and normalized boxes).
   - The app draws tappable word boxes over the image, which the learner can zoom so small print is

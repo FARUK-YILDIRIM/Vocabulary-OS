@@ -146,9 +146,13 @@ public final class SpeechPlayer {
 public final class SystemSpeechEngine: NSObject, SpeechEngine, AVSpeechSynthesizerDelegate {
     public var onFinish: (() -> Void)?
     private let synthesizer = AVSpeechSynthesizer()
+    private let interruptsOtherAudio: Bool
     private var current: ObjectIdentifier?
 
-    override public init() {
+    /// - Parameter interruptsOtherAudio: pause other apps' audio, as podcasts do, which also puts
+    ///   the app on the lock screen; otherwise it is only lowered, which suits a word or two.
+    public init(interruptsOtherAudio: Bool = false) {
+        self.interruptsOtherAudio = interruptsOtherAudio
         super.init()
         synthesizer.delegate = self
     }
@@ -156,7 +160,7 @@ public final class SystemSpeechEngine: NSObject, SpeechEngine, AVSpeechSynthesiz
     public func speak(_ segment: SpeechSegment, speed: Double) {
         #if os(iOS)
         // Spoken content is the point of a listen button, so it plays with the ringer off too.
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: interruptsOtherAudio ? [] : [.duckOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
         #endif
         let utterance = AVSpeechUtterance(string: segment.text)

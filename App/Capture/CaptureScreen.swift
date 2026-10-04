@@ -44,7 +44,7 @@ struct CaptureScreen: View {
                 switch mode {
                 case .text:
                     if let textModel {
-                        CaptureFlowView(model: textModel, providerName: app.providerDisplayName)
+                        CaptureFlowView(model: textModel, providerName: app.providerName(for:))
                     }
                 case .page:
                     if let pageModel {

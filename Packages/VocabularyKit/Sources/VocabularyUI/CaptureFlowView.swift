@@ -13,16 +13,21 @@ public enum CaptureHost: Sendable {
 /// The capture flow UI, shared by the app and the Share extension (SPEC C5).
 public struct CaptureFlowView: View {
     @Bindable private var model: CaptureModel
-    private let providerName: String
+    private let providerName: (String) -> String
     private let host: CaptureHost
     @State private var isEditing: Bool
 
-    public init(model: CaptureModel, providerName: String, host: CaptureHost = .app) {
+    /// - Parameter providerName: the name to show for the provider that explained a word, by its ID;
+    ///   the learner may have chosen another provider since.
+    public init(model: CaptureModel, providerName: @escaping (String) -> String, host: CaptureHost = .app) {
         self.model = model
         self.providerName = providerName
         self.host = host
         _isEditing = State(initialValue: model.tokens.tokens.isEmpty)
     }
+
+    /// Grows with the text size, so the placeholder fits.
+    @ScaledMetric(relativeTo: .title3) private var editorHeight = 140.0
 
     public var body: some View {
         ScrollView {
@@ -47,9 +52,13 @@ public struct CaptureFlowView: View {
     private var textSection: some View {
         if isEditing {
             VStack(alignment: .leading, spacing: 10) {
+                // The label goes on the editor alone: after the overlay it would also replace the
+                // placeholder's text.
                 TextEditor(text: $model.text)
+                    .accessibilityLabel(Text("Sentence", bundle: .module))
+                    .accessibilityIdentifier("capture-input")
                     .font(.title3)
-                    .frame(minHeight: 140)
+                    .frame(minHeight: editorHeight)
                     .scrollContentBackground(.hidden)
                     .padding(8)
                     .background(.quaternary.opacity(0.5), in: .rect(cornerRadius: 12))
@@ -57,13 +66,12 @@ public struct CaptureFlowView: View {
                         if model.text.isEmpty {
                             Text("Paste or type the sentence where you found the word.", bundle: .module)
                                 .font(.title3)
-                                .foregroundStyle(.tertiary)
+                                .foregroundStyle(.secondary)
                                 .padding(16)
                                 .allowsHitTesting(false)
                         }
                     }
-                    .accessibilityIdentifier("capture-input")
-                HStack {
+                AdaptiveStack {
                     PasteButton(payloadType: String.self) { strings in
                         model.text = strings.first ?? ""
                         isEditing = model.tokens.tokens.isEmpty
@@ -82,7 +90,7 @@ public struct CaptureFlowView: View {
             }
         } else {
             VStack(alignment: .leading, spacing: 10) {
-                HStack {
+                AdaptiveStack {
                     Text("Tap a word. Tap a second word to select a phrase.", bundle: .module)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -179,7 +187,7 @@ public struct CaptureFlowView: View {
 
         if let insight = model.insight {
             VStack(alignment: .leading, spacing: 16) {
-                InsightCard(insight: insight, providerName: providerName)
+                InsightCard(insight: insight, providerName: providerName(insight.source.providerID))
                 if insight.examples.isEmpty {
                     Button {
                         Task { await model.loadExamples() }

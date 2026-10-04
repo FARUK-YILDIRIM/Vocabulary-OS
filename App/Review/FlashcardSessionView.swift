@@ -31,7 +31,6 @@ struct FlashcardSessionView: View {
                     ToolbarItem(placement: .primaryAction) {
                         Text("\(model.finished) of \(model.total)")
                             .monospacedDigit()
-                            .foregroundStyle(.secondary)
                             .accessibilityIdentifier("flashcard-progress")
                     }
                 }
@@ -105,10 +104,14 @@ struct FlashcardSessionView: View {
         .multilineTextAlignment(.center)
     }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     @ViewBuilder
     private var controls: some View {
         if model.isRevealed {
-            HStack(spacing: 8) {
+            // Two rows at accessibility text sizes, where four in a row would cut the words.
+            let columns = dynamicTypeSize.isAccessibilitySize ? 2 : 4
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: columns), spacing: 8) {
                 ForEach(Array(ReviewRating.allCases.enumerated()), id: \.element) { index, rating in
                     ratingButton(rating, shortcut: KeyEquivalent(Character(String(index + 1))))
                 }
@@ -137,6 +140,8 @@ struct FlashcardSessionView: View {
                     Text("^[\(days) day](inflect: true)").font(.caption)
                 }
             }
+            // The tint colors the button; orange or green text on it would be hard to read.
+            .foregroundStyle(Color.primary)
             .frame(maxWidth: .infinity, minHeight: 44)
         }
         .buttonStyle(.bordered)

@@ -5,9 +5,10 @@ import VocabularyCapture
 /// (SPEC C6, ADR-005).
 public struct ObjectCaptureFlowView: View {
     @Bindable private var model: ObjectCaptureModel
-    private let providerName: String
+    private let providerName: (String) -> String
 
-    public init(model: ObjectCaptureModel, providerName: String) {
+    /// - Parameter providerName: the name to show for the provider that named the object, by its ID.
+    public init(model: ObjectCaptureModel, providerName: @escaping (String) -> String) {
         self.model = model
         self.providerName = providerName
     }
@@ -143,7 +144,7 @@ public struct ObjectCaptureFlowView: View {
     private var resultSection: some View {
         if let insight = model.insight {
             VStack(alignment: .leading, spacing: 16) {
-                InsightCard(insight: insight, providerName: providerName)
+                InsightCard(insight: insight, providerName: providerName(insight.source.providerID))
                 if let duplicate = model.duplicateTranslation, model.phase != .saved {
                     Text("Already in your library as “\(duplicate)”.", bundle: .module)
                         .font(.callout)

@@ -83,3 +83,42 @@ struct PhotoSourceButtons: View {
         }
     }
 }
+
+/// An image dragged in from Finder, Photos or another app.
+struct DroppedImage: Transferable {
+    let data: Data
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(importedContentType: .image) { DroppedImage(data: $0) }
+    }
+}
+
+extension View {
+    /// Takes an image dropped on the view, as the photo buttons do (ADR-005: drag and drop on a Mac,
+    /// and on iPad).
+    func photoDropDestination(onImage: @escaping (Data) -> Void) -> some View {
+        modifier(PhotoDropDestination(onImage: onImage))
+    }
+}
+
+private struct PhotoDropDestination: ViewModifier {
+    let onImage: (Data) -> Void
+    @State private var isTargeted = false
+
+    func body(content: Content) -> some View {
+        content
+            .dropDestination(for: DroppedImage.self) { images, _ in
+                guard let image = images.first else { return false }
+                onImage(image.data)
+                return true
+            } isTargeted: { isTargeted = $0 }
+            .overlay {
+                if isTargeted {
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(.tint, style: StrokeStyle(lineWidth: 3, dash: [10, 6]))
+                        .padding(6)
+                        .allowsHitTesting(false)
+                }
+            }
+    }
+}

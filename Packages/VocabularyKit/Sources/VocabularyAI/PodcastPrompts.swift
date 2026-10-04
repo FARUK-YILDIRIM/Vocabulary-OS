@@ -39,10 +39,15 @@ enum PodcastPrompts {
         )
     }
 
-    /// How many parts the on-device model writes: one per word, within limits for the length.
+    /// Words in a drafted part, about: 3 to 5 short lines (measured with `vos-eval podcast`).
+    static let wordsPerPart = 40
+
+    /// How many parts the on-device model writes: enough for the length, at least one per word,
+    /// within limits for the length. With a part per word alone, a few words made a short episode.
     static func partCount(for request: PodcastRequest) -> Int {
-        let range = request.length == .short ? 2...6 : 4...10
-        return min(max(request.words.count, range.lowerBound), range.upperBound)
+        let range = request.length == .short ? 2...6 : 4...14
+        let forLength = (request.length.targetWords + wordsPerPart - 1) / wordsPerPart
+        return min(max(request.words.count, forLength, range.lowerBound), range.upperBound)
     }
 
     /// One part of the draft, for the on-device model. The first part sees every word, to choose a
@@ -67,8 +72,8 @@ enum PodcastPrompts {
             lines.append("In this part, use each of these \(request.language.englishName) words naturally: \(wordList(words)).")
         }
         switch request.style {
-        case .dialogue: lines.append("Write 2 to 4 short lines, taking turns between the two hosts.")
-        case .story: lines.append("Write one paragraph of 3 short sentences.")
+        case .dialogue: lines.append("Write 3 to 5 short lines, taking turns between the two hosts.")
+        case .story: lines.append("Write one paragraph of 4 short sentences.")
         }
         lines.append(number == count ? "End the episode." : "Don't end the episode yet.")
         var generation = GenerationRequest(
@@ -81,7 +86,7 @@ enum PodcastPrompts {
         generation.temperature = 0.7
         return PodcastSpec(
             request: generation,
-            schema: try schema(for: request.style, title: title == nil, language: request.language, turns: request.style == .dialogue ? 2...4 : 1...1)
+            schema: try schema(for: request.style, title: title == nil, language: request.language, turns: request.style == .dialogue ? 3...5 : 1...1)
         )
     }
 

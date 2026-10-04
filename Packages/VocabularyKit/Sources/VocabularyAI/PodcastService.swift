@@ -76,39 +76,48 @@ public struct PodcastService: Sendable {
                 total: draftBudget, used: PodcastScript(title: "", segments: earlier).wordCount, partsLeft: count - index
             )
             var attempt = 0
-            let part = try await spec.run(on: client, attempts: 3) { [title] content throws(ValidationFailure) in
-                attempt += 1
-                let written = try PodcastParser.script(from: content, style: request.style, title: title)
-                // A plain title is better than no episode, so the last attempt keeps whatever came.
-                if title == nil, attempt < 3 {
-                    try PodcastParser.checkTitle(written.title, words: request.words)
+            let part: PodcastScript
+            do throws(AIError) {
+                part = try await spec.run(on: client, attempts: 3) { [title] content throws(ValidationFailure) in
+                    attempt += 1
+                    let written = try PodcastParser.script(from: content, style: request.style, title: title)
+                    // A plain title is better than no episode, so the last attempt keeps whatever came.
+                    if title == nil, attempt < 3 {
+                        try PodcastParser.checkTitle(written.title, words: request.words, language: request.language)
+                    }
+                    // Sentences said before, and lines beyond the part's share, are dropped rather than
+                    // failing the whole part.
+                    let part = PodcastParser.trimmed(PodcastScript(
+                        title: written.title,
+                        segments: PodcastValidator.removingRepeatedSentences(from: written.segments, after: earlier)
+                    ), toWordLimit: limit)
+                    try PodcastParser.checkPart(part, request: request, limit: limit)
+                    return part
                 }
-                // Sentences said before, and lines beyond the part's share, are dropped rather than
-                // failing the whole part.
-                let part = PodcastParser.trimmed(PodcastScript(
-                    title: written.title,
-                    segments: PodcastValidator.removingRepeatedSentences(from: written.segments, after: earlier)
-                ), toWordLimit: limit)
-                try PodcastParser.checkPart(part, request: request, limit: limit)
-                return part
+            } catch .guardrailViolation, .refusal {
+                // The model's safety rules sometimes stop an ordinary part. It is left out; its words
+                // get lines of their own below, and without a title yet, the next part writes one.
+                parts.append([])
+                continue
             }
             title = title ?? part.title
             parts.append(part.segments)
         }
+        guard let title else { throw .guardrailViolation }
 
         // Each word the draft left out gets one more line in the part meant to use it.
         for (index, words) in groups.enumerated() {
             let draft = PodcastScript(title: "", segments: parts[index])
             for word in PodcastValidator.missingWords(words, in: draft, language: request.language) {
                 let earlier = parts.flatMap { $0 }
-                let sentence = try await PodcastPrompts.line(request, word: word, title: title ?? "").run(on: client, attempts: 3) { content throws(ValidationFailure) in
+                let sentence = try await PodcastPrompts.line(request, word: word, title: title).run(on: client, attempts: 3) { content throws(ValidationFailure) in
                     try PodcastParser.line(from: content, word: word, request: request, after: earlier)
                 }
                 parts[index] = PodcastParser.adding(sentence, to: parts[index], style: request.style)
             }
         }
 
-        let script = PodcastScript(title: title ?? "", segments: parts.flatMap { $0 })
+        let script = PodcastScript(title: title, segments: parts.flatMap { $0 })
         do {
             try PodcastValidator.validate(script, words: request.words, language: request.language, style: request.style, length: request.length)
         } catch {
@@ -168,13 +177,21 @@ enum PodcastParser {
     /// The most words a line written for a missing word may have; the prompt asks for 15.
     static let lineWordLimit = 20
 
-    /// A title names the topic. Asked for a topic that fits the words, the model sometimes made the
-    /// word list the title.
-    static func checkTitle(_ title: String, words: [QuizWord]) throws(ValidationFailure) {
+    /// A title names the topic, in the episode's language. Asked for a topic that fits the words, the
+    /// model sometimes made the word list the title, and sometimes wrote it in English.
+    static func checkTitle(_ title: String, words: [QuizWord], language: LanguageCode) throws(ValidationFailure) {
         let tokens = TokenizedText(title).tokens
         let listed = words.filter { word in tokens.contains { QuizValidator.isForm($0.text, of: word) } }
         guard listed.count <= 2 else {
             throw ValidationFailure(reason: "the title must name the episode's topic, not list the words")
+        }
+        // Fewer words are too few to tell a language by; names would pass for anything.
+        guard tokens.count >= 3 else { return }
+        let recognizer = NLLanguageRecognizer()
+        recognizer.processString(title)
+        if let (detected, probability) = recognizer.languageHypotheses(withMaximum: 1).first,
+           probability >= 0.7, !detected.rawValue.hasPrefix(language.languageSubtag) {
+            throw ValidationFailure(reason: "the title must be in \(language.englishName)")
         }
     }
 

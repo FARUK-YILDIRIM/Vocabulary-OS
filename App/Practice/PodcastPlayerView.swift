@@ -40,6 +40,7 @@ private struct PodcastPlayerContent: View {
     @State private var resumesAfterWord = false
     @AppStorage("podcast.speed") private var speed = 1.0
     @ScaledMetric(relativeTo: .largeTitle) private var playButtonSize = 48.0
+    @State private var nowPlaying: PodcastNowPlaying?
 
     private static let speeds = [0.8, 0.9, 1.0, 1.1, 1.2]
 
@@ -90,8 +91,18 @@ private struct PodcastPlayerContent: View {
             .frame(minWidth: 480, minHeight: 560)
             #endif
         }
-        .onAppear { model.speed = speed }
-        .onChange(of: speed) { model.speed = speed }
+        .onAppear {
+            model.speed = speed
+            nowPlaying = nowPlaying ?? PodcastNowPlaying(model: model)
+            nowPlaying?.start()
+        }
+        .onDisappear { nowPlaying?.stop() }
+        .onChange(of: speed) {
+            model.speed = speed
+            nowPlaying?.update()
+        }
+        .onChange(of: model.position) { nowPlaying?.update() }
+        .onChange(of: model.player.state) { nowPlaying?.update() }
     }
 
     // MARK: Transcript
@@ -117,27 +128,31 @@ private struct PodcastPlayerContent: View {
         let segment = model.script.segments[index]
         let isCurrent = index == model.position
         let isSpeaking = isCurrent && model.player.state != .idle
-        return HStack(alignment: .firstTextBaseline, spacing: 10) {
+        return HStack(alignment: .top, spacing: 2) {
             Button {
                 play(from: index)
             } label: {
                 Image(systemName: isSpeaking ? "speaker.wave.2.fill" : "play.circle")
                     .foregroundStyle(isSpeaking ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+                    // A full-size target, though the icon is small.
+                    .frame(width: 44, height: 44)
+                    .contentShape(.rect)
             }
             .buttonStyle(.borderless)
             .accessibilityLabel(Text("Play from Here"))
             VStack(alignment: .leading, spacing: 2) {
                 if segment.speaker != .narrator {
+                    // Primary: secondary text is too faint on the current line's background.
                     Text(segment.speaker == .host ? "Host" : "Guest")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
                 }
                 Text(model.transcript(for: index))
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.top, 12)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
+        .padding(.vertical, 2)
+        .padding(.trailing, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             isCurrent ? AnyShapeStyle(isSpeaking ? Color.accentColor.opacity(0.14) : Color.secondary.opacity(0.1)) : AnyShapeStyle(.clear),
@@ -179,17 +194,20 @@ private struct PodcastPlayerContent: View {
                 Button(action: model.previous) {
                     Label("Previous Line", systemImage: "backward.fill")
                 }
+                .accessibilityShowsLargeContentViewer()
                 .keyboardShortcut(.leftArrow, modifiers: .command)
                 .accessibilityIdentifier("podcast-previous")
                 Button(action: togglePlayback) {
                     Label(model.isPlaying ? "Pause" : "Play", systemImage: model.isPlaying ? "pause.circle.fill" : "play.circle.fill")
                         .font(.system(size: playButtonSize))
                 }
+                .accessibilityShowsLargeContentViewer()
                 .keyboardShortcut(.space, modifiers: [])
                 .accessibilityIdentifier("podcast-play")
                 Button(action: model.next) {
                     Label("Next Line", systemImage: "forward.fill")
                 }
+                .accessibilityShowsLargeContentViewer()
                 .keyboardShortcut(.rightArrow, modifiers: .command)
                 .accessibilityIdentifier("podcast-next")
             }
@@ -197,7 +215,7 @@ private struct PodcastPlayerContent: View {
             .buttonStyle(.borderless)
             .foregroundStyle(.tint)
             .font(.title2)
-            HStack {
+            AdaptiveStack {
                 Text("Line \(model.position + 1) of \(model.script.segments.count)")
                     .monospacedDigit()
                     .accessibilityIdentifier("podcast-position")
@@ -219,6 +237,9 @@ private struct PodcastPlayerContent: View {
         .frame(maxWidth: 720)
         .frame(maxWidth: .infinity)
         .background(.bar)
+        // Like the system's bars, the controls stop growing before they cover the transcript; a long
+        // press on a button shows it large.
+        .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 
     // MARK: Actions

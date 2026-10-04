@@ -31,15 +31,24 @@ Measurements and facts:
   - Cloud models generate the script in one call.
   - On device, measured with `vos-eval podcast` (docs/eval/podcast-on-device.md), the script is
     drafted and then completed:
-    - The draft is written in short parts, about one per word (2–6 parts for about two minutes,
-      4–10 for about five), with sampling: greedy decoding repeated sentences.
+    - The draft is written in parts of 3 to 5 short lines, about 40 words each: enough parts for
+      the length and at least one per word (6 for about two minutes, 14 for about five), with
+      sampling: greedy decoding repeated sentences. With only a part per word, a few words made an
+      episode of about a minute (131–222 words in the eval against a 260-word target); now 303–335
+      words for dialogues and 159–312 for stories, in 17–30 s. Parts after the words' parts have no
+      word of their own, and they drift further from the topic.
+    - A part the model's safety rules stop is left out, and its words get lines of their own: in one
+      run, a part about banking stopped a whole episode.
     - Asked to use words in a dialogue, the model often left them out, even with one word per part.
       So each word the draft left out gets one more short line of its own. The model writes one
       sentence with a given word reliably. The line is validated and added to that word's part.
     - Earlier lines are not quoted in the prompt, because the model then repeated them. Sentences said
       before are dropped and an over-long part loses its last lines, rather than failing the part.
     - The first part sees every word, to choose a topic where they all fit.
-    - First version: 0 of 3 scripts valid. This design: 9 of 9 valid over three runs.
+    - First version: 0 of 3 scripts valid. This design: 9 of 9 valid over three runs, and 6 of 6
+      over two runs with the longer drafts.
+    - A title in another language is asked for again; the model sometimes titled a German episode
+      in English.
 - **Storage:** scripts are stored as `PodcastEpisode` records (JSON segments) and sync like other
   data. No audio files are stored or synced.
 - **Playback:**
@@ -54,7 +63,9 @@ Measurements and facts:
   - Leaving the player stops it and remembers the segment (`resumeSegment`, saved as each segment
     starts). The next visit continues there; an episode played to its end starts over.
   - On iPhone and iPad an episode keeps playing while the screen is locked (`UIBackgroundModes`
-    `audio`). Lock-screen controls (Now Playing) are not part of v1.
+    `audio`). Like other podcast apps, an episode pauses other audio, which makes it the Now Playing
+    app: the lock screen and Control Center show its title with play/pause and previous/next line.
+    A listen button only lowers other audio, since a word takes a second.
 - **Voices:**
   - Use the best installed quality for the language (premium, then enhanced, then default), then the
     region the language is usually heard in (en-US, pt-BR; zh-TW for Traditional Chinese).

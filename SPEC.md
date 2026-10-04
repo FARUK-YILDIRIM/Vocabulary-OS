@@ -241,7 +241,9 @@ Each capability can be built and tested on its own. Build order goes top to bott
 - **Offline:** the library, review, stored podcasts and on-device AI work without a network.
 - **Accessibility:** Dynamic Type, VoiceOver labels on every control, sufficient contrast, and
   layouts that work on the smallest supported iPhone, in iPad split view and in a resizable Mac
-  window.
+  window. The main screens pass the system's accessibility audit on iPhone at the default and the
+  largest text size (`AccessibilityUITests`); at accessibility sizes, rows stack their parts and the
+  podcast controls stop growing, as system bars do.
 - **Localization:** English and Turkish UI at launch, through String Catalogs. That includes the
   Share extension, error messages, reminders, the camera permission text, the word list file type and
   the Mac's Services menu item. Generated content stays in the languages the learner chose.
