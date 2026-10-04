@@ -1,5 +1,6 @@
 import Foundation
 import UserNotifications
+import VocabularyCore
 import VocabularyData
 
 /// Starts a plan when the learner taps its reminder, and shows reminders that arrive while the app
@@ -12,8 +13,9 @@ final class ReminderDelegate: NSObject, UNUserNotificationCenterDelegate {
     }
 
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        // Only a plan's link: a reminder never opens a file or anything else (security review).
         guard let link = response.notification.request.content.userInfo[PlanNotificationScheduler.urlKey] as? String,
-              let url = URL(string: link)
+              let url = URL(string: link), DeepLink(url: url) != nil
         else { return }
         await open(url)
     }
