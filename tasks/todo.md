@@ -54,7 +54,12 @@ Done holds and its commit exists.
 - [x] T26 `feat(speech)`: speech engine — also enables listening quiz questions
 - [x] T27 `feat(podcast)`: podcast script generation
 - [x] T28 `feat(podcast)`: podcast setup and player — on-device writing and playback with system voices checked by the macOS self-test
-- [ ] Checkpoint 5: Practice
+- [ ] Checkpoint 5: Practice — automated checks passed 2026-10-04: flashcard review, quizzes and
+  podcasts run in the UI tests on iPhone and iPad with canned answers, and an episode plays to its
+  end in the Simulator; on the Mac, the on-device model writes quiz questions (4/4 valid) and podcast
+  episodes (7–13 s each) in the self-tests, and Samantha and Daniel speak them. Owner checks: podcast
+  audio on a device, with the screen locked and with music playing; whether the voices and the
+  shorter-than-asked episodes are good enough (T32). Awaiting owner review.
 
 ## Phase 6: Plans, sharing, polish
 - [ ] T29 `feat(plans)`: study plans and notifications
