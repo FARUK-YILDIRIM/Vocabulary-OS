@@ -32,13 +32,18 @@ import VocabularyCore
         #expect(inbox.pending().isEmpty)
     }
 
-    @Test func setsCorruptFilesAsideInsteadOfFailing() throws {
+    /// A draft this version can't read, perhaps written by a newer extension, is kept aside for a
+    /// later version rather than deleted.
+    @Test func setsUnreadableFilesAsideInsteadOfDeletingThem() throws {
         try inbox.write(draft())
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         try Data("not json".utf8).write(to: directory.appending(path: "broken.json"))
 
         #expect(inbox.pending().map(\.insight.term) == ["cookies"])
         #expect(!FileManager.default.fileExists(atPath: directory.appending(path: "broken.json").path()))
+        let kept = directory.appending(path: CaptureInbox.unreadableFolder).appending(path: "broken.json")
+        #expect(try Data(contentsOf: kept) == Data("not json".utf8))
+        #expect(inbox.pending().map(\.insight.term) == ["cookies"], "files set aside aren't read again")
     }
 
     @Test func anEmptyOrMissingInboxHasNothingPending() {
@@ -58,5 +63,19 @@ import VocabularyCore
         #expect(try repository.entries(language: .english).allSatisfy { $0.captureSource == .shareSheet })
         #expect(inbox.pending().isEmpty)
         #expect(CaptureInbox.importPending(from: inbox, into: repository) == 0)
+    }
+
+    /// The extension can't see the library, so the import keeps a word the learner already has from
+    /// being saved twice (SPEC C4).
+    @MainActor
+    @Test func aWordAlreadyInTheLibraryIsNotImportedAgain() throws {
+        let repository = WordRepository(container: try VocabularyStore.makeContainer(inMemory: true, cloudSync: false))
+        try repository.save(draft("cookies").insight, captureSource: .text)
+        try inbox.write(draft("cookies"))
+        try inbox.write(draft("pitch"))
+
+        #expect(CaptureInbox.importPending(from: inbox, into: repository) == 1)
+        #expect(try repository.entries(language: .english).map(\.term).sorted() == ["cookies", "pitch"])
+        #expect(inbox.pending().isEmpty, "the duplicate's draft is done with too")
     }
 }

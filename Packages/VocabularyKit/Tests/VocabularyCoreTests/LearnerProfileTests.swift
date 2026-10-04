@@ -133,8 +133,17 @@ import Testing
         #expect(decoded == profile)
     }
 
-    @Test func decodingRejectsInvalidProfiles() {
-        let json = Data(#"{"native":"tr","learning":["tr"]}"#.utf8)
+    /// A newer version may add a language this one doesn't know; the profile still loads, so the
+    /// learner isn't sent back to onboarding.
+    @Test func decodingLeavesOutLearningLanguagesItCantUse() throws {
+        let json = Data(#"{"native":"tr","learning":["ka","en","tr","en","de"]}"#.utf8)
+        let profile = try JSONDecoder().decode(LearnerProfile.self, from: json)
+        #expect(profile.native == .turkish)
+        #expect(profile.learning == [.english, .german])
+    }
+
+    @Test func decodingRejectsANativeLanguageItDoesntKnow() {
+        let json = Data(#"{"native":"ka","learning":["en"]}"#.utf8)
         #expect(throws: (any Error).self) {
             try JSONDecoder().decode(LearnerProfile.self, from: json)
         }

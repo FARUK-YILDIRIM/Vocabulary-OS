@@ -49,6 +49,22 @@ import VocabularyCore
         #expect(store.profile == profile)
     }
 
+    @Test func aChangeThisVersionCantReadKeepsTheCurrentSettings() throws {
+        let backing = InMemoryKeyValueBacking()
+        let store = SettingsStore(backing: backing)
+        let profile = try LearnerProfile(native: .turkish, learning: [.english])
+        store.profile = profile
+        store.reviewLimits = ReviewLimits(newPerDay: 5, reviewsPerDay: 60)
+
+        backing.simulateExternalChange(key: SettingsStore.Key.profile, value: Data(#"{"native":"ka","learning":["en"]}"#.utf8))
+        backing.simulateExternalChange(key: SettingsStore.Key.reviewLimits, value: Data("not json".utf8))
+        #expect(store.profile == profile, "the learner isn't sent back to onboarding")
+        #expect(store.reviewLimits == ReviewLimits(newPerDay: 5, reviewsPerDay: 60))
+
+        backing.simulateExternalChange(key: SettingsStore.Key.profile, value: nil)
+        #expect(store.profile == nil, "a profile removed on another device is removed")
+    }
+
     @Test func ignoresCorruptValues() {
         let backing = InMemoryKeyValueBacking()
         backing.setData(Data("not json".utf8), forKey: SettingsStore.Key.profile)

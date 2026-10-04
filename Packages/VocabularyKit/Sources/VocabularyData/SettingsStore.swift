@@ -111,21 +111,33 @@ public final class SettingsStore {
         for key in keys {
             switch key {
             case Key.profile:
-                profile = Self.load(LearnerProfile.self, forKey: key, from: backing)
+                if backing.data(forKey: key) == nil {
+                    profile = nil
+                } else if let value = Self.load(LearnerProfile.self, forKey: key, from: backing) {
+                    profile = value
+                }
             case Key.aiSelection:
-                sharedAISelection = Self.load(AIProviderSelection.self, forKey: key, from: backing) ?? .onDevice
+                sharedAISelection = externalValue(forKey: key, removed: .onDevice) ?? sharedAISelection
             case Key.reviewLimits:
-                reviewLimits = Self.load(ReviewLimits.self, forKey: key, from: backing) ?? ReviewLimits()
+                reviewLimits = externalValue(forKey: key, removed: ReviewLimits()) ?? reviewLimits
             case Key.customProviders:
-                customProviders = Self.load([CustomProvider].self, forKey: key, from: backing) ?? []
+                customProviders = externalValue(forKey: key, removed: []) ?? customProviders
             case Key.cloudPrivacy:
-                hasAcknowledgedCloudPrivacy = Self.load(Bool.self, forKey: key, from: backing) ?? false
+                hasAcknowledgedCloudPrivacy = externalValue(forKey: key, removed: false) ?? hasAcknowledgedCloudPrivacy
             case Key.sharesPhotosWithAI:
-                sharesPhotosWithAI = Self.load(Bool.self, forKey: key, from: backing) ?? false
+                sharesPhotosWithAI = externalValue(forKey: key, removed: false) ?? sharesPhotosWithAI
             default:
                 continue
             }
         }
+    }
+
+    /// The value another device wrote, or `removed` when it deleted the value. `nil` when this
+    /// version can't read it, perhaps because a newer version wrote it: the current setting then
+    /// stays, rather than being reset (code review).
+    private func externalValue<T: Decodable>(forKey key: String, removed: T) -> T? {
+        guard backing.data(forKey: key) != nil else { return removed }
+        return Self.load(T.self, forKey: key, from: backing)
     }
 
     private func save(_ value: (some Encodable)?, forKey key: String) {

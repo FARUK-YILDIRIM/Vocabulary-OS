@@ -54,12 +54,14 @@ public struct LearnerProfile: Hashable, Sendable, Codable {
     }
 
     /// Decoding re-checks the invariants, because synced or imported data may come from elsewhere.
+    /// A learning language this version can't use, such as one a newer version added, is left out
+    /// instead of failing the whole profile, which would send the learner back to onboarding.
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        try self.init(
-            native: container.decode(LanguageCode.self, forKey: .native),
-            learning: container.decode([LanguageCode].self, forKey: .learning)
-        )
+        try self.init(native: container.decode(LanguageCode.self, forKey: .native), learning: [])
+        for code in try container.decode([LanguageCode].self, forKey: .learning) {
+            try? addLearning(code)
+        }
     }
 }
 

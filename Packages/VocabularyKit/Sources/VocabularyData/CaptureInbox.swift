@@ -23,6 +23,9 @@ public struct CaptureDraft: Codable, Sendable, Equatable, Identifiable {
 /// SQLite locks held across process suspension get extensions terminated (ADR-002). Each draft is one
 /// atomically written file, so a half-written capture can't corrupt the others.
 public struct CaptureInbox: Sendable {
+    /// Where drafts this version can't read are kept, perhaps for a later version.
+    public static let unreadableFolder = "Unreadable"
+
     public let directory: URL
     private static let logger = Logger(subsystem: VocabularyCore.logSubsystem, category: VocabularyData.logCategory)
 
@@ -32,10 +35,18 @@ public struct CaptureInbox: Sendable {
 
     public func write(_ draft: CaptureDraft) throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        try JSONEncoder().encode(draft).write(to: url(for: draft.id), options: .atomic)
+        // Sentences can come from private mail. The extension writes and the app reads drafts only
+        // while the device is unlocked, so they can be locked away otherwise (security review).
+        #if os(iOS)
+        let options: Data.WritingOptions = [.atomic, .completeFileProtection]
+        #else
+        let options: Data.WritingOptions = .atomic
+        #endif
+        try JSONEncoder().encode(draft).write(to: url(for: draft.id), options: options)
     }
 
-    /// Drafts waiting to be imported, oldest first. Unreadable files are deleted and logged.
+    /// Drafts waiting to be imported, oldest first. A file this version can't read, perhaps from a
+    /// newer extension, is moved to `unreadableFolder` and logged, never deleted.
     public func pending() -> [CaptureDraft] {
         let files = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
         let decoder = JSONDecoder()
@@ -44,11 +55,19 @@ public struct CaptureInbox: Sendable {
             if let data = try? Data(contentsOf: file), let draft = try? decoder.decode(CaptureDraft.self, from: data) {
                 drafts.append(draft)
             } else {
-                Self.logger.error("Discarding unreadable inbox file \(file.lastPathComponent, privacy: .public)")
-                try? FileManager.default.removeItem(at: file)
+                Self.logger.error("Setting aside unreadable inbox file \(file.lastPathComponent, privacy: .public)")
+                setAside(file)
             }
         }
         return drafts.sorted { $0.savedAt < $1.savedAt }
+    }
+
+    private func setAside(_ file: URL) {
+        let folder = directory.appending(path: Self.unreadableFolder)
+        let destination = folder.appending(path: file.lastPathComponent)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try? FileManager.default.removeItem(at: destination)
+        try? FileManager.default.moveItem(at: file, to: destination)
     }
 
     public func remove(_ id: UUID) throws {
@@ -59,16 +78,20 @@ public struct CaptureInbox: Sendable {
     }
 
     /// Saves every pending draft to the library and removes it from the inbox. Returns how many were
-    /// imported. A draft that fails to save stays in the inbox for the next attempt.
+    /// imported. A word the library already has is not saved again: the extension can't see the
+    /// library to warn the learner (SPEC C4). A draft that fails to save stays in the inbox for the
+    /// next attempt.
     @MainActor
     @discardableResult
     public static func importPending(from inbox: CaptureInbox, into repository: WordRepository) -> Int {
         var imported = 0
         for draft in inbox.pending() {
             do {
-                try repository.save(draft.insight, captureSource: draft.captureSource)
+                if try repository.existingEntry(lemma: draft.insight.lemma, language: draft.insight.language) == nil {
+                    try repository.save(draft.insight, captureSource: draft.captureSource)
+                    imported += 1
+                }
                 try inbox.remove(draft.id)
-                imported += 1
             } catch {
                 logger.error("Could not import a captured word: \(error.localizedDescription, privacy: .public)")
             }
