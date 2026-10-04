@@ -27,8 +27,18 @@ Measurements and facts:
   - It uses the chosen words, level (A1–C2), length and style (dialogue or story).
   - The script is validated: every target word or an inflection appears, segments are not empty,
     and lengths are capped.
-  - On device, longer scripts are generated in sections that each fit the context window. Cloud
-    models generate the script in one call.
+  - Cloud models generate the script in one call.
+  - On device, measured with `vos-eval podcast` (docs/eval/podcast-on-device.md), the script is
+    drafted and then completed:
+    - The draft is written in short parts, about one per word (2–6 parts for about two minutes,
+      4–10 for about five), with sampling: greedy decoding repeated sentences.
+    - Asked to use words in a dialogue, the model often left them out, even with one word per part.
+      So each word the draft left out gets one more short line of its own. The model writes one
+      sentence with a given word reliably. The line is validated and added to that word's part.
+    - Earlier lines are not quoted in the prompt, because the model then repeated them. Sentences said
+      before are dropped and an over-long part loses its last lines, rather than failing the part.
+    - The first part sees every word, to choose a topic where they all fit.
+    - First version: 0 of 3 scripts valid. This design: 9 of 9 valid over three runs.
 - **Storage:** scripts are stored as `PodcastEpisode` records (JSON segments) and sync like other
   data. No audio files are stored or synced.
 - **Playback:**

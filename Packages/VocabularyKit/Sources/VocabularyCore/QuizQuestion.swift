@@ -12,7 +12,7 @@ public enum QuizKind: String, CaseIterable, Codable, Sendable {
     case listening
 }
 
-/// A saved word as a quiz sees it.
+/// A saved word as practice sees it: quizzes ask about it and podcasts use it.
 public struct QuizWord: Sendable, Hashable, Identifiable {
     public var id: UUID
     public var term: String

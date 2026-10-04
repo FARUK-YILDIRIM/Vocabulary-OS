@@ -365,7 +365,8 @@ Conventions:
   with the App Group, so the maintainer checks it at the checkpoint.
 - **AI quality:** `vos-eval insight` runs fixed sentences against the on-device model and reports the
   right-sense rate and language adherence; `vos-eval quiz` checks that on-device quiz questions are
-  valid and how fast the first one is ready. It runs before and after any prompt change, and results
+  valid and how fast the first one is ready; `vos-eval podcast` checks that on-device scripts use
+  every chosen word. It runs before and after any prompt change, and results
   are recorded under `docs/eval/`. Cloud providers are checked manually with the maintainer's key and
   never in automated tests.
 - **The iOS Simulator has no on-device model assets.** The framework reports the model as available,

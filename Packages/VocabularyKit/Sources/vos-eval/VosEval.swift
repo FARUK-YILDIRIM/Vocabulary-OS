@@ -2,15 +2,15 @@ import Foundation
 import VocabularyAI
 import VocabularyCore
 
-/// Evaluates prompts against Apple's on-device model on this Mac (ADR-003, tasks T09 and T24).
+/// Evaluates prompts against Apple's on-device model on this Mac (ADR-003, tasks T09, T24, T27).
 ///
-///     swift run --package-path Packages/VocabularyKit vos-eval insight|quiz [--report <file.md>]
+///     swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [--report <file.md>]
 @main
 struct VosEval {
     static func main() async {
         let arguments = Array(CommandLine.arguments.dropFirst())
-        guard let command = arguments.first, ["insight", "quiz"].contains(command) else {
-            print("usage: vos-eval insight|quiz [--report <file.md>]")
+        guard let command = arguments.first, ["insight", "quiz", "podcast"].contains(command) else {
+            print("usage: vos-eval insight|quiz|podcast [--report <file.md>]")
             exit(64)
         }
         let client = AppleOnDeviceClient()
@@ -21,6 +21,10 @@ struct VosEval {
         let (summary, markdown, meetsTargets): (String, String, Bool)
         if command == "insight" {
             let report = await InsightEvaluation(client: client).run()
+            (summary, markdown, meetsTargets) = (report.summary, report.markdown, report.meetsTargets)
+        } else if command == "podcast" {
+            let verbose = arguments.contains("--verbose")
+            let report = await PodcastEvaluation(client: verbose ? LoggingClient(base: client) : client).run()
             (summary, markdown, meetsTargets) = (report.summary, report.markdown, report.meetsTargets)
         } else {
             // As in the app: distractors from the learner's other words, the model for cloze sentences.

@@ -52,7 +52,7 @@ Done holds and its commit exists.
 - [x] T24 `feat(ai)`: quiz generation and validation
 - [x] T25 `feat(quiz)`: quiz session and grading — listening questions come with the speech engine (T26)
 - [x] T26 `feat(speech)`: speech engine — also enables listening quiz questions
-- [ ] T27 `feat(podcast)`: podcast script generation
+- [x] T27 `feat(podcast)`: podcast script generation
 - [ ] T28 `feat(podcast)`: podcast setup and player
 - [ ] Checkpoint 5: Practice
 

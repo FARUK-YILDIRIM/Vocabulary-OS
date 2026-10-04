@@ -8,14 +8,16 @@ struct ValidationFailure: Error {
 }
 
 extension PromptSpec {
-    /// Runs the prompt, retrying once when the answer is unreadable or rejected by the validator.
+    /// Runs the prompt, retrying when the answer is unreadable or rejected by the validator: once by
+    /// default, more often for long creative text that fails more easily.
     func run<Output>(
         on client: any GenerationClient,
+        attempts: Int = 2,
         validate: (GeneratedContent) throws(ValidationFailure) -> Output
     ) async throws(AIError) -> Output {
         var current = self
         var lastError = AIError.invalidOutput("No answer")
-        for _ in 0..<2 {
+        for _ in 0..<max(1, attempts) {
             let content: GeneratedContent
             do {
                 content = try await client.generate(current.request, schema: current.schema)
