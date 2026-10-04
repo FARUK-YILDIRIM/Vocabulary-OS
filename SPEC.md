@@ -202,10 +202,17 @@ Each capability can be built and tested on its own. Build order goes top to bott
 
 **C10 — Plans**
 - I create plans such as "Quiz, German, Mon/Wed/Fri 08:00, due words, 10 questions" or "Podcast,
-  English, every day 19:30".
-- Each device schedules its own local notifications from the synced plans.
-- Tapping a notification opens the activity, preconfigured.
-- iOS allows at most 64 pending notifications, so the app enforces that limit.
+  English, every day 19:30". A plan reviews flashcards, takes a quiz (which words, how many
+  questions) or makes a podcast (level, length, style). Plans live under Practice; I can turn one
+  off without losing it, and plans in a language I removed pause until I add it back.
+- Each device schedules its own local notifications from the synced plans. The app asks for
+  permission when I save my first plan, and tells me if notifications are off.
+- Tapping a notification opens the activity, preconfigured: a review plan opens that language's
+  flashcards when anything is due, a quiz plan starts the quiz, and a podcast plan writes a new
+  episode with suggested words and opens it. `vocabularyos://plan/<id>` links do the same.
+- iOS allows at most 64 pending notifications, so the app enforces that limit: a plan that would
+  need more than 64 reminders a week, together with the others, can't be saved, and a device with
+  more plans from other devices schedules the 64 that come soonest.
 - *Accept when:* a plan for Mon/Wed/Fri at 08:00 produces three weekly repeating triggers (tests);
   the deep link opens the right screen.
 

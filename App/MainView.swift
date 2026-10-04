@@ -6,10 +6,11 @@ enum AppTab: String, Hashable {
 
 /// The main navigation: a tab bar on iPhone, a sidebar on iPad and Mac.
 struct MainView: View {
-    @State private var selection = LaunchOptions().initialTab ?? .today
+    @Environment(AppModel.self) private var app
 
     var body: some View {
-        TabView(selection: $selection) {
+        @Bindable var navigation = app.navigation
+        TabView(selection: $navigation.tab) {
             Tab("Today", systemImage: "sun.max", value: AppTab.today) {
                 TodayView()
             }

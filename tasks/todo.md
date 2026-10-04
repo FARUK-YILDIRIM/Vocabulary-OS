@@ -62,7 +62,7 @@ Done holds and its commit exists.
   shorter-than-asked episodes are good enough (T32). Awaiting owner review.
 
 ## Phase 6: Plans, sharing, polish
-- [ ] T29 `feat(plans)`: study plans and notifications
+- [x] T29 `feat(plans)`: study plans and notifications — the reminder scheduler lives in VocabularyData so the package tests cover it
 - [ ] T30 `feat(sharing)`: export and import
 - [ ] T31 `feat(i18n)`: Turkish localization
 - [ ] T32 `feat(ui)`: accessibility and polish
@@ -79,4 +79,9 @@ Done holds and its commit exists.
     - short words over-match as inflected forms in validation and highlighting: "ran" also matches
       "random" (the prefix rule in `QuizValidator.isForm`).
 - [ ] T33 `docs(release)`: open-source release readiness
+  - Noticed while building T29:
+    - Info.plist lacks the `remote-notification` background mode that ADR-002 lists for CloudKit
+      sync, so changes from other devices arrive only while the app is open;
+    - `scripts/mac-smoke.sh` counts only windows on the current Space, so it reports no window while
+      another app is full screen.
 - [ ] Checkpoint 6: Ship

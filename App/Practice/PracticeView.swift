@@ -5,16 +5,19 @@ import VocabularyUI
 
 /// Where the Practice tab navigates.
 enum PracticeRoute: Hashable {
-    case newPodcast
+    /// A study plan's podcast starts writing at once.
+    case newPodcast(PodcastPlan?)
     case episode(PodcastEpisode)
     case episodes
 }
 
-/// Practice: quizzes and podcasts on saved words (SPEC C8, C9).
+/// Practice: quizzes, podcasts and the study plans that start them (SPEC C8, C9, C10).
 struct PracticeView: View {
     @State private var quiz: QuizSessionModel?
     @State private var refreshToken = UUID()
     @State private var path: [PracticeRoute] = []
+    @State private var planDraft: PlanDraft?
+    @State private var planError: String?
     @Environment(AppModel.self) private var app
     #if DEBUG
     @State private var didOpenLaunchScreen = false
@@ -25,16 +28,20 @@ struct PracticeView: View {
             Form {
                 QuizSetupView(refreshToken: refreshToken) { quiz = $0 }
                 PodcastsSection()
+                PlansSection(draft: $planDraft)
             }
             .formStyle(.grouped)
             .navigationTitle("Practice")
+            .sheet(item: $planDraft) { draft in
+                PlanEditorView(draft: draft)
+            }
             #if DEBUG
             .onAppear(perform: openLaunchScreen)
             #endif
             .navigationDestination(for: PracticeRoute.self) { route in
                 switch route {
-                case .newPodcast:
-                    PodcastSetupView { episode in
+                case .newPodcast(let plan):
+                    PodcastSetupView(plan: plan) { episode in
                         // The new episode takes the setup screen's place.
                         path.removeLast()
                         path.append(.episode(episode))
@@ -54,6 +61,35 @@ struct PracticeView: View {
                 }
             }
         }
+        .onChange(of: app.navigation.startingPlan, initial: true) { startPlan() }
+        .alert("The Plan Couldn't Start", isPresented: isShowingPlanError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(verbatim: planError ?? "")
+        }
+    }
+
+    private var isShowingPlanError: Binding<Bool> {
+        Binding(get: { planError != nil }, set: { if !$0 { planError = nil } })
+    }
+
+    /// Starts a plan's quiz or podcast, as its reminder or link asks (SPEC C10).
+    private func startPlan() {
+        guard let plan = app.navigation.takePlan(for: [.quiz, .podcast]), let language = plan.language else { return }
+        switch plan.activity {
+        case .quiz:
+            do {
+                let session = try app.makeQuiz(language: language, source: plan.quizSource, length: plan.quizLength)
+                quiz?.cancel()
+                quiz = session
+            } catch {
+                planError = error.localizedDescription
+            }
+        case .podcast:
+            path = [.newPodcast(PodcastPlan(language: language, level: plan.podcastLevel, length: plan.podcastLength, style: plan.podcastStyle))]
+        case .review:
+            break
+        }
     }
 
     private var isQuizzing: Binding<Bool> {
@@ -67,7 +103,7 @@ struct PracticeView: View {
         didOpenLaunchScreen = true
         switch LaunchOptions().podcastScreen {
         case "new":
-            path = [.newPodcast]
+            path = [.newPodcast(nil)]
         case "newest":
             var newest = FetchDescriptor<PodcastEpisode>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
             newest.fetchLimit = 1
@@ -91,7 +127,7 @@ private struct PodcastsSection: View {
     var body: some View {
         let visible = episodes.visible(for: app.settings.profile)
         Section {
-            NavigationLink(value: PracticeRoute.newPodcast) {
+            NavigationLink(value: PracticeRoute.newPodcast(nil)) {
                 Label("New Podcast", systemImage: "plus.circle")
             }
             .accessibilityIdentifier("practice-new-podcast")

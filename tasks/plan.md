@@ -521,9 +521,9 @@ because its files are tiny and only work together.
     `UNCalendarNotificationTrigger`s, at most 64.
   - Deep links (`vocabularyos://plan/<id>`) start the activity.
 - **Acceptance criteria:**
-  - [ ] Scheduler tests: Mon/Wed/Fri 08:00 gives three triggers; editing or deleting reconciles;
+  - [x] Scheduler tests: Mon/Wed/Fri 08:00 gives three triggers; editing or deleting reconciles;
     the cap is enforced.
-  - [ ] Tapping the notification opens the activity (Simulator).
+  - [x] Tapping the notification opens the activity (Simulator).
 - **Verification:** `swift test`; a Simulator notification check.
 - **Dependencies:** T25, T28.
 - **Files:** `Sources/VocabularyData/StudyPlan.swift`, `Sources/VocabularyCore/PlanSchedule.swift`,

@@ -4,9 +4,19 @@ import VocabularyCore
 import VocabularyData
 import VocabularyUI
 
+/// A podcast a study plan asks for (SPEC C10).
+struct PodcastPlan: Hashable {
+    let language: LanguageCode
+    let level: LanguageLevel
+    let length: PodcastLength
+    let style: PodcastStyle
+}
+
 /// A new podcast: a language, 3 to 12 saved words, a level, a length and a style (SPEC C9). The AI
-/// writes the script; the new episode then opens in the player.
+/// writes the script; the new episode then opens in the player. A study plan's podcast starts
+/// writing at once with the suggested words.
 struct PodcastSetupView: View {
+    var plan: PodcastPlan?
     let onCreate: (PodcastEpisode) -> Void
     @Environment(AppModel.self) private var app
     @State private var language: LanguageCode?
@@ -19,6 +29,7 @@ struct PodcastSetupView: View {
     @State private var creation: PodcastCreationModel?
     @State private var writing: Task<Void, Never>?
     @State private var loadError: String?
+    @State private var didStartPlan = false
 
     /// How many words a new podcast starts with.
     private static let suggestedWordCount = 5
@@ -112,7 +123,15 @@ struct PodcastSetupView: View {
             if creation == nil {
                 creation = PodcastCreationModel(podcasts: app.podcasts) { [app] in PodcastService(app.makeInsightService()) }
             }
-            if language == nil {
+            if let plan, !didStartPlan {
+                didStartPlan = true
+                language = plan.language
+                level = plan.level
+                length = plan.length
+                style = plan.style
+                loadWords()
+                if canCreate { create() }
+            } else if language == nil {
                 language = app.settings.profile?.learning.first
             }
         }
@@ -223,7 +242,7 @@ private struct PodcastWordPicker: View {
 
 #Preview {
     NavigationStack {
-        PodcastSetupView { _ in }
+        PodcastSetupView(plan: nil) { _ in }
     }
     .environment(AppModel.preview())
 }

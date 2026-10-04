@@ -84,12 +84,6 @@ struct QuizSetupView: View {
         }
     }
 
-    /// Listening questions need a voice for the language.
-    private func kinds(for language: LanguageCode) -> [QuizKind] {
-        let hasVoice = VoiceCatalog.installed().bestVoice(for: language) != nil
-        return [.meaning, .reverse, .cloze] + (hasVoice ? [.listening] : [])
-    }
-
     private var canStart: Bool {
         language != nil && languageWordCount >= QuizRepository.minimumWords && matching > 0
     }
@@ -113,18 +107,47 @@ struct QuizSetupView: View {
     private func start() {
         guard let language else { return }
         do {
-            onStart(QuizSessionModel(
-                language: language,
-                words: try app.quizzes.words(language: language, source: source, limit: length),
-                library: try app.quizzes.library(),
-                kinds: kinds(for: language),
-                source: source,
-                service: QuizService(app.makeInsightService()),
-                reviews: app.reviews,
-                quizzes: app.quizzes
-            ))
+            onStart(try app.makeQuiz(language: language, source: source, length: length))
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+}
+
+/// Why a quiz couldn't start.
+enum QuizStartError: LocalizedError {
+    case tooFewWords(LanguageCode, minimum: Int)
+    case noMatchingWords
+
+    var errorDescription: String? {
+        switch self {
+        case .tooFewWords(let language, let minimum):
+            String(localized: "Save at least \(minimum) \(language.localizedName()) words to make a quiz: the wrong answers come from your other words.")
+        case .noMatchingWords:
+            String(localized: "No words match.")
+        }
+    }
+}
+
+extension AppModel {
+    /// A quiz on saved words (SPEC C8), as Practice and study plans start it.
+    func makeQuiz(language: LanguageCode, source: QuizSource, length: Int) throws -> QuizSessionModel {
+        guard try repository.count(language: language) >= QuizRepository.minimumWords else {
+            throw QuizStartError.tooFewWords(language, minimum: QuizRepository.minimumWords)
+        }
+        let words = try quizzes.words(language: language, source: source, limit: length)
+        guard !words.isEmpty else { throw QuizStartError.noMatchingWords }
+        // Listening questions need a voice for the language.
+        let hasVoice = VoiceCatalog.installed().bestVoice(for: language) != nil
+        return QuizSessionModel(
+            language: language,
+            words: words,
+            library: try quizzes.library(),
+            kinds: [.meaning, .reverse, .cloze] + (hasVoice ? [.listening] : []),
+            source: source,
+            service: QuizService(makeInsightService()),
+            reviews: reviews,
+            quizzes: quizzes
+        )
     }
 }

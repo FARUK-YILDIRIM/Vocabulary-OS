@@ -28,6 +28,18 @@
 			<dict/>
 		</dict>
 	</array>
+	<!-- vocabularyos://plan/<id> starts a study plan; reminders open these links (SPEC C10). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>vocabularyos</string>
+			</array>
+		</dict>
+	</array>
 	<!-- Podcasts keep speaking when the screen locks or another app comes forward (ADR-008). macOS ignores it. -->
 	<key>UIBackgroundModes</key>
 	<array>

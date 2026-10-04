@@ -3,9 +3,13 @@ import Foundation
 import VocabularyCore
 import VocabularyData
 
-/// Sample words and a podcast episode for UI tests and screenshots (`-vos-seed-library YES`, Debug
-/// builds only).
+/// Sample words, a podcast episode and a study plan for UI tests and screenshots
+/// (`-vos-seed-library YES`, Debug builds only).
 enum SampleLibrary {
+    /// The sample plans' IDs, so UI tests can open `vocabularyos://plan/<id>`.
+    static let quizPlanID = UUID(uuidString: "5A3F1E2D-7C4B-4E8A-9F60-1B2C3D4E5F60")!
+    static let podcastPlanID = UUID(uuidString: "5A3F1E2D-7C4B-4E8A-9F60-1B2C3D4E5F61")!
+
     @MainActor
     static func seed(into repository: WordRepository, now: Date = .now) {
         let source = InsightSource(providerID: AIProviderSelection.onDevice.providerID)
@@ -32,6 +36,21 @@ enum SampleLibrary {
         }
         try? repository.context.save()
         seedPodcast(words: english, into: repository, source: source)
+        seedPlan(into: repository)
+    }
+
+    /// An English quiz every day at 08:00 with five questions on the due words, and an English podcast
+    /// on Mondays, Wednesdays and Fridays at 19:30.
+    @MainActor
+    private static func seedPlan(into repository: WordRepository) {
+        let plans = PlanRepository(words: repository)
+        let quiz = StudyPlan(activity: .quiz, language: .english, schedule: PlanSchedule(weekdays: PlanSchedule.allWeekdays, hour: 8, minute: 0))
+        quiz.id = quizPlanID
+        quiz.quizLength = 5
+        try? plans.insert(quiz)
+        let podcast = StudyPlan(activity: .podcast, language: .english, schedule: PlanSchedule(weekdays: [2, 4, 6], hour: 19, minute: 30))
+        podcast.id = podcastPlanID
+        try? plans.insert(podcast)
     }
 
     /// A short English dialogue that uses the sample English words.

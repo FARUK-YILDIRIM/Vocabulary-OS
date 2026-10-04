@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import os
 import SwiftData
+import UserNotifications
 import VocabularyAI
 import VocabularyCore
 import VocabularyData
@@ -16,6 +17,10 @@ final class AppModel {
     let reviews: ReviewRepository
     let quizzes: QuizRepository
     let podcasts: PodcastRepository
+    let plans: PlanRepository
+    /// Schedules the study plans' reminders on this device (SPEC C10).
+    let reminders = PlanNotificationScheduler(center: SystemNotificationCenter())
+    let navigation: AppNavigation
     /// Speaks words, listening questions and podcasts with on-device voices (ADR-008).
     let speech = SpeechPlayer()
     let secrets: any SecretStore
@@ -38,6 +43,8 @@ final class AppModel {
         self.reviews = ReviewRepository(words: repository)
         self.quizzes = QuizRepository(words: repository)
         self.podcasts = PodcastRepository(words: repository)
+        self.plans = PlanRepository(words: repository)
+        self.navigation = AppNavigation(tab: options.initialTab ?? .today)
         self.secrets = secrets
         self.router = ProviderRouter(secrets: secrets)
         self.inbox = inbox
@@ -123,6 +130,46 @@ final class AppModel {
         return ProviderCatalog.provider(id: providerID)?.displayName ?? providerID
     }
 
+    // MARK: Plans
+
+    /// Plans in the learner's languages: removing a language pauses its plans, and adding it back
+    /// resumes them (SPEC C1, C10).
+    func activePlans() throws -> [StudyPlan] {
+        let learning = Set(settings.profile?.learning ?? [])
+        return try plans.plans().filter { $0.language.map(learning.contains) == true }
+    }
+
+    /// Makes this device's reminders match the plans (SPEC C10).
+    func rescheduleReminders() async {
+        do {
+            await reminders.reconcile(try activePlans()) { PlanText.reminder(for: $0) }
+        } catch {
+            Logger(subsystem: VocabularyCore.logSubsystem, category: "app")
+                .error("Could not read the study plans: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Asks once whether plans may send reminders; later calls return the learner's answer.
+    @discardableResult
+    func requestReminderPermission() async -> Bool {
+        (try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])) ?? false
+    }
+
+    /// Whether the learner turned notifications off for the app.
+    func remindersAreDenied() async -> Bool {
+        await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
+    }
+
+    /// Opens a `vocabularyos://` link: a plan's link starts its activity (SPEC C10).
+    func open(_ url: URL) {
+        guard let link = DeepLink(url: url) else { return }
+        switch link {
+        case .plan(let id):
+            guard let plan = try? activePlans().first(where: { $0.id == id }) else { return }
+            navigation.start(plan)
+        }
+    }
+
     // MARK: Share extension
 
     /// Moves words saved in the Share extension into the library (ADR-002).
@@ -184,6 +231,7 @@ struct LaunchOptions {
     static let samplePage = "vos-sample-page"
     static let sampleObject = "vos-sample-object"
     static let podcast = "vos-podcast"
+    static let remindIn = "vos-remind-in"
 
     private let defaults: UserDefaults
 
@@ -213,6 +261,12 @@ struct LaunchOptions {
     /// Open Practice → New Podcast (`new`) or the newest episode (`newest`), for screenshots (Debug
     /// builds only).
     var podcastScreen: String? { defaults.string(forKey: Self.podcast) }
+
+    /// Sends the first plan's reminder this many seconds after launch, for UI tests (Debug builds
+    /// only).
+    var remindInSeconds: Int? {
+        defaults.object(forKey: Self.remindIn) == nil ? nil : defaults.integer(forKey: Self.remindIn)
+    }
 
     /// Debug-only end-to-end check to run at launch, e.g. `capture` (see `SelfTest`).
     var selfTest: String? { defaults.string(forKey: Self.selfTest) }

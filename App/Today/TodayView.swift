@@ -27,6 +27,7 @@ struct TodayView: View {
                 .navigationTitle("Today")
         }
         .onAppear(perform: refresh)
+        .onChange(of: app.navigation.startingPlan, initial: true) { startPlan() }
         .onChange(of: scenePhase) { _, phase in
             // A new day may have started while the app was in the background.
             if phase == .active { refresh() }
@@ -112,6 +113,16 @@ struct TodayView: View {
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Starts a review plan's flashcards, unless that language has nothing left for today
+    /// (SPEC C10).
+    private func startPlan() {
+        guard let plan = app.navigation.takePlan(for: [.review]), let language = plan.language else { return }
+        refresh()
+        if summaries.first(where: { $0.language == language })?.isDone == false {
+            start(language)
         }
     }
 
