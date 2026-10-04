@@ -1,3 +1,6 @@
+#if canImport(AppKit)
+import AppKit
+#endif
 import CoreGraphics
 import CoreText
 import Foundation
@@ -25,6 +28,24 @@ enum TestImages {
         CTFrameDraw(CTFramesetterCreateFrame(framesetter, CFRange(location: 0, length: 0), path, nil), context)
         return context.makeImage()!
     }
+
+    #if canImport(AppKit)
+    /// An SF Symbol drawn large on white, standing in for a photo of the object: the system draws it
+    /// at test time, so no image file needs a license. `cup.and.saucer.fill` is classified as a cup.
+    static func symbol(_ name: String, size: Int = 600) -> CGImage {
+        let configuration = NSImage.SymbolConfiguration(pointSize: CGFloat(size) * 0.6, weight: .regular)
+            .applying(NSImage.SymbolConfiguration(paletteColors: [.brown]))
+        let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)!.withSymbolConfiguration(configuration)!
+        let context = blankContext(width: size, height: size)
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: false)
+        image.draw(in: NSRect(
+            x: (CGFloat(size) - image.size.width) / 2, y: (CGFloat(size) - image.size.height) / 2,
+            width: image.size.width, height: image.size.height
+        ))
+        NSGraphicsContext.current = nil
+        return context.makeImage()!
+    }
+    #endif
 
     /// A plain image of the given size, for thumbnail tests.
     static func blank(width: Int, height: Int) -> CGImage {

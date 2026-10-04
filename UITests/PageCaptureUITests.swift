@@ -43,8 +43,8 @@ final class PageCaptureUITests: XCTestCase {
     func testAnEmptyPageOffersPhotoSources() {
         let app = launch(extraArguments: [])
 
-        XCTAssertTrue(app.buttons["page-choose-photo"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["page-choose-file"].exists)
+        XCTAssertTrue(app.buttons["photo-choose"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["photo-choose-file"].exists)
         attachScreenshot(of: app, named: "04-empty")
     }
 

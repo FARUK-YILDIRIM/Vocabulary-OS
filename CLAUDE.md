@@ -49,7 +49,7 @@ swift test --package-path Packages/VocabularyKit    # package tests on the Mac h
 scripts/verify.sh                                   # full gate: generate + tests + iOS Simulator + macOS builds
 scripts/ui-test.sh [Class/test]                     # XCUITests on iPhone 17 (VOS_UI_TEST_DEVICE for iPad); screenshots in .build/ui-tests
 scripts/mac-smoke.sh [-vos-preset-profile tr:en,de] # macOS Debug build launches, shows a window, logs no errors
-scripts/mac-smoke.sh --self-test [capture|page]     # macOS app captures a word with the real on-device model
+scripts/mac-smoke.sh --self-test [capture|page|object]  # macOS app captures a word with the real on-device model
 scripts/mac-smoke.sh --services                     # Services → "Capture in Vocabulary-OS" opens the capture window
 swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-device prompt evaluation
 ```
@@ -125,6 +125,8 @@ swift run --package-path Packages/VocabularyKit vos-eval insight   # live on-dev
   - `-vos-ai-stub YES`: canned AI answers (the Simulator has no on-device model assets).
   - `-vos-capture-mode page`: open Capture on the page tab.
   - `-vos-sample-page YES`: load a generated book page (the Simulator has no photos).
+  - `-vos-capture-mode object` with `-vos-sample-object YES`: a stand-in cup photo. The Simulator
+    can't run Vision's image classifier, so there the learner types the label.
 
   Never pass a bare flag: AppKit then treats the next value as a file to open.
 - **Tests:**

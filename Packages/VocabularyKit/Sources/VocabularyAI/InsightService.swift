@@ -112,30 +112,11 @@ public struct InsightService: Sendable {
 
     // MARK: Retry
 
-    /// Runs one prompt, retrying once when the answer is unreadable or rejected by the validator.
     private func run<Output>(
         _ spec: PromptSpec,
-        validate: (GeneratedContent) throws(InsightValidator.Failure) -> Output
+        validate: (GeneratedContent) throws(ValidationFailure) -> Output
     ) async throws(AIError) -> Output {
-        var current = spec
-        var lastError = AIError.invalidOutput("No answer")
-        for _ in 0..<2 {
-            let content: GeneratedContent
-            do {
-                content = try await client.generate(current.request, schema: current.schema)
-            } catch where error.isWorthRetrying {
-                lastError = error
-                current = spec.retry(reason: nil)
-                continue
-            }
-            do {
-                return try validate(content)
-            } catch {
-                lastError = .invalidOutput(error.reason)
-                current = spec.retry(reason: error.reason)
-            }
-        }
-        throw lastError
+        try await spec.run(on: client, validate: validate)
     }
 }
 

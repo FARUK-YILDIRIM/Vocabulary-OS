@@ -157,7 +157,7 @@ enum InsightPrompts {
         )
     }
 
-    private static func text(_ name: String, _ description: String) -> DynamicGenerationSchema.Property {
+    static func text(_ name: String, _ description: String) -> DynamicGenerationSchema.Property {
         .init(name: name, description: description, schema: DynamicGenerationSchema(type: String.self))
     }
 
@@ -169,7 +169,7 @@ enum InsightPrompts {
         )
     }
 
-    private static func schema(_ name: String, _ properties: [DynamicGenerationSchema.Property]) throws(AIError) -> GenerationSchema {
+    static func schema(_ name: String, _ properties: [DynamicGenerationSchema.Property]) throws(AIError) -> GenerationSchema {
         do {
             return try GenerationSchema(root: DynamicGenerationSchema(name: name, properties: properties), dependencies: [])
         } catch {

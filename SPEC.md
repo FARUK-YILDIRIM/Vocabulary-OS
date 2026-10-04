@@ -140,7 +140,8 @@ Each capability can be built and tested on its own. Build order goes top to bott
   - I take or choose a photo. On-device classification suggests what the object is, and I pick or
     correct the suggestion.
   - The AI gives the object's name in my learning language (with article/gender where the language
-    has one), a translation into my native language, and an example sentence.
+    has one), a translation and a one-line meaning in my native language, and an example sentence.
+  - If the suggestion fails, I type what the object is, in any language.
   - The word is saved with a downscaled photo.
 - *Accept when:* recognition tests on generated page images return the right sentence for a tapped
   word; classification labels map to saved words; photos are stored at most 1024 px on the long edge.
@@ -361,10 +362,11 @@ Conventions:
   are recorded under `docs/eval/`. Cloud providers are checked manually with the maintainer's key and
   never in automated tests.
 - **The iOS Simulator has no on-device model assets.** The framework reports the model as available,
-  but generation then fails. So:
+  but generation then fails. Vision's image classifier doesn't run there either. So:
   - UI tests use canned AI answers (`-vos-ai-stub YES`);
   - the real on-device model is exercised on macOS by `vos-eval` and `scripts/mac-smoke.sh --self-test`,
-    which captures a word inside the running app, from a sentence or from a generated book page.
+    which captures a word inside the running app: from a sentence, from a generated book page, or
+    by classifying and naming a photographed cup.
 - **No network in tests:** HTTP is stubbed with a `URLProtocol` subclass.
 - **Bugs:** a failing reproduction test comes before the fix (prove-it pattern).
 - **Coverage goal:** about 90% of lines in VocabularyCore; at least 70% in AI and Data.

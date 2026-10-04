@@ -4,13 +4,8 @@ import NaturalLanguage
 import VocabularyCore
 
 /// Cleans and checks model output before it reaches the learner (ADR-003, "validation everywhere").
-///
-/// Rejections carry a short reason that goes back to the model in the retry prompt, so reasons are
-/// written as instructions and never quote the learner's text.
 enum InsightValidator {
-    struct Failure: Error {
-        let reason: String
-    }
+    typealias Failure = ValidationFailure
 
     struct Sense {
         let englishWord: String
@@ -105,7 +100,7 @@ enum InsightValidator {
         }
     }
 
-    private static func checkMeaning(_ meaning: String, native: LanguageCode) throws(Failure) {
+    static func checkMeaning(_ meaning: String, native: LanguageCode) throws(Failure) {
         guard !meaning.isEmpty, wordCount(meaning) <= 30 else {
             throw Failure(reason: "meaning must be one short \(native.englishName) sentence")
         }
@@ -152,7 +147,7 @@ enum InsightValidator {
         return clean(text)
     }
 
-    private static func string(_ property: String, in content: GeneratedContent) -> String {
+    static func string(_ property: String, in content: GeneratedContent) -> String {
         (try? content.value(String.self, forProperty: property)) ?? ""
     }
 
@@ -160,7 +155,7 @@ enum InsightValidator {
         PartOfSpeech(rawValue: clean(string("partOfSpeech", in: content)).lowercased())
     }
 
-    private static func wordCount(_ text: String) -> Int {
+    static func wordCount(_ text: String) -> Int {
         text.split(whereSeparator: \.isWhitespace).count
     }
 

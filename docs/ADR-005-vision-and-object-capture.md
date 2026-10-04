@@ -44,9 +44,16 @@ classifier is `ClassifyImageRequest` (Swift API) / `VNClassifyImageRequest`.
     sentence extraction across line wraps.
 - **Object:**
   - Run Vision **`ClassifyImageRequest`** on device and keep labels with confidence ≥ 0.3 (top 5).
-  - The learner picks or corrects a label.
-  - The active AI model returns the object's name in the chosen learning language (with
-    article/gender where relevant), a translation into the native language and an example sentence.
+  - Vision returns a hierarchy with equal confidences ("utensil", "tableware", "cup"). Labels that
+    only group things are listed after the specific ones.
+  - The learner picks or corrects a label. If classification fails, the learner types what the
+    object is: the classifier needs hardware the iOS Simulator lacks ("Failed to create espresso
+    context").
+  - The active AI model returns the object's name in the chosen learning language, a translation
+    and a one-line meaning in the native language, and an example sentence. The article is a fixed
+    choice per language: der/die/das, le/la/l', el/la, il/lo/la/l', o/a, de/het, and en/ett (en/et,
+    en/ei/et) for the Scandinavian languages. Other languages get none.
+  - Measured with the macOS on-device model: a cup photo classified as `cup` and named "die Tasse".
   - Sending the photo itself to a vision-capable cloud model is **off by default**. It waits on
     spec open question 3.
 - **Images:**

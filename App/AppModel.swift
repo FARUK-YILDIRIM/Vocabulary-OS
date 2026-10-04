@@ -172,6 +172,7 @@ struct LaunchOptions {
     static let seedLibrary = "vos-seed-library"
     static let captureMode = "vos-capture-mode"
     static let samplePage = "vos-sample-page"
+    static let sampleObject = "vos-sample-object"
 
     private let defaults: UserDefaults
 
@@ -194,6 +195,9 @@ struct LaunchOptions {
 
     /// Load a generated book page into page capture (Debug builds only, see `SamplePage`).
     var usesSamplePage: Bool { defaults.bool(forKey: Self.samplePage) }
+
+    /// Load a stand-in photo of a cup into object capture (Debug builds only, see `SampleObject`).
+    var usesSampleObject: Bool { defaults.bool(forKey: Self.sampleObject) }
 
     /// Debug-only end-to-end check to run at launch, e.g. `capture` (see `SelfTest`).
     var selfTest: String? { defaults.string(forKey: Self.selfTest) }

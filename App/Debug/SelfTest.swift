@@ -7,7 +7,8 @@ import VocabularyUI
 import AppKit
 #endif
 
-/// Debug-only end-to-end checks with the real AI provider (`-vos-self-test capture` or `page`).
+/// Debug-only end-to-end checks with the real AI provider (`-vos-self-test capture`, `page` or
+/// `object`).
 ///
 /// The iOS Simulator has no on-device model assets, so `scripts/mac-smoke.sh --self-test` runs these
 /// in the macOS build. Each captures a word, explains it, saves it, logs the outcome and quits. UI
@@ -21,6 +22,8 @@ enum SelfTest {
             await captureFromText(app: app)
         case "page":
             await captureFromPage(app: app)
+        case "object":
+            await captureObject(app: app)
         default:
             return
         }
@@ -77,6 +80,33 @@ enum SelfTest {
         model.save()
         let entry = try? app.repository.existingEntry(lemma: insight.lemma, language: insight.language)
         logger.notice("Self-test page passed: \(insight.term, privacy: .public) (\(insight.language.rawValue, privacy: .public)) → \(insight.translation, privacy: .public) | \(model.sentence ?? "", privacy: .public) | photo=\(entry?.imageData != nil)")
+    }
+
+    /// Classifies the stand-in cup photo and names it in German.
+    private static func captureObject(app: AppModel) async {
+        let model = ObjectCaptureModel(
+            settings: app.settings,
+            destination: { [repository = app.repository] photo in
+                LibraryCaptureDestination(repository: repository, photo: photo)
+            },
+            insightService: app.makeInsightService
+        )
+        await model.load(SampleObject.jpegData())
+        guard model.phase == .choosing, !model.label.isEmpty else {
+            logger.error("Self-test object failed: nothing was recognized (\(String(describing: model.phase), privacy: .public))")
+            return
+        }
+        let label = model.label
+        model.language = .german
+        model.name()
+        await model.waitForName()
+        guard let insight = model.insight else {
+            logger.error("Self-test object failed: \(model.namingError?.localizedDescription ?? "no name", privacy: .public)")
+            return
+        }
+        model.save()
+        let entry = try? app.repository.existingEntry(lemma: insight.lemma, language: insight.language)
+        logger.notice("Self-test object passed: \(label, privacy: .public) → \(insight.term, privacy: .public) (\(insight.language.rawValue, privacy: .public)) → \(insight.translation, privacy: .public) | \(insight.meaning, privacy: .public) | \(insight.examples.first?.sentence ?? "no example", privacy: .public) | photo=\(entry?.imageData != nil)")
     }
 
     private static func logFailure(_ test: String, phase: CaptureModel.Phase) {

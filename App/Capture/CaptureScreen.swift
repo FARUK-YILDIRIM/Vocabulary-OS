@@ -3,10 +3,11 @@ import VocabularyCore
 import VocabularyData
 import VocabularyUI
 
-/// The Capture tab: text the learner pastes or types, or a photo of a page (SPEC C5, C6).
+/// The Capture tab: text the learner pastes or types, a photo of a page, or a photo of an object
+/// (SPEC C5, C6).
 struct CaptureScreen: View {
     enum Mode: String, CaseIterable, Identifiable {
-        case text, page
+        case text, page, object
 
         var id: Self { self }
 
@@ -14,6 +15,7 @@ struct CaptureScreen: View {
             switch self {
             case .text: "Text"
             case .page: "Page"
+            case .object: "Object"
             }
         }
     }
@@ -22,6 +24,7 @@ struct CaptureScreen: View {
     @State private var mode = LaunchOptions().captureMode ?? .text
     @State private var textModel: CaptureModel?
     @State private var pageModel: PageCaptureModel?
+    @State private var objectModel: ObjectCaptureModel?
 
     var body: some View {
         NavigationStack {
@@ -47,6 +50,10 @@ struct CaptureScreen: View {
                     if let pageModel {
                         PageCaptureView(model: pageModel)
                     }
+                case .object:
+                    if let objectModel {
+                        ObjectCaptureView(model: objectModel)
+                    }
                 }
             }
             .frame(maxHeight: .infinity, alignment: .top)
@@ -65,6 +72,15 @@ struct CaptureScreen: View {
         }
         if pageModel == nil {
             pageModel = PageCaptureModel(
+                settings: app.settings,
+                destination: { [repository = app.repository] photo in
+                    LibraryCaptureDestination(repository: repository, photo: photo)
+                },
+                insightService: app.makeInsightService
+            )
+        }
+        if objectModel == nil {
+            objectModel = ObjectCaptureModel(
                 settings: app.settings,
                 destination: { [repository = app.repository] photo in
                     LibraryCaptureDestination(repository: repository, photo: photo)

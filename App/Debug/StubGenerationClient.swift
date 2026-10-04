@@ -16,6 +16,8 @@ struct StubGenerationClient: GenerationClient {
             #"{"situation":"a website tracks visitors","englishWord":"cookie","englishGloss":"a small file a website stores in the browser","partOfSpeech":"noun"}"#
         case "Explanation":
             #"{"translation":"çerez","meaning":"Web sitelerinin tarayıcıda sakladığı küçük veri dosyası."}"#
+        case "ObjectName":
+            #"{"name":"Tasse","article":"die","translation":"fincan","meaning":"İçecek içmek için kullanılan kulplu küçük kap.","example":"Die Tasse steht auf dem Tisch.","exampleTranslation":"Fincan masanın üstünde duruyor."}"#
         case "Examples":
             #"{"examples":[{"sentence":"Accept the cookies to continue.","translation":"Devam etmek için çerezleri kabul edin."},{"sentence":"You can delete cookies in your browser settings.","translation":"Çerezleri tarayıcı ayarlarından silebilirsin."}]}"#
         default:

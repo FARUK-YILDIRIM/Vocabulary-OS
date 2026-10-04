@@ -1,6 +1,4 @@
-import PhotosUI
 import SwiftUI
-import UniformTypeIdentifiers
 import VocabularyCapture
 import VocabularyUI
 
@@ -8,10 +6,6 @@ import VocabularyUI
 struct PageCaptureView: View {
     @Environment(AppModel.self) private var app
     @Bindable var model: PageCaptureModel
-    @State private var photoItem: PhotosPickerItem?
-    @State private var isImportingFile = false
-    @State private var isShowingCamera = false
-    @State private var openErrorMessage: String?
     #if DEBUG
     @State private var didLoadSample = false
     #endif
@@ -23,26 +17,7 @@ struct PageCaptureView: View {
     var body: some View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .onChange(of: photoItem) { _, item in
-                guard let item else { return }
-                photoItem = nil
-                Task { await loadPhoto(item) }
-            }
-            .fileImporter(isPresented: $isImportingFile, allowedContentTypes: [.image]) { result in
-                importFile(result)
-            }
-            #if os(iOS)
-            .fullScreenCover(isPresented: $isShowingCamera) {
-                CameraPicker { data in load(data) }
-                    .ignoresSafeArea()
-            }
-            #endif
             .sheet(isPresented: isCapturing) { captureSheet }
-            .alert("Couldn't Open the Photo", isPresented: isShowingOpenError) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(verbatim: openErrorMessage ?? "")
-            }
             #if DEBUG
             .onAppear {
                 // Not a view task: SwiftUI cancels those when the view is rebuilt, as on macOS at launch.
@@ -160,28 +135,8 @@ struct PageCaptureView: View {
         .padding(12)
     }
 
-    @ViewBuilder
     private var sourceButtons: some View {
-        #if os(iOS)
-        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            Button {
-                isShowingCamera = true
-            } label: {
-                Label("Take Photo", systemImage: "camera")
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        #endif
-        PhotosPicker(selection: $photoItem, matching: .images) {
-            Label("Choose Photo", systemImage: "photo.on.rectangle")
-        }
-        .accessibilityIdentifier("page-choose-photo")
-        Button {
-            isImportingFile = true
-        } label: {
-            Label("Choose File", systemImage: "folder")
-        }
-        .accessibilityIdentifier("page-choose-file")
+        PhotoSourceButtons(onImage: load)
     }
 
     @ViewBuilder
@@ -218,38 +173,10 @@ struct PageCaptureView: View {
         Binding(get: { model.capture != nil }, set: { if !$0 { model.capture = nil } })
     }
 
-    private var isShowingOpenError: Binding<Bool> {
-        Binding(get: { openErrorMessage != nil }, set: { if !$0 { openErrorMessage = nil } })
-    }
-
     // MARK: Loading
 
     private func load(_ data: Data) {
         zoom = 1
         Task { await model.load(data) }
-    }
-
-    private func loadPhoto(_ item: PhotosPickerItem) async {
-        do {
-            if let data = try await item.loadTransferable(type: Data.self) {
-                load(data)
-            }
-        } catch {
-            openErrorMessage = error.localizedDescription
-        }
-    }
-
-    private func importFile(_ result: Result<URL, any Error>) {
-        do {
-            let url = try result.get()
-            // Files chosen in the picker are outside the sandbox until access is started.
-            let isAccessing = url.startAccessingSecurityScopedResource()
-            defer {
-                if isAccessing { url.stopAccessingSecurityScopedResource() }
-            }
-            load(try Data(contentsOf: url))
-        } catch {
-            openErrorMessage = error.localizedDescription
-        }
     }
 }

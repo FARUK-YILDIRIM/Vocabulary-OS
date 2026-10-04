@@ -39,7 +39,7 @@ Done holds and its commit exists.
 - [x] T18 `feat(share)`: macOS share extension and Services menu — sharing from Safari needs a signed build (owner)
 - [x] T19 `feat(capture)`: page text recognition
 - [x] T20 `feat(capture)`: page capture screen
-- [ ] T21 `feat(capture)`: object capture
+- [x] T21 `feat(capture)`: object capture — on-device naming checked by the macOS self-test (the Simulator has neither the model nor the classifier)
 - [ ] Checkpoint 4: Capture
 
 ## Phase 5: Practice
