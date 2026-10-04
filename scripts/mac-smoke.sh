@@ -2,13 +2,13 @@
 # macOS smoke test for the Debug build: the app launches, shows a window, keeps running and logs no
 # errors or faults from our subsystem. Visual review of macOS screens stays a manual checkpoint step.
 #
-# Usage:   scripts/mac-smoke.sh [--self-test [capture|page|object|quiz] | --services] [launch arguments...]
+# Usage:   scripts/mac-smoke.sh [--self-test [capture|page|object|quiz|speech] | --services] [launch arguments...]
 #          (run scripts/verify.sh first)
 # Example: scripts/mac-smoke.sh -vos-preset-profile tr:en,de -vos-tab settings
 # --self-test captures a word with the real on-device model inside the app (App/Debug/SelfTest.swift),
 # which the iOS Simulator can't do because it has no model assets: from a sentence (capture, the
 # default), from a generated book page (page), by naming a photographed cup (object), or by running
-# a quiz over sample words (quiz).
+# a quiz over sample words (quiz). `speech` says a German word with the system synthesizer.
 # --services sends text through Services → "Capture in Vocabulary-OS" and expects the capture window.
 set -euo pipefail
 
@@ -24,7 +24,7 @@ services=0
 if [[ "${1:-}" == "--self-test" ]]; then
     self_test=1
     shift
-    if [[ "${1:-}" =~ ^(capture|page|object|quiz)$ ]]; then
+    if [[ "${1:-}" =~ ^(capture|page|object|quiz|speech)$ ]]; then
         self_test_mode="$1"
         shift
     fi

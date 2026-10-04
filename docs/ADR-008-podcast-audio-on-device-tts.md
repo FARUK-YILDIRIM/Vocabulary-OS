@@ -38,9 +38,16 @@ Measurements and facts:
   - Controls: play/pause, previous/next segment, speed (0.8×–1.2×).
   - The transcript highlights the current segment and the target words.
 - **Voices:**
-  - Use the best installed quality for the language.
+  - Use the best installed quality for the language (premium, then enhanced, then default), then the
+    region the language is usually heard in (en-US, pt-BR; zh-TW for Traditional Chinese).
+  - Novelty and personal voices are never used. macOS also ships robotic-sounding voices (Eddy,
+    Flo, Grandma …) at default quality without a gender; regular voices with a gender come first,
+    and a dialogue's second voice is only ever a regular one.
   - If none is installed, the player explains how to download a voice in system settings and falls
     back to the default voice.
+  - Speech plays in the `.playback` audio session on iPhone and iPad, so a listen button works with
+    the ringer off.
+  - The same player speaks single words (word detail, listening quiz questions).
 
 ## Alternatives Considered
 - **Cloud TTS (e.g. OpenAI audio):**

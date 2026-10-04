@@ -40,6 +40,7 @@ final class LibraryUITests: XCTestCase {
         let translation = app.staticTexts["insight-translation"]
         XCTAssertTrue(translation.waitForExistence(timeout: 3))
         XCTAssertEqual(translation.label, "anahtar")
+        app.buttons["insight-listen"].tap()
         attachScreenshot(of: app, named: "02-detail")
 
         app.buttons["detail-more"].tap()

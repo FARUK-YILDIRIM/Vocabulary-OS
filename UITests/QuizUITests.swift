@@ -28,6 +28,12 @@ final class QuizUITests: XCTestCase {
         while answered < 3 {
             let option = app.buttons["quiz-option-0"]
             XCTAssertTrue(option.waitForExistence(timeout: 10), "Question \(answered + 1) should appear")
+            // A listening question plays the word instead of showing it.
+            let listen = app.buttons["quiz-listen"]
+            XCTAssertTrue(listen.exists || app.staticTexts["quiz-prompt"].exists)
+            if listen.exists {
+                attachScreenshot(of: app, named: "listening-question")
+            }
             if answered == 0 {
                 attachScreenshot(of: app, named: "02-question")
             }

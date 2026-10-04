@@ -3,13 +3,14 @@ import Foundation
 import os
 import VocabularyAI
 import VocabularyCore
+import VocabularySpeech
 import VocabularyUI
 #if os(macOS)
 import AppKit
 #endif
 
-/// Debug-only end-to-end checks with the real AI provider (`-vos-self-test capture`, `page`,
-/// `object` or `quiz`).
+/// Debug-only end-to-end checks with the real AI provider and system services (`-vos-self-test
+/// capture`, `page`, `object`, `quiz` or `speech`).
 ///
 /// The iOS Simulator has no on-device model assets, so `scripts/mac-smoke.sh --self-test` runs these
 /// in the macOS build. Each captures a word, explains it, saves it, logs the outcome and quits. UI
@@ -27,6 +28,8 @@ enum SelfTest {
             await captureObject(app: app)
         case "quiz":
             await quiz(app: app)
+        case "speech":
+            await speech(app: app)
         default:
             return
         }
@@ -150,6 +153,25 @@ enum SelfTest {
             logger.notice("Self-test quiz passed: \(summary, privacy: .public)")
         } else {
             logger.error("Self-test quiz failed: \(summary, privacy: .public)")
+        }
+    }
+
+    /// Says a German word with the system synthesizer and waits for it to finish.
+    private static func speech(app: AppModel) async {
+        guard let voice = VoiceCatalog.installed().bestVoice(for: .german) else {
+            logger.error("Self-test speech failed: no German voice is installed")
+            return
+        }
+        let start = ContinuousClock.now
+        app.speech.speak("Die Tasse", language: .german)
+        while app.speech.state != .idle, ContinuousClock.now - start < .seconds(10) {
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        let elapsed = ContinuousClock.now - start
+        if app.speech.state == .idle {
+            logger.notice("Self-test speech passed: “Die Tasse” spoken by \(voice.name, privacy: .public) (\(voice.language, privacy: .public)) in \(elapsed.formatted(.units(allowed: [.seconds], fractionalPart: .show(length: 2))), privacy: .public)")
+        } else {
+            logger.error("Self-test speech failed: the synthesizer didn't finish within 10 s")
         }
     }
 

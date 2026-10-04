@@ -49,7 +49,7 @@ swift test --package-path Packages/VocabularyKit    # package tests on the Mac h
 scripts/verify.sh                                   # full gate: generate + tests + iOS Simulator + macOS builds
 scripts/ui-test.sh [Class/test]                     # XCUITests on iPhone 17 (VOS_UI_TEST_DEVICE for iPad); screenshots in .build/ui-tests
 scripts/mac-smoke.sh [-vos-preset-profile tr:en,de] # macOS Debug build launches, shows a window, logs no errors
-scripts/mac-smoke.sh --self-test [capture|page|object|quiz]  # the macOS app with the real on-device model
+scripts/mac-smoke.sh --self-test [capture|page|object|quiz|speech]  # the macOS app with the real model and voices
 scripts/mac-smoke.sh --services                     # Services → "Capture in Vocabulary-OS" opens the capture window
 swift run --package-path Packages/VocabularyKit vos-eval insight|quiz   # live on-device prompt evaluation
 ```

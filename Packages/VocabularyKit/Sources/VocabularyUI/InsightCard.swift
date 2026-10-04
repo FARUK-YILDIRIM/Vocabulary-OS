@@ -5,10 +5,13 @@ import VocabularyCore
 public struct InsightCard: View {
     private let insight: WordInsight
     private let providerName: String?
+    private let onListen: (() -> Void)?
 
-    public init(insight: WordInsight, providerName: String? = nil) {
+    /// - Parameter onListen: shows a button next to the word that says it.
+    public init(insight: WordInsight, providerName: String? = nil, onListen: (() -> Void)? = nil) {
         self.insight = insight
         self.providerName = providerName
+        self.onListen = onListen
     }
 
     public var body: some View {
@@ -18,6 +21,18 @@ public struct InsightCard: View {
                     Text(verbatim: insight.term).font(.title2.bold())
                     if let details = headwordDetails {
                         Text(verbatim: details).foregroundStyle(.secondary)
+                    }
+                    if let onListen {
+                        Button(action: onListen) {
+                            Label {
+                                Text("Listen", bundle: .module)
+                            } icon: {
+                                Image(systemName: "speaker.wave.2")
+                            }
+                            .labelStyle(.iconOnly)
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityIdentifier("insight-listen")
                     }
                 }
                 Text(verbatim: insight.translation)

@@ -5,6 +5,7 @@ import VocabularyUI
 /// A quiz: one question at a time, immediate feedback, and a summary of what to repeat (SPEC C8).
 /// On a Mac, 1–4 pick an answer and Return goes on.
 struct QuizSessionView: View {
+    @Environment(AppModel.self) private var app
     let model: QuizSessionModel
     let close: () -> Void
 
@@ -61,10 +62,23 @@ struct QuizSessionView: View {
                     Text(question.kind.instruction)
                         .font(.headline)
                         .foregroundStyle(.secondary)
-                    Text(verbatim: question.prompt)
-                        .font(question.kind == .cloze ? .title2 : .largeTitle.bold())
-                        .multilineTextAlignment(.center)
-                        .accessibilityIdentifier("quiz-prompt")
+                    if question.kind == .listening && model.phase == .asking {
+                        // The word is heard, not read, until the learner answers.
+                        Button {
+                            listen(to: question)
+                        } label: {
+                            Label("Play Again", systemImage: "speaker.wave.2.fill")
+                                .font(.title2)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                        .accessibilityIdentifier("quiz-listen")
+                    } else {
+                        Text(verbatim: question.prompt)
+                            .font(question.kind == .cloze ? .title2 : .largeTitle.bold())
+                            .multilineTextAlignment(.center)
+                            .accessibilityIdentifier("quiz-prompt")
+                    }
                     VStack(spacing: 10) {
                         ForEach(question.options.indices, id: \.self) { index in
                             optionButton(question, index: index)
@@ -97,6 +111,15 @@ struct QuizSessionView: View {
             }
         }
         .id(question.id)
+        .task(id: question.id) {
+            if question.kind == .listening {
+                listen(to: question)
+            }
+        }
+    }
+
+    private func listen(to question: QuizQuestion) {
+        app.speech.speak(question.prompt, language: model.language)
     }
 
     private func optionButton(_ question: QuizQuestion, index: Int) -> some View {

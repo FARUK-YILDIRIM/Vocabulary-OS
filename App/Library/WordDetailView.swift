@@ -26,7 +26,11 @@ struct WordDetailView: View {
                         .accessibilityLabel(Text("Captured photo"))
                 }
 
-                InsightCard(insight: entry.insight, providerName: app.providerName(for: entry.insightProviderID))
+                InsightCard(insight: entry.insight, providerName: app.providerName(for: entry.insightProviderID)) {
+                    if let language = entry.language {
+                        app.speech.speak(entry.term, language: language)
+                    }
+                }
 
                 if isRegenerating {
                     ProgressView { Text("Explaining again…") }

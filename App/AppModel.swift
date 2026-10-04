@@ -5,6 +5,7 @@ import SwiftData
 import VocabularyAI
 import VocabularyCore
 import VocabularyData
+import VocabularySpeech
 
 /// Owns the app's long-lived dependencies and hands them to views through the environment.
 @Observable
@@ -14,6 +15,8 @@ final class AppModel {
     let repository: WordRepository
     let reviews: ReviewRepository
     let quizzes: QuizRepository
+    /// Speaks words, listening questions and podcasts with on-device voices (ADR-008).
+    let speech = SpeechPlayer()
     let secrets: any SecretStore
     let router: ProviderRouter
     /// Words saved in the Share extension, waiting to be imported; `nil` without an App Group.

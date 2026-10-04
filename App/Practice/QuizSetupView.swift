@@ -3,6 +3,7 @@ import SwiftUI
 import VocabularyAI
 import VocabularyCore
 import VocabularyData
+import VocabularySpeech
 import VocabularyUI
 
 /// Quiz setup: a language, which words, and how many questions (SPEC C8). A section of the
@@ -20,8 +21,6 @@ struct QuizSetupView: View {
     @State private var languageWordCount = 0
     @State private var errorMessage: String?
 
-    /// Listening questions join once the app can speak words (task T26).
-    private static let kinds: [QuizKind] = [.meaning, .reverse, .cloze]
 
     var body: some View {
         Section {
@@ -85,6 +84,12 @@ struct QuizSetupView: View {
         }
     }
 
+    /// Listening questions need a voice for the language.
+    private func kinds(for language: LanguageCode) -> [QuizKind] {
+        let hasVoice = VoiceCatalog.installed().bestVoice(for: language) != nil
+        return [.meaning, .reverse, .cloze] + (hasVoice ? [.listening] : [])
+    }
+
     private var canStart: Bool {
         language != nil && languageWordCount >= QuizRepository.minimumWords && matching > 0
     }
@@ -112,7 +117,7 @@ struct QuizSetupView: View {
                 language: language,
                 words: try app.quizzes.words(language: language, source: source, limit: length),
                 library: try app.quizzes.library(),
-                kinds: Self.kinds,
+                kinds: kinds(for: language),
                 source: source,
                 service: QuizService(app.makeInsightService()),
                 reviews: app.reviews,
