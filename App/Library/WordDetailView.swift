@@ -10,6 +10,7 @@ struct WordDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var entry: VocabularyEntry
     @State private var isEditing = false
+    @State private var isChoosingLists = false
     @State private var isConfirmingDelete = false
     @State private var isRegenerating = false
     @State private var regenerateError: String?
@@ -61,6 +62,7 @@ struct WordDetailView: View {
                         Task { await regenerate() }
                     }
                     .disabled(isRegenerating)
+                    Button("Lists…", systemImage: "list.bullet") { isChoosingLists = true }
                     Divider()
                     Button("Delete", systemImage: "trash", role: .destructive) { isConfirmingDelete = true }
                 } label: {
@@ -71,6 +73,9 @@ struct WordDetailView: View {
         }
         .sheet(isPresented: $isEditing) {
             WordEditView(entry: entry)
+        }
+        .sheet(isPresented: $isChoosingLists) {
+            WordListsView(entry: entry)
         }
         .confirmationDialog(
             String(localized: "Delete “\(entry.term)”?"),

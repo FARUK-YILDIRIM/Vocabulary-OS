@@ -112,7 +112,8 @@ Each capability can be built and tested on its own. Build order goes top to bott
   - review statistics.
 - Word actions: edit any field, favorite, add to a list, regenerate the insight, listen (TTS),
   delete.
-- I can create named lists within a language.
+- I can create named lists within a language, from the Library's Lists or from a word's page, and
+  delete a list without losing its words.
 - Saving a word whose lemma already exists in that language offers to open the existing word
   instead.
 - Everything works offline and syncs through my private iCloud database when online.
@@ -221,6 +222,12 @@ Each capability can be built and tested on its own. Build order goes top to bott
 - A list, or all words of a language, exports as a `.vocabularyos` file (versioned JSON) through the
   share sheet (AirDrop, Messages, Mail, Files). Opening the file imports it. Words with the same lemma
   and language are skipped.
+- The file holds each word's explanation: the term, its dictionary form, the sentence, the
+  translation, meaning, examples, other meanings and which AI explained it. Review history, photos
+  and favorites stay on my devices.
+- Before importing, I see how many words are new and how many I already have. Saved words stay as
+  they are. A named list is created, or my list with that name is reused, and gets all the file's
+  words. If the language isn't one I'm learning, it's added.
 - Words can also export as CSV, for spreadsheets or Anki.
 - *Accept when:* an export → import round trip is lossless; importing twice adds nothing; API keys
   and review history are never exported.

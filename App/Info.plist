@@ -40,6 +40,49 @@
 			</array>
 		</dict>
 	</array>
+	<!-- Word lists shared as .vocabularyos files open in the app, which imports them (SPEC C11). -->
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>app.vocabularyos.wordlist</string>
+			<key>UTTypeDescription</key>
+			<string>Vocabulary-OS Word List</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.json</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>vocabularyos</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/vnd.vocabularyos.wordlist+json</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Vocabulary-OS Word List</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>app.vocabularyos.wordlist</string>
+			</array>
+		</dict>
+	</array>
+	<!-- Opened files are read where they are and imported; the app never changes them. -->
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<!-- Podcasts keep speaking when the screen locks or another app comes forward (ADR-008). macOS ignores it. -->
 	<key>UIBackgroundModes</key>
 	<array>

@@ -160,8 +160,13 @@ final class AppModel {
         await UNUserNotificationCenter.current().notificationSettings().authorizationStatus == .denied
     }
 
-    /// Opens a `vocabularyos://` link: a plan's link starts its activity (SPEC C10).
+    /// Opens a `vocabularyos://` link, where a plan's link starts its activity (SPEC C10), or a
+    /// `.vocabularyos` word list file to import (SPEC C11).
     func open(_ url: URL) {
+        if url.isFileURL {
+            openWordList(at: url)
+            return
+        }
         guard let link = DeepLink(url: url) else { return }
         switch link {
         case .plan(let id):
@@ -232,6 +237,7 @@ struct LaunchOptions {
     static let sampleObject = "vos-sample-object"
     static let podcast = "vos-podcast"
     static let remindIn = "vos-remind-in"
+    static let importSample = "vos-import-sample"
 
     private let defaults: UserDefaults
 
@@ -267,6 +273,9 @@ struct LaunchOptions {
     var remindInSeconds: Int? {
         defaults.object(forKey: Self.remindIn) == nil ? nil : defaults.integer(forKey: Self.remindIn)
     }
+
+    /// Opens a sample word list file at launch, as if the learner had opened it (Debug builds only).
+    var importsSample: Bool { defaults.bool(forKey: Self.importSample) }
 
     /// Debug-only end-to-end check to run at launch, e.g. `capture` (see `SelfTest`).
     var selfTest: String? { defaults.string(forKey: Self.selfTest) }

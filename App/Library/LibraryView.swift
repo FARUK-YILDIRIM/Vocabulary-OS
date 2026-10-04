@@ -3,16 +3,19 @@ import SwiftUI
 import VocabularyCore
 import VocabularyData
 
-/// Saved words of one learning language, with filters, search and sort (SPEC C4).
+/// Saved words of one learning language, with filters, search and sort (SPEC C4), its lists, and
+/// sharing and import (SPEC C11).
 struct LibraryView: View {
     @Environment(AppModel.self) private var app
     @State private var language: LanguageCode?
     @State private var filter: LibraryFilter = .all
     @State private var sort: LibrarySort = .recent
     @State private var search = ""
+    @State private var path = NavigationPath()
+    @State private var isImporting = false
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             Group {
                 if let current {
                     LibraryList(language: current, filter: filter, sort: sort, search: search) {
@@ -26,8 +29,27 @@ struct LibraryView: View {
             .navigationDestination(for: VocabularyEntry.self) { entry in
                 WordDetailView(entry: entry)
             }
+            .navigationDestination(for: LibraryRoute.self) { route in
+                switch route {
+                case .lists(let language): ListsView(language: language)
+                case .list(let list): ListDetailView(list: list)
+                }
+            }
             .searchable(text: $search, prompt: Text("Search words or translations"))
+            .fileImporter(isPresented: $isImporting, allowedContentTypes: [.vocabularyOSWordList]) { result in
+                if case .success(let url) = result {
+                    app.openWordList(at: url)
+                }
+            }
             .toolbar {
+                if let current {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button("Lists", systemImage: "list.bullet.rectangle") {
+                            path.append(LibraryRoute.lists(current))
+                        }
+                        .accessibilityIdentifier("library-lists")
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Picker(selection: $sort) {
@@ -42,6 +64,29 @@ struct LibraryView: View {
                         Label("Sort", systemImage: "arrow.up.arrow.down")
                     }
                     .accessibilityIdentifier("library-sort")
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
+                        if let current {
+                            let name = String(localized: "\(current.localizedName()) Words")
+                            ShareLink(
+                                item: WordListExport(contents: .language(current), name: name, container: app.container),
+                                preview: SharePreview(Text(verbatim: name))
+                            ) {
+                                Label("Share All \(current.localizedName()) Words", systemImage: "square.and.arrow.up")
+                            }
+                            ShareLink(
+                                item: WordListCSVExport(contents: .language(current), name: name, container: app.container),
+                                preview: SharePreview(Text(verbatim: name))
+                            ) {
+                                Label("Export as CSV", systemImage: "tablecells")
+                            }
+                        }
+                        Button("Import Word List…", systemImage: "square.and.arrow.down") { isImporting = true }
+                    } label: {
+                        Label("Share and Import", systemImage: "ellipsis.circle")
+                    }
+                    .accessibilityIdentifier("library-more")
                 }
             }
         }
@@ -186,7 +231,7 @@ private struct LibraryList<Header: View>: View {
     }
 }
 
-private struct WordRow: View {
+struct WordRow: View {
     let entry: VocabularyEntry
 
     var body: some View {

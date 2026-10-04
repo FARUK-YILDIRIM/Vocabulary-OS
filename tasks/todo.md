@@ -63,7 +63,7 @@ Done holds and its commit exists.
 
 ## Phase 6: Plans, sharing, polish
 - [x] T29 `feat(plans)`: study plans and notifications — the reminder scheduler lives in VocabularyData so the package tests cover it
-- [ ] T30 `feat(sharing)`: export and import
+- [x] T30 `feat(sharing)`: export and import — with the list management deferred from T12
 - [ ] T31 `feat(i18n)`: Turkish localization
 - [ ] T32 `feat(ui)`: accessibility and polish
   - Noticed while building T20:
@@ -84,4 +84,6 @@ Done holds and its commit exists.
       sync, so changes from other devices arrive only while the app is open;
     - `scripts/mac-smoke.sh` counts only windows on the current Space, so it reports no window while
       another app is full screen.
+  - Noticed while building T30: the macOS build warns that `NSCameraUsageDescription` is empty (it is
+    set for iOS only in project.yml), and `scripts/verify.sh` only catches warnings in source files.
 - [ ] Checkpoint 6: Ship

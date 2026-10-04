@@ -78,6 +78,10 @@ The first version of this ADR assumed SwiftData supports CloudKit sharing throug
    - A word list or a language's words exports as a versioned `.vocabularyos` JSON document through
      `ShareLink`/the share sheet. Opening it imports the words, skipping duplicates by lemma and
      language.
+   - The file type is `app.vocabularyos.wordlist` (extension `.vocabularyos`, conforming to
+     `public.json`), exported by the app. Files are read where they are and never changed.
+   - A file says what it is (`format`) and which version wrote it; a newer version is refused
+     rather than half read. Photos aren't exported: they can show the learner's surroundings.
    - CSV export covers spreadsheets and Anki.
    - Nothing leaves the device unless the user exports it. Review history and keys are never
      exported.

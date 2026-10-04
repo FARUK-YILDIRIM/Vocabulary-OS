@@ -45,6 +45,7 @@ struct VocabularyOSApp: App {
                 #if DEBUG
                 .task { await SelfTest.runIfRequested(app: model) }
                 .task { await ReminderTest.sendIfRequested(app: model) }
+                .task { ImportTest.openSampleIfRequested(app: model) }
                 #endif
         }
         .onChange(of: scenePhase, initial: true) { _, phase in

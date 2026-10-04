@@ -536,9 +536,9 @@ because its files are tiny and only work together.
     language, and import with de-duplication.
   - CSV export.
 - **Acceptance criteria:**
-  - [ ] Round-trip and duplicate tests.
-  - [ ] Keys and review logs are never exported (test).
-  - [ ] Opening a file in the app imports it.
+  - [x] Round-trip and duplicate tests.
+  - [x] Keys and review logs are never exported (test).
+  - [x] Opening a file in the app imports it.
 - **Verification:** `swift test`; Simulator walkthrough.
 - **Dependencies:** T12.
 - **Files:** `Sources/VocabularyData/WordListDocument.swift`, `CSVExporter.swift`,

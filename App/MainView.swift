@@ -28,6 +28,18 @@ struct MainView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
+        .sheet(item: $navigation.pendingImport) { pending in
+            ImportView(pending: pending)
+        }
+        .alert("Couldn't Open the File", isPresented: isShowingImportError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(verbatim: app.navigation.importError ?? "")
+        }
+    }
+
+    private var isShowingImportError: Binding<Bool> {
+        Binding(get: { app.navigation.importError != nil }, set: { if !$0 { app.navigation.importError = nil } })
     }
 }
 

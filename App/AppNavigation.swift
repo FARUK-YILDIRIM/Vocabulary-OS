@@ -8,6 +8,10 @@ final class AppNavigation {
     var tab: AppTab
     /// A plan whose activity should start.
     private(set) var startingPlan: StudyPlan?
+    /// A word list file the learner opened, waiting for them to confirm.
+    var pendingImport: PendingImport?
+    /// Why an opened file couldn't be read.
+    var importError: String?
 
     init(tab: AppTab) {
         self.tab = tab
