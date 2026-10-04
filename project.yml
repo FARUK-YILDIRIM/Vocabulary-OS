@@ -57,7 +57,8 @@ targets:
         "INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphone*]": YES
         "INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphone*]": YES
         "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphone*]": YES
-        "INFOPLIST_KEY_NSCameraUsageDescription[sdk=iphone*]": "Vocabulary-OS uses the camera to photograph book pages and objects, so you can capture their words."
+        # Set for macOS too, where the build otherwise warns that the value is empty.
+        INFOPLIST_KEY_NSCameraUsageDescription: "Vocabulary-OS uses the camera to photograph book pages and objects, so you can capture their words."
         "INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone[sdk=iphone*]": UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
         "INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad[sdk=iphone*]": UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
         TARGETED_DEVICE_FAMILY: "1,2"

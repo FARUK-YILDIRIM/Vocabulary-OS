@@ -4,7 +4,8 @@
 #   2. run the VocabularyKit package tests on the Mac host
 #   3. build the app for the iOS Simulator and for macOS
 #   4. sync the String Catalogs with both builds, and check every string has a Turkish translation
-# Fails on any error, and on any compiler warning that points at project sources.
+# Fails on any error, on any compiler warning that points at project sources, and on any warning
+# about one of our targets, such as a build setting or an Info.plist value.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -17,10 +18,10 @@ mkdir -p "$LOG_DIR"
 step() { printf '\n\033[1m==> %s\033[0m\n' "$*"; }
 fail() { printf '\033[31merror:\033[0m %s\n' "$*" >&2; exit 1; }
 
-# Only warnings from our own sources count; SDK and toolchain noise is ignored.
+# Only warnings from our own sources and targets count; SDK and toolchain noise is ignored.
 check_warnings() {
     local log="$1" label="$2" found
-    found="$(grep -E "^($ROOT/)?(App|Extensions|UITests|Packages/VocabularyKit/(Sources|Tests))/[^:]+:[0-9]+:[0-9]+: warning:" "$log" | sort -u || true)"
+    found="$(grep -E "^($ROOT/)?(App|Extensions|UITests|Packages/VocabularyKit/(Sources|Tests))/[^:]+:[0-9]+:[0-9]+: warning:|^warning: .*\(in target '[^']+' from project '(VocabularyOS|VocabularyKit)'\)" "$log" | sort -u || true)"
     if [[ -n "$found" ]]; then
         printf '%s\n' "$found" >&2
         fail "$label produced warnings in project code"

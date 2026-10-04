@@ -77,6 +77,7 @@ Done holds and its commit exists.
       sync, so changes from other devices arrive only while the app is open;
     - `scripts/mac-smoke.sh` counts only windows on the current Space, so it reports no window while
       another app is full screen.
-  - Noticed while building T30: the macOS build warns that `NSCameraUsageDescription` is empty (it is
-    set for iOS only in project.yml), and `scripts/verify.sh` only catches warnings in source files.
+  - Noticed while building T30, done early because T33's verify needed it: the macOS build warned
+    that `NSCameraUsageDescription` is empty (it was set for iOS only in project.yml), and
+    `scripts/verify.sh` only caught warnings in source files.
 - [ ] Checkpoint 6: Ship
