@@ -106,8 +106,18 @@ xcodegen generate
 
 The build then uses the App Group `group.<prefix>` and the iCloud container `iCloud.<prefix>`.
 With automatic signing, Xcode registers both for your team; if it can't, create them in your
-developer account. Before you distribute a build, deploy the CloudKit schema to production in the
-CloudKit Console.
+developer account. A new container can take a few minutes before CloudKit knows it.
+
+TestFlight and App Store builds use CloudKit's production environment. Before you distribute a
+build, create every record type and field in the development environment, then deploy the schema
+to production in the CloudKit Console:
+
+```bash
+scripts/mac-smoke.sh --self-test cloudkit-schema   # needs the signed macOS build from verify.sh
+```
+
+SwiftData alone creates only the fields it has saved values for, so a field that stayed empty
+during development would be missing in production.
 
 ## Development
 

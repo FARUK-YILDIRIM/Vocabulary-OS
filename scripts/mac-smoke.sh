@@ -2,7 +2,7 @@
 # macOS smoke test for the Debug build: the app launches, shows a window, keeps running and logs no
 # errors or faults from our subsystem. Visual review of macOS screens stays a manual checkpoint step.
 #
-# Usage:   scripts/mac-smoke.sh [--self-test [capture|page|object|quiz|speech|podcast] | --services | --screenshot FILE]
+# Usage:   scripts/mac-smoke.sh [--self-test [capture|page|object|quiz|speech|podcast|cloudkit-schema] | --services | --screenshot FILE]
 #                               [launch arguments...]
 #          (run scripts/verify.sh first)
 # Example: scripts/mac-smoke.sh -vos-preset-profile tr:en,de -vos-tab settings
@@ -10,7 +10,10 @@
 # which the iOS Simulator can't do because it has no model assets: from a sentence (capture, the
 # default), from a generated book page (page), by naming a photographed cup (object), or by running
 # a quiz over sample words (quiz). `speech` says a German word with the system synthesizer; `podcast`
-# writes a dialogue over sample words and plays its first lines.
+# writes a dialogue over sample words and plays its first lines. `cloudkit-schema` creates every
+# record type and field in CloudKit's development environment; it needs a signed build
+# (Config/Signing.local.xcconfig), and the schema is then deployed to production in the CloudKit
+# Console before a TestFlight build.
 # --services sends text through Services → "Capture in Vocabulary-OS" and expects the capture window.
 # --screenshot FILE also saves the app's window as a PNG for review; the terminal needs the Screen
 # Recording permission. Example: scripts/mac-smoke.sh --screenshot player.png -vos-preset-profile tr:en,de
@@ -30,7 +33,7 @@ screenshot=""
 if [[ "${1:-}" == "--self-test" ]]; then
     self_test=1
     shift
-    if [[ "${1:-}" =~ ^(capture|page|object|quiz|speech|podcast)$ ]]; then
+    if [[ "${1:-}" =~ ^(capture|page|object|quiz|speech|podcast|cloudkit-schema)$ ]]; then
         self_test_mode="$1"
         shift
     fi
@@ -54,9 +57,10 @@ logged_problems() {
 
 if [[ $self_test -eq 1 ]]; then
     open -n "$APP" --args -ui-testing YES -vos-preset-profile tr:en,de -vos-self-test "$self_test_mode" "$@"
-    # Half-second ticks: 30 s, or 3 minutes for a podcast, which the model writes in several parts.
+    # Half-second ticks: 30 s, or 3 minutes for a podcast, which the model writes in several parts,
+    # and for the CloudKit schema, which goes over the network.
     ticks=60
-    [[ "$self_test_mode" == podcast ]] && ticks=360
+    [[ "$self_test_mode" == podcast || "$self_test_mode" == cloudkit-schema ]] && ticks=360
     for _ in $(seq 1 "$ticks"); do
         pgrep -f "$BINARY" >/dev/null || break
         sleep 0.5

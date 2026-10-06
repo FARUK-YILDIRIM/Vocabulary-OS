@@ -50,6 +50,7 @@ scripts/verify.sh                                   # full gate: generate + test
 scripts/ui-test.sh [Class/test]                     # XCUITests on iPhone 17 (VOS_UI_TEST_DEVICE for iPad); screenshots in .build/ui-tests
 scripts/mac-smoke.sh [-vos-preset-profile tr:en,de] # macOS Debug build launches, shows a window, logs no errors
 scripts/mac-smoke.sh --self-test [capture|page|object|quiz|speech|podcast]  # the macOS app with the real model and voices
+scripts/mac-smoke.sh --self-test cloudkit-schema    # signed builds: every record type and field in CloudKit's development environment
 scripts/mac-smoke.sh --services                     # Services → "Capture in Vocabulary-OS" opens the capture window
 scripts/mac-smoke.sh --screenshot out.png [args]    # also saves the window (Screen Recording permission), e.g. -vos-podcast newest
 scripts/strings.sh sync [DERIVED_DATA] | check      # String Catalogs: add the strings a build found; check Turkish

@@ -11,7 +11,8 @@ import AppKit
 #endif
 
 /// Debug-only end-to-end checks with the real AI provider and system services (`-vos-self-test
-/// capture`, `page`, `object`, `quiz`, `speech` or `podcast`).
+/// capture`, `page`, `object`, `quiz`, `speech` or `podcast`), and `cloudkit-schema`, which creates
+/// the CloudKit development schema for a signed build.
 ///
 /// The iOS Simulator has no on-device model assets, so `scripts/mac-smoke.sh --self-test` runs these
 /// in the macOS build. Each runs one flow, logs the outcome and quits. UI tests cover the same flows
@@ -33,12 +34,25 @@ enum SelfTest {
             await speech(app: app)
         case "podcast":
             await podcast(app: app)
+        case "cloudkit-schema":
+            await initializeCloudKitSchema()
         default:
             return
         }
         #if os(macOS)
         NSApp.terminate(nil)
         #endif
+    }
+
+    /// Creates every record type and field in CloudKit's development environment, so the schema can
+    /// be deployed to production before a TestFlight build (`CloudKitSchemaSetup`).
+    private static func initializeCloudKitSchema() async {
+        do {
+            try await CloudKitSchemaSetup.initialize()
+            logger.notice("Self-test cloudkit-schema passed: the development environment has every record type and field")
+        } catch {
+            logger.error("Self-test cloudkit-schema failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     /// Captures "cookies" from a sentence.

@@ -107,8 +107,9 @@ Low, Info.
 
 ## Before a store release
 
-1. Put the Team ID in `Config/Signing.local.xcconfig`, build signed, and deploy the CloudKit schema
-   to production.
+1. Put the Team ID in `Config/Signing.local.xcconfig`, build signed, create the CloudKit schema with
+   `scripts/mac-smoke.sh --self-test cloudkit-schema`, and deploy it to production in the CloudKit
+   Console.
 2. Sync between two devices signed in to the same iCloud account (success criterion 11).
 3. Try one key per provider family: an OpenAI-compatible provider and Anthropic. None of the
    providers has been tried with a real key.
