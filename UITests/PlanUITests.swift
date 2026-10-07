@@ -103,6 +103,21 @@ final class PlanUITests: XCTestCase {
         attachScreenshot(of: app, named: "04-quiz")
     }
 
+    func testTappingAReminderInTheBackgroundStartsItsQuiz() {
+        // Reminders usually arrive with the app in the background. Tapping one then makes UIKit
+        // update the app's snapshot when the delegate finishes, which must happen on the main thread.
+        let app = launch(tab: "today", ["-vos-remind-in", "10"])
+        allowNotificationsIfAsked()
+        XCUIDevice.shared.press(.home)
+        let reminder = springboard.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS %@", "Quiz · English")).firstMatch
+        XCTAssertTrue(reminder.waitForExistence(timeout: 30), "The plan's reminder should arrive")
+        reminder.tap()
+        XCTAssertTrue(app.buttons["quiz-option-0"].waitForExistence(timeout: 10), "Tapping the reminder starts the quiz")
+        attachScreenshot(of: app, named: "05-quiz-from-background")
+        XCTAssertEqual(app.state, .runningForeground)
+    }
+
     func testPlanLinksStartTheirActivity() throws {
         let app = launch(tab: "library")
         app.open(try XCTUnwrap(URL(string: quizPlanLink)))

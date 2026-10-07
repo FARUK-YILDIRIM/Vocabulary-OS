@@ -85,4 +85,4 @@ Done holds and its commit exists.
 ## After the first TestFlight build
 The owner's reports from TestFlight build 0.1.0 (1) on an iPhone 11 with iOS 27, 2026-10-07.
 - [x] `fix(data)`: a provider chosen before iCloud's first download went back to the on-device model; DeepSeek took effect only after the app was opened again
-- [ ] `fix(plans)`: tapping a quiz plan's reminder crashed the app — waiting for the crash report
+- [x] `fix(plans)`: tapping a quiz plan's reminder crashed the app when it was in the background — the reminder's completion handler ran off the main thread
