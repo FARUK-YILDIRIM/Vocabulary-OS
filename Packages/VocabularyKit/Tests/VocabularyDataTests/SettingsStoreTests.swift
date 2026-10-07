@@ -142,10 +142,119 @@ import VocabularyCore
         backing.onExternalChange = { changed = $0 }
 
         cloud.values["k"] = Data("remote".utf8)
-        backing.handleExternalChange(changedKeys: ["k"])
+        backing.handleExternalChange(changedKeys: ["k"], reason: .server)
 
         #expect(changed == ["k"])
         #expect(defaults.data(forKey: "vos.k") == Data("remote".utf8))
+    }
+
+    // iCloud discards what a device writes before its first download from iCloud, which can take a
+    // while after the app's first launch, and then reports the keys as changed.
+
+    @Test func aProviderChosenBeforeICloudsFirstDownloadStaysChosen() {
+        let cloud = FakeCloudStore()
+        let defaults = makeDefaults()
+        let backing = UbiquitousKeyValueBacking(cloud: cloud, mirror: defaults)
+        let store = SettingsStore(backing: backing)
+        let deepSeek = AIProviderSelection(providerID: "deepseek", modelID: "deepseek-chat")
+        store.hasAcknowledgedCloudPrivacy = true
+        store.aiSelection = deepSeek
+
+        // The download had nothing for this app, so both writes are gone from iCloud.
+        cloud.values.removeAll()
+        backing.handleExternalChange(changedKeys: [SettingsStore.Key.cloudPrivacy, SettingsStore.Key.aiSelection], reason: .initialSync)
+
+        #expect(store.aiSelection == deepSeek)
+        #expect(store.hasAcknowledgedCloudPrivacy)
+        let relaunched = SettingsStore(backing: UbiquitousKeyValueBacking(cloud: cloud, mirror: defaults))
+        #expect(relaunched.aiSelection == deepSeek, "written to iCloud again")
+    }
+
+    @Test func whatThisDeviceChoseWinsOverTheFirstDownload() {
+        let cloud = FakeCloudStore()
+        let defaults = makeDefaults()
+        let backing = UbiquitousKeyValueBacking(cloud: cloud, mirror: defaults)
+        var changed: [String] = []
+        backing.onExternalChange = { changed = $0 }
+        backing.setData(Data("chosen here".utf8), forKey: "k")
+
+        // Another device's older value arrives with the download, whether or not the key is listed.
+        cloud.values["k"] = Data("other device".utf8)
+        backing.handleExternalChange(changedKeys: [], reason: .initialSync)
+
+        #expect(cloud.values["k"] == Data("chosen here".utf8))
+        #expect(backing.data(forKey: "k") == Data("chosen here".utf8))
+        #expect(changed.isEmpty)
+    }
+
+    @Test func aValueSavedInAnEarlierLaunchBeforeTheDownloadIsUploaded() {
+        // The app was closed before the download finished; only the mirror kept the value.
+        let cloud = FakeCloudStore()
+        let defaults = makeDefaults()
+        defaults.set(Data("saved earlier".utf8), forKey: "vos.k")
+        let backing = UbiquitousKeyValueBacking(cloud: cloud, mirror: defaults)
+        var changed: [String] = []
+        backing.onExternalChange = { changed = $0 }
+
+        backing.handleExternalChange(changedKeys: ["k"], reason: .initialSync)
+
+        #expect(cloud.values["k"] == Data("saved earlier".utf8))
+        #expect(defaults.data(forKey: "vos.k") == Data("saved earlier".utf8))
+        #expect(changed.isEmpty)
+    }
+
+    @Test func theFirstDownloadBringsSettingsMadeOnOtherDevices() {
+        let cloud = FakeCloudStore()
+        let defaults = makeDefaults()
+        defaults.set(Data("seen before".utf8), forKey: "vos.k")
+        let backing = UbiquitousKeyValueBacking(cloud: cloud, mirror: defaults)
+        var changed: [String] = []
+        backing.onExternalChange = { changed = $0 }
+
+        cloud.values["k"] = Data("other device".utf8)
+        backing.handleExternalChange(changedKeys: ["k"], reason: .initialSync)
+
+        #expect(defaults.data(forKey: "vos.k") == Data("other device".utf8))
+        #expect(changed == ["k"])
+    }
+
+    @Test func anotherICloudAccountsSettingsReplaceThisDevicesChoices() {
+        let cloud = FakeCloudStore()
+        let defaults = makeDefaults()
+        let backing = UbiquitousKeyValueBacking(cloud: cloud, mirror: defaults)
+        var changed: [String] = []
+        backing.onExternalChange = { changed = $0 }
+        backing.setData(Data("first account".utf8), forKey: "k")
+
+        cloud.values["k"] = nil
+        backing.handleExternalChange(changedKeys: ["k"], reason: .accountChange)
+
+        #expect(backing.data(forKey: "k") == nil)
+        #expect(changed == ["k"])
+        // The other account's values aren't this device's choices, so a later download keeps them.
+        backing.handleExternalChange(changedKeys: [], reason: .initialSync)
+        #expect(cloud.values["k"] == nil)
+    }
+
+    @Test func aChangeFromAnotherDeviceIsNotUndoneByALaterDownload() {
+        let cloud = FakeCloudStore()
+        let defaults = makeDefaults()
+        let backing = UbiquitousKeyValueBacking(cloud: cloud, mirror: defaults)
+        backing.setData(Data("chosen here".utf8), forKey: "k")
+
+        cloud.values["k"] = Data("newer, from another device".utf8)
+        backing.handleExternalChange(changedKeys: ["k"], reason: .server)
+        backing.handleExternalChange(changedKeys: [], reason: .initialSync)
+
+        #expect(cloud.values["k"] == Data("newer, from another device".utf8))
+    }
+
+    @Test func readsTheReasonICloudGives() {
+        #expect(ExternalChangeReason(code: NSUbiquitousKeyValueStoreServerChange) == .server)
+        #expect(ExternalChangeReason(code: NSUbiquitousKeyValueStoreInitialSyncChange) == .initialSync)
+        #expect(ExternalChangeReason(code: NSUbiquitousKeyValueStoreAccountChange) == .accountChange)
+        #expect(ExternalChangeReason(code: NSUbiquitousKeyValueStoreQuotaViolationChange) == .server)
+        #expect(ExternalChangeReason(code: nil) == .server)
     }
 }
 

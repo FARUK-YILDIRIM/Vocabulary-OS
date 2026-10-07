@@ -46,6 +46,13 @@ The first version of this ADR assumed SwiftData supports CloudKit sharing throug
    - The store has a 1 MB / 1,024-key limit. It is meant for preferences and is not for sensitive
      data.
    - Changes from other devices arrive through `didChangeExternallyNotification`.
+   - iCloud discards what a device writes before its first download from iCloud, which can come
+     minutes after the first launch, and then reports those keys as changed
+     (`NSUbiquitousKeyValueStoreInitialSyncChange`). The app writes the learner's choices again
+     instead of taking the download's empty values, so a provider chosen right after installing
+     stays chosen. A value another device saved still arrives with the download, unless the learner
+     changed that setting on this device since launch. Signing in to another iCloud account brings
+     that account's settings.
    - It only syncs in App Store/TestFlight-signed builds, so the `UserDefaults` mirror is what
      contributor builds use.
    - When the app has its App Group, the mirror is the group's `UserDefaults` suite, so the Share

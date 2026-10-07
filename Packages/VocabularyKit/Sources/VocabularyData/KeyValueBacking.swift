@@ -62,6 +62,8 @@ public final class UbiquitousKeyValueBacking: KeyValueBacking {
     private let cloud: (any CloudKeyValueStoring)?
     private let mirror: UserDefaults
     private var observer: (any NSObjectProtocol)?
+    /// Keys the learner changed on this device since launch.
+    private var keysWrittenHere: Set<String> = []
 
     public init(cloud: (any CloudKeyValueStoring)?, mirror: UserDefaults = .standard) {
         self.cloud = cloud
@@ -73,8 +75,9 @@ public final class UbiquitousKeyValueBacking: KeyValueBacking {
                 queue: .main
             ) { [weak self] notification in
                 let keys = notification.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] ?? []
+                let reason = ExternalChangeReason(code: notification.userInfo?[NSUbiquitousKeyValueStoreChangeReasonKey] as? Int)
                 MainActor.assumeIsolated {
-                    self?.handleExternalChange(changedKeys: keys)
+                    self?.handleExternalChange(changedKeys: keys, reason: reason)
                 }
             }
             // Apple recommends synchronizing at launch so the first external change arrives promptly.
@@ -98,6 +101,7 @@ public final class UbiquitousKeyValueBacking: KeyValueBacking {
     }
 
     public func setData(_ data: Data?, forKey key: String) {
+        keysWrittenHere.insert(key)
         if let data {
             cloud?.set(data, forKey: key)
             mirror.set(data, forKey: mirrorKey(key))
@@ -116,14 +120,78 @@ public final class UbiquitousKeyValueBacking: KeyValueBacking {
         mirror.set(data, forKey: deviceKey(key))
     }
 
-    func handleExternalChange(changedKeys: [String]) {
-        for key in changedKeys {
+    func handleExternalChange(changedKeys: [String], reason: ExternalChangeReason) {
+        switch reason {
+        case .server:
+            // Newer than what this device wrote, so a later download mustn't bring that back.
+            keysWrittenHere.subtract(changedKeys)
+            adopt(changedKeys)
+        case .accountChange:
+            keysWrittenHere.removeAll()
+            adopt(changedKeys)
+        case .initialSync:
+            restoreWritesDiscardedByFirstDownload(changedKeys: changedKeys)
+        }
+    }
+
+    private func adopt(_ keys: [String]) {
+        for key in keys {
             mirror.set(cloud?.data(forKey: key), forKey: mirrorKey(key))
         }
-        onExternalChange?(changedKeys)
+        onExternalChange?(keys)
+    }
+
+    /// iCloud throws away what a device writes before its first download, which can come minutes
+    /// after the first launch: a provider chosen in the meantime would silently go back to the
+    /// on-device model. What the learner chose here is written again instead, and the download
+    /// only brings what other devices saved.
+    private func restoreWritesDiscardedByFirstDownload(changedKeys: [String]) {
+        var adopted: [String] = []
+        for key in changedKeys where !keysWrittenHere.contains(key) {
+            let remote = cloud?.data(forKey: key)
+            if remote == nil, let local = mirror.data(forKey: mirrorKey(key)) {
+                // Written in an earlier launch that ended before the download.
+                cloud?.set(local, forKey: key)
+            } else {
+                mirror.set(remote, forKey: mirrorKey(key))
+                adopted.append(key)
+            }
+        }
+        // Listed or not, since what the download reports isn't documented.
+        for key in keysWrittenHere {
+            let local = mirror.data(forKey: mirrorKey(key))
+            guard cloud?.data(forKey: key) != local else { continue }
+            if let local {
+                cloud?.set(local, forKey: key)
+            } else {
+                cloud?.removeObject(forKey: key)
+            }
+        }
+        if !adopted.isEmpty {
+            onExternalChange?(adopted)
+        }
     }
 
     private func mirrorKey(_ key: String) -> String { "vos.\(key)" }
 
     private func deviceKey(_ key: String) -> String { "vos.device.\(key)" }
+}
+
+/// Why iCloud changed values (`NSUbiquitousKeyValueStoreChangeReasonKey`).
+enum ExternalChangeReason: Equatable {
+    /// Another device changed them. Also used for the rare quota violation, and when no reason is
+    /// given.
+    case server
+    /// iCloud's first download on this device replaced what was written before it.
+    case initialSync
+    /// The device signed in to another iCloud account.
+    case accountChange
+
+    init(code: Int?) {
+        switch code {
+        case NSUbiquitousKeyValueStoreInitialSyncChange?: self = .initialSync
+        case NSUbiquitousKeyValueStoreAccountChange?: self = .accountChange
+        default: self = .server
+        }
+    }
 }

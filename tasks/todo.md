@@ -81,3 +81,8 @@ Done holds and its commit exists.
     that `NSCameraUsageDescription` is empty (it was set for iOS only in project.yml), and
     `scripts/verify.sh` only caught warnings in source files.
 - [ ] Checkpoint 6: Ship — success criteria 1–13 checked in docs/ship-review.md (11, sync, needs a signed build); awaiting the owner's GO
+
+## After the first TestFlight build
+The owner's reports from TestFlight build 0.1.0 (1) on an iPhone 11 with iOS 27, 2026-10-07.
+- [x] `fix(data)`: a provider chosen before iCloud's first download went back to the on-device model; DeepSeek took effect only after the app was opened again
+- [ ] `fix(plans)`: tapping a quiz plan's reminder crashed the app — waiting for the crash report
