@@ -14,7 +14,7 @@ VOS_SWIFT_CONDITIONS =
 
 // The app and its extensions must share one version.
 MARKETING_VERSION = 0.1.0
-CURRENT_PROJECT_VERSION = 1
+CURRENT_PROJECT_VERSION = 2
 
 // Identifiers derived from the bundle prefix; referenced by the entitlement files.
 VOS_APP_GROUP = group.$(VOS_BUNDLE_PREFIX)
