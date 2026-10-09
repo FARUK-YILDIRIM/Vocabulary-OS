@@ -2,8 +2,9 @@
 
 ## Reporting a vulnerability
 
-Please report security problems privately, not in a public issue: use **Report a vulnerability** on
-the repository's Security tab (GitHub private vulnerability reporting). Include the steps to
+Please report security problems privately, not in a public issue: use
+[**Report a vulnerability**](https://github.com/FARUK-YILDIRIM/Vocabulary-OS/security/advisories/new)
+on the repository's Security tab (GitHub private vulnerability reporting). Include the steps to
 reproduce, the affected version and what an attacker could gain.
 
 We aim to acknowledge a report within a week. Once the problem is confirmed, we fix it, release the

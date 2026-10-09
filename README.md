@@ -77,7 +77,7 @@ rare senses and idioms; the measurements are in [`docs/eval`](docs/eval).
 ## Build and run
 
 ```bash
-git clone <repository URL> Vocabulary-OS
+git clone https://github.com/FARUK-YILDIRIM/Vocabulary-OS.git
 cd Vocabulary-OS
 xcodegen generate          # creates VocabularyOS.xcodeproj from project.yml
 open VocabularyOS.xcodeproj
