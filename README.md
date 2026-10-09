@@ -126,6 +126,7 @@ scripts/verify.sh                                  # the gate before every commi
 swift test --package-path Packages/VocabularyKit   # package tests only
 scripts/ui-test.sh                                 # UI tests in the iOS Simulator, with screenshots
 scripts/mac-smoke.sh                               # launch check of the macOS build
+scripts/store-screenshots.sh                       # App Store screenshots for iPhone, iPad and Mac
 swift run --package-path Packages/VocabularyKit vos-eval insight   # measures the on-device prompts
 ```
 

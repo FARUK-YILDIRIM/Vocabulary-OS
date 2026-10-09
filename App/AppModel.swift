@@ -119,7 +119,9 @@ final class AppModel {
     func makeInsightService() -> InsightService {
         #if DEBUG
         if options.usesAIStub {
-            return InsightService(client: StubGenerationClient(), strategy: .stepwise, source: InsightSource(providerID: "stub"))
+            // Store screenshots show the canned answer as the default model's, as the sample words are.
+            let providerID = options.takesStoreScreenshots ? AIProviderSelection.onDevice.providerID : "stub"
+            return InsightService(client: StubGenerationClient(), strategy: .stepwise, source: InsightSource(providerID: providerID))
         }
         #endif
         return router.insightService(for: settings.aiSelection)
@@ -280,6 +282,7 @@ struct LaunchOptions {
     static let importSample = "vos-import-sample"
     static let sharedInbox = "vos-shared-inbox"
     static let storeFails = "vos-store-fails"
+    static let storeScreenshots = "vos-store-screenshots"
 
     private let defaults: UserDefaults
 
@@ -291,6 +294,10 @@ struct LaunchOptions {
 
     /// Replace AI with canned answers so UI tests don't depend on a model (Debug builds only).
     var usesAIStub: Bool { defaults.bool(forKey: Self.aiStub) }
+
+    /// App Store screenshots: canned answers are labeled as the on-device model's rather than as test
+    /// answers (Debug builds only).
+    var takesStoreScreenshots: Bool { defaults.bool(forKey: Self.storeScreenshots) }
 
     /// Fill the in-memory library with sample words (Debug builds only, see `SampleLibrary`).
     var seedsLibrary: Bool { defaults.bool(forKey: Self.seedLibrary) }

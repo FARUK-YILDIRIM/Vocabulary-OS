@@ -54,6 +54,7 @@ scripts/mac-smoke.sh --self-test cloudkit-schema    # signed builds: every recor
 scripts/mac-smoke.sh --services                     # Services → "Capture in Vocabulary-OS" opens the capture window
 scripts/mac-smoke.sh --screenshot out.png [args]    # also saves the window (Screen Recording permission), e.g. -vos-podcast newest
 scripts/strings.sh sync [DERIVED_DATA] | check      # String Catalogs: add the strings a build found; check Turkish
+scripts/store-screenshots.sh [DIR]                  # App Store screenshots of the sample library: iPhone 6.9", iPad 13" and Mac
 swift scripts/tools/make-app-icon.swift             # redraws the app icon into Assets.xcassets
 swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [--verbose]   # live on-device prompt evaluation
 ```
@@ -129,6 +130,8 @@ swift run --package-path Packages/VocabularyKit vos-eval insight|quiz|podcast [-
   - `-vos-preset-profile tr:en,de`: skip onboarding.
   - `-vos-tab settings`: start on that tab.
   - `-vos-ai-stub YES`: canned AI answers (the Simulator has no on-device model assets).
+  - `-vos-store-screenshots YES`: canned answers are labeled as the on-device model's, for App Store
+    screenshots.
   - `-vos-capture-mode page`: open Capture on the page tab.
   - `-vos-sample-page YES`: load a generated book page (the Simulator has no photos).
   - `-vos-capture-mode object` with `-vos-sample-object YES`: a stand-in cup photo. The Simulator
