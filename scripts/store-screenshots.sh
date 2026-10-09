@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Makes the App Store screenshots of the sample library: iPhone 6.9" and iPad 13" from the
+# Makes the App Store screenshots of the sample library: iPhone 6.3" and iPad 13" from the
 # Simulator with a clean status bar, and the Mac window on a 1440x900 canvas.
 # Usage: scripts/store-screenshots.sh [output directory]   (default: .build/store-screenshots)
 # The Mac screenshots need the Screen Recording permission, like scripts/mac-smoke.sh --screenshot.
@@ -60,7 +60,8 @@ EOF
     echo "$device: $(ls "$OUT/$folder" | tr '\n' ' ')"
 }
 
-ios_screenshots "iPhone 17 Pro Max" "iphone-6.9"
+# App Store Connect asks for the medium iPhone with Dynamic Island (6.1" or 6.3", 1206x2622).
+ios_screenshots "iPhone 17" "iphone-6.3"
 ios_screenshots "iPad Pro 13-inch (M5)" "ipad-13"
 
 # The Mac: each screen's window, in light mode and in front, centered on the App Store's 1440x900
