@@ -190,6 +190,7 @@ follow the same ones.
 - Your words, lists and plans stay on your devices and in your private iCloud database. They leave
   only when you export them, and exported files contain no review history, photos or keys.
 
+The full [privacy policy](PRIVACY.md), in English and Turkish, is the one the App Store links to.
 Report security problems privately, as described in [`SECURITY.md`](SECURITY.md).
 
 ## License
