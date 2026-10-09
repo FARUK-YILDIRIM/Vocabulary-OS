@@ -9,8 +9,9 @@ with spaced repetition, AI-generated quizzes and AI-generated podcasts, on a sch
 - **Your choice of AI.** Apple's on-device model works by default, with no key. You can also connect
   one of 16 cloud providers, such as OpenAI, Anthropic, Google Gemini or Mistral, with your own API
   key, or add your own, such as Ollama on your Mac.
-- **Several languages at once.** Learning English and German at the same time? Words are routed to
-  the right language automatically.
+- **Several languages at once.** Learn any of 19 languages, with explanations in your own language.
+  Learning English and German at the same time? Words are routed to the right language
+  automatically.
 
 <p align="center">
   <img src="docs/screenshots/today.png" width="200" alt="Today: the words due for review in English and German">
@@ -51,7 +52,8 @@ with spaced repetition, AI-generated quizzes and AI-generated podcasts, on a sch
   start.
 - **Sharing.** Export a list or a language as a `.vocabularyos` file or as CSV. Opening a file
   imports it and skips the words you already have.
-- **For everyone.** English and Turkish, Dynamic Type and VoiceOver, on iPhone, iPad and Mac.
+- **For everyone.** Dynamic Type and VoiceOver on iPhone, iPad and Mac. The app's own interface is
+  in English and Turkish.
 
 ## AI providers
 
